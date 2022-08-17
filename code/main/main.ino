@@ -13,11 +13,14 @@ void setup() {
 
     // run default themes
     led_change_theme(THEME_RED);
+    led_setup_snake(SPEED_SLOW);
 
     Serial.println("booting complete...");
 }
 
 void loop(){
+
+    led_loop_snake(SPEED_SLOW);
 
     //loop_dmx();
     
