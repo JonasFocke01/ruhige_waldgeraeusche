@@ -1,1 +1,1 @@
-#define testinput 47
+#define TESTINPUT 2
