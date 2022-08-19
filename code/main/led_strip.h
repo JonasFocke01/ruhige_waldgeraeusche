@@ -1,5 +1,4 @@
 #include <Adafruit_NeoPixel.h>
-#include "main.h"
 
 //setup
 #define PIXEL_COUNT 150

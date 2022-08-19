@@ -1,11 +1,13 @@
 #include "led_strip.h"
+#include "utilities.h"
+#include "controller.h"
 
 int _speed;
 bool strobe;
 int strobe_mode;
 
 void setup() {
-    _speed = SPEED_FAST;
+    _speed = SPEED_SLOW;
 
   
     strobe = false;
