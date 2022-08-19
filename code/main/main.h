@@ -1,9 +1,6 @@
 //strobe controll
 #define STROBE_MODE_LED 0
 #define STROBE_MODE_DEDICATED 1
-
-bool strobe = false;
-int strobe_mode = STROBE_MODE_DEDICATED;
 //strobe controll
 
 //theme controll
@@ -27,7 +24,7 @@ int strobe_mode = STROBE_MODE_DEDICATED;
 //speeds
 #define SPEED_SLOW 4
 #define SPEED_MEDIUM 2
-#define SPEED_FAST 0
+#define SPEED_FAST 1
 //speeds
 
 //bpm modes
