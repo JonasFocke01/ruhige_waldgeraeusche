@@ -14,7 +14,7 @@ void led_strip_init(int theme) {
   
   pixels.begin();
 
-  memset(color_store, 0, sizeof(color_store) / 2);
+  memset(color_store, 0, sizeof(color_store));
   led_change_theme(theme);
 
   timestamp = millis();
@@ -28,7 +28,7 @@ void led_strip_init(int theme) {
 
 void led_setup_snake(int _speed) {
 
-  memset(snake, 0, sizeof(snake) / 2);
+  memset(snake, 0, sizeof(snake));
 
   for (int i = 0; i < PIXEL_COUNT; i++)
   {

@@ -55,6 +55,7 @@ void handle_buttons() {
     } else {
       _speed = SPEED_SLOW;
     }
+    led_setup_snake(_speed);
     button_timestamp = millis();
   }
 }
