@@ -1,8 +1,7 @@
 #include "led_strip.h"
 #include "utilities.h"
 
-unsigned long timestamp;
-void setup_leds(int color);
+unsigned long led_timestamp;
 int snake[PIXEL_COUNT];
 int snake_count;
 int color_store[3];
@@ -17,7 +16,7 @@ void led_strip_init(int theme) {
   memset(color_store, 0, sizeof(color_store));
   led_change_theme(theme);
 
-  timestamp = millis();
+  led_timestamp = millis();
 
   for (int i = 0; i < PIXEL_COUNT; i++) {
     pixels.setPixelColor(i, pixels.Color(0, 0, 0));
@@ -56,17 +55,21 @@ void led_setup_snake(int _speed) {
 }
 
 void led_loop_snake(int _speed){
-  if (millis() - timestamp > _speed * 10)
+  int speed_increased = 1;
+  if (_speed == 0) { speed_increased = 5; }
+  if (millis() - led_timestamp > _speed * 10)
   {
     for (int i = PIXEL_COUNT - 1; i > -1; i--)
     {
-      if (i == PIXEL_COUNT - 1)
-      {
-        snake[0] = snake[PIXEL_COUNT - 1];
-      }
-      else
-      {
-        snake[i + 1] = snake[i];
+      for (int t = 0; t < speed_increased; t++ ) {
+        if (i + t == PIXEL_COUNT - 1)
+        {
+          snake[0] = snake[PIXEL_COUNT - 1];
+        }
+        else
+        {
+          snake[i + t + 1] = snake[i + t];
+        }
       }
     }
 
@@ -74,7 +77,7 @@ void led_loop_snake(int _speed){
     {
       pixels.setPixelColor(i, pixels.Color(color_store[0] * snake[i], color_store[1] * snake[i], color_store[2] * snake[i]));
     }
-    timestamp = millis();
+    led_timestamp = millis();
     pixels.show();
   }
 }
