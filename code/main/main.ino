@@ -1,6 +1,7 @@
 #include "led_strip.h"
 #include "utilities.h"
 #include "controller.h"
+#include "dmx.h"
 
 int _speed;
 bool strobe;
@@ -18,18 +19,20 @@ void setup() {
 
     Serial.print("booting...");
     led_strip_init(THEME_OFF);
+    dmx_channels_init(THEME_OFF);
 
     button_timestamp = millis();
     pinMode(TESTINPUT, INPUT_PULLUP);
-    //setup_dmx();
     Serial.print(" ok\n");
 
     Serial.print("setting default themes...");
     led_change_theme(THEME_RED);
+    dmx_change_theme(THEME_RED);
     Serial.print("ok\n");
 
     Serial.print("setting default speed...");
     led_setup_snake(_speed);
+    dmx_setup_snake(_speed);
     Serial.print("ok\n");
     
     Serial.print("booting complete\n");
@@ -42,8 +45,6 @@ void loop(){
     
     //default: run snake
     led_loop_snake(_speed);
-
-    //loop_dmx();
 }
 
 void handle_buttons() {
