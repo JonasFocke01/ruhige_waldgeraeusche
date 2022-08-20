@@ -1,38 +1,41 @@
+#include <stdlib.h>
 #include "led_strip.h"
 #include "utilities.h"
 #include "controller.h"
 #include "dmx.h"
 
-int _speed;
+int _speed, strobe_mode, color_theme[3];
 bool strobe;
-int strobe_mode;
 unsigned long button_timestamp;
 
 void setup() {
-    _speed = SPEED_SLOW;
-
-  
-    strobe = false;
-    strobe_mode = STROBE_MODE_DEDICATED;
     
     Serial.begin(9600);
 
     Serial.print("booting...");
-    led_strip_init(THEME_OFF);
-    dmx_channels_init(THEME_OFF);
+    
+    _speed = SPEED_SLOW;
+
+    memset(color_theme, 0, sizeof(color_theme));
+    strobe = false;
+    strobe_mode = STROBE_MODE_DEDICATED;
+    
+    led_strip_init(color_theme[0], color_theme[1], color_theme[2]);
+    dmx_channels_init();
+
+    srand(1);
 
     button_timestamp = millis();
     pinMode(TESTINPUT, INPUT_PULLUP);
+    
     Serial.print(" ok\n");
 
     Serial.print("setting default themes...");
-    led_change_theme(THEME_RED);
-    dmx_change_theme(THEME_RED);
+    change_color_theme(150, 150, 150);
     Serial.print("ok\n");
 
     Serial.print("setting default speed...");
     led_setup_snake(_speed);
-    dmx_setup_snake(_speed);
     Serial.print("ok\n");
     
     Serial.print("booting complete\n");
@@ -44,20 +47,28 @@ void loop(){
     handle_buttons();
     
     //default: run snake
-    led_loop_snake(_speed);
-    dmx_loop_snake(_speed);
+  Serial.println(color_theme[0]);
+    led_loop_snake(_speed, color_theme[0], color_theme[1], color_theme[2]);
+
+    dmx_main_loop(color_theme[0], color_theme[1], color_theme[2], false);
 }
 
 void handle_buttons() {
-  if (digitalRead(TESTINPUT) == LOW && millis() - button_timestamp > 1000) {
+  if (digitalRead(TESTINPUT) == LOW && millis() - button_timestamp > DETECT_CLICKS_LENGTH_IN_MS) {
     if (_speed == SPEED_SLOW) {
       _speed = SPEED_MEDIUM;
     } else if (_speed == SPEED_MEDIUM) {
       _speed = SPEED_FAST;
     } else {
       _speed = SPEED_SLOW;
-    }
+    }    
+    change_color_theme(rand() % 255, rand() % 255, rand() % 255);
     led_setup_snake(_speed);
     button_timestamp = millis();
   }
+}
+
+void change_color_theme(int r, int g, int b) {
+  int temp_theme[3] = {r, g, b};
+  memcpy(color_theme, temp_theme, sizeof(color_theme));
 }

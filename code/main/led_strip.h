@@ -3,6 +3,8 @@
 //setup
 #define PIXEL_COUNT 150
 #define LED_1_PIN 4
+
+void led_strip_init(int, int, int);
 //setup
 
 
@@ -14,11 +16,6 @@
 #define SNAKE_COUNT_FAST 9
 #define TAIL_LENGTH_FAST 10
 
-void led_loop_snake(int speed);
-void led_setup_snake(int speed);
+void led_setup_snake(int);
+void led_loop_snake(int, int, int, int);
 // snake theme
-
-//utility functions
-void led_strip_init(int theme);
-void led_change_theme(int color);
-//utility functions

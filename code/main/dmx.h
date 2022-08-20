@@ -9,6 +9,6 @@
 //setup
 
 //utility functions
-void dmx_channels_init(int);
-void dmx_main_loop(int);
+void dmx_channels_init();
+void dmx_main_loop(int, int, int, bool);
 //utility functions

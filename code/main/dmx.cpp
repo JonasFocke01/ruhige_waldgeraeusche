@@ -1,12 +1,17 @@
+#include "Arduino.h"
 #include "dmx.h"
 #include "utilities.h"
 
 unsigned long dmx_timestamp;
 int dmx_color_store[3];
 
-void dmx_channels_init(int theme) {
+void dmx_channels_init() {
 
   DmxSimple.usePin(DMX_DATA_PIN);
+
+  for (int i = 0; i < 512; i++) {
+    DmxSimple.write(i, 0);
+  }
 
   dmx_timestamp = millis();
 }

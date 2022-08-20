@@ -2,24 +2,19 @@
 #include "utilities.h"
 
 unsigned long led_timestamp;
-int snake[PIXEL_COUNT];
-int snake_count;
-int color_store[3];
+int snake[PIXEL_COUNT], snake_count;
 Adafruit_NeoPixel pixels;
 
-void led_strip_init(int theme) {
+void led_strip_init(int r, int g, int b) {
 
   pixels = Adafruit_NeoPixel(PIXEL_COUNT, LED_1_PIN, NEO_GRB + NEO_KHZ800);
   
   pixels.begin();
 
-  memset(color_store, 0, sizeof(color_store));
-  led_change_theme(theme);
-
   led_timestamp = millis();
 
   for (int i = 0; i < PIXEL_COUNT; i++) {
-    pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+    pixels.setPixelColor(i, pixels.Color(r, g, b));
   }
   
   pixels.show();
@@ -54,66 +49,34 @@ void led_setup_snake(int _speed) {
   }
 }
 
-void led_loop_snake(int _speed){
-  int speed_increased = 1;
-  if (_speed == 0) { speed_increased = 5; }
+void led_loop_snake(int _speed, int r, int g, int b){
+  int speed_increased = 1, i_wrapped;
+  bool wrapped = false;
+  if (_speed == 1) { speed_increased = 2; }
   if (millis() - led_timestamp > _speed * 10)
   {
     for (int i = PIXEL_COUNT - 1; i > -1; i--)
     {
-      for (int t = 0; t < speed_increased; t++ ) {
-        if (i + t == PIXEL_COUNT - 1)
-        {
-          snake[0] = snake[PIXEL_COUNT - 1];
-        }
-        else
-        {
-          snake[i + t + 1] = snake[i + t];
-        }
+      i_wrapped = i + speed_increased;
+      if ( i_wrapped >= PIXEL_COUNT ) {
+        i_wrapped -= PIXEL_COUNT;
+        wrapped = true;
+      }
+      if (wrapped)
+      {
+        snake[i_wrapped] = snake[i];
+      }
+      else
+      {
+        snake[i_wrapped + 1] = snake[i];
       }
     }
 
     for (int i = 0; i < sizeof(snake) / 2; i++)
     {
-      pixels.setPixelColor(i, pixels.Color(color_store[0] * snake[i], color_store[1] * snake[i], color_store[2] * snake[i]));
+      pixels.setPixelColor(i, pixels.Color((r / 10) * snake[i], (g / 10) * snake[i], (b / 10) * snake[i]));
     }
     led_timestamp = millis();
     pixels.show();
   }
-}
-
-void led_change_theme(int theme) {
-  if (theme == 0) {
-    color_store[0] = 0;
-    color_store[1] = 25;
-    color_store[2] = 0;
-  } else if (theme == 1) {
-    color_store[0] = 25;
-    color_store[1] = 25;
-    color_store[2] = 0;
-  } else if (theme == 2) {
-    color_store[0] = 25;
-    color_store[1] = 0;
-    color_store[2] = 0;
-  } else if (theme == 3) {
-    color_store[0] = 25;
-    color_store[1] = 0;
-    color_store[2] = 25;
-  } else if (theme == 4) {
-    color_store[0] = 0;
-    color_store[1] = 0;
-    color_store[2] = 25;
-  } else if (theme == 5) {
-    color_store[0] = 0;
-    color_store[1] = 25;
-    color_store[2] = 25;
-  } else if (theme == 6) {
-    color_store[0] = 25;
-    color_store[1] = 25;
-    color_store[2] = 25;
-  } else if (theme == 7) {
-    color_store[0] = 0;
-    color_store[1] = 0;
-    color_store[2] = 0;
-  }  
 }
