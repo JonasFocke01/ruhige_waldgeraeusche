@@ -4,8 +4,8 @@
 //strobe controll
 
 //speeds
-#define SPEED_SLOW 4
-#define SPEED_MEDIUM 2
+#define SPEED_SLOW 2
+#define SPEED_MEDIUM 0
 #define SPEED_FAST 1
 //speeds
 
