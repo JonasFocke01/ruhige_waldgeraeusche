@@ -45,6 +45,7 @@ void loop(){
     
     //default: run snake
     led_loop_snake(_speed);
+    dmx_loop_snake(_speed);
 }
 
 void handle_buttons() {

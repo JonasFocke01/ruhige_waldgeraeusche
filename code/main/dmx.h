@@ -12,6 +12,18 @@
 #define COUNT_SINGEL_CHANNEL 20
 //setup
 
+//snake theme
+#define DMX_SNAKE_COUNT_SLOW 1
+#define DMX_TAIL_LENGTH_SLOW 10
+#define DMX_SNAKE_COUNT_MEDIUM 2
+#define DMX_TAIL_LENGTH_MEDIUM 7
+#define DMX_SNAKE_COUNT_FAST 5
+#define DMX_TAIL_LENGTH_FAST 4
+
+void dmx_setup_snake(int);
+void dmx_loop_snake(int);
+//snake theme
+
 //utility functions
 void dmx_channels_init(int);
 void dmx_change_theme(int);
