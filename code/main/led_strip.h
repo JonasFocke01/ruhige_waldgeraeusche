@@ -8,7 +8,7 @@ void led_strip_init(int, int, int);
 //setup
 
 
-// snake theme
+//snake theme
 #define SNAKE_COUNT_SLOW 1
 #define TAIL_LENGTH_SLOW 50
 #define SNAKE_COUNT_MEDIUM 3
@@ -18,4 +18,17 @@ void led_strip_init(int, int, int);
 
 void led_setup_snake(int);
 void led_loop_snake(int, int, int, int);
-// snake theme
+//snake theme
+
+//shifting blocks theme
+#define EDGE_SPACING 8
+
+void led_setup_shifting_blocks();
+void led_loop_shifting_blocks(int, int, int, int);
+//shifting blocks theme
+
+//raindrops theme
+//raindrops theme
+
+//turn off
+//turn off

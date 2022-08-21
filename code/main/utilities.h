@@ -5,8 +5,8 @@
 
 //speeds
 #define SPEED_SLOW 2
-#define SPEED_MEDIUM 0
-#define SPEED_FAST 1
+#define SPEED_MEDIUM 1
+#define SPEED_FAST 0
 //speeds
 
 //bpm modes
