@@ -13,6 +13,8 @@ void setup() {
     Serial.begin(9600);
 
     Serial.print("booting...");
+
+    randomSeed(analogRead(9)); // 9 is an unconnected analog pin
     
     _speed = SPEED_SLOW;
 
@@ -62,7 +64,7 @@ void handle_buttons() {
     } else {
       _speed = SPEED_SLOW;
     }    
-    change_color_theme(rand() % 255, rand() % 255, rand() % 255);
+    change_color_theme(random(0, 255), random(0, 255), random(0, 255));
     led_setup_snake(_speed);
     button_timestamp = millis();
   }
