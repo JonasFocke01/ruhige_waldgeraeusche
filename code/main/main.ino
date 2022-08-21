@@ -33,12 +33,17 @@ void setup() {
     Serial.print(" ok\n");
 
     Serial.print("setting default themes...");
+    
     change_color_theme(150, 150, 150);
+    
     Serial.print("ok\n");
 
     Serial.print("setting default speed...");
+    
     // led_setup_snake(_speed);
-    led_setup_shifting_blocks();
+    //led_setup_shifting_blocks();
+    led_setup_rain_drops();
+    
     Serial.print("ok\n");
     
     Serial.print("booting complete\n");
@@ -50,7 +55,8 @@ void loop(){
     handle_buttons();
     
     // led_loop_snake(_speed, color_theme[0], color_theme[1], color_theme[2]);
-    led_loop_shifting_blocks(_speed, color_theme[0], color_theme[1], color_theme[2]);
+    //led_loop_shifting_blocks(_speed, color_theme[0], color_theme[1], color_theme[2]);
+    led_loop_rain_drops(_speed, color_theme[0], color_theme[1], color_theme[2]);
     
     dmx_main_loop(color_theme[0], color_theme[1], color_theme[2], false);
 }

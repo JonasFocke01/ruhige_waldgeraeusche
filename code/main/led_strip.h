@@ -28,7 +28,6 @@ void led_loop_shifting_blocks(int, int, int, int);
 //shifting blocks theme
 
 //raindrops theme
+void led_setup_rain_drops();
+void led_loop_rain_drops(int, int, int, int);
 //raindrops theme
-
-//turn off
-//turn off

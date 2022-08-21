@@ -3,7 +3,7 @@
 #include "utilities.h"
 
 unsigned long led_timestamp;
-int snake[PIXEL_COUNT], snake_count, blocks[PIXEL_COUNT], blocks_position = 0;
+int snake[PIXEL_COUNT], snake_count, blocks[PIXEL_COUNT], blocks_position = 0, rain_drops[PIXEL_COUNT][2];
 bool shift_direction_up = true;
 Adafruit_NeoPixel pixels;
 
@@ -146,3 +146,66 @@ void led_loop_shifting_blocks(int _speed, int r, int g, int b) {
   }
 }
 //shifting blocks theme
+
+//rain drops
+void led_setup_rain_drops() {
+  
+  memset(rain_drops, 0, sizeof(rain_drops));
+
+  for (int i = 0; i < PIXEL_COUNT; i++)
+  {
+    pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+  }
+}
+
+void led_loop_rain_drops(int _speed, int r, int g, int b) {
+
+  int random_spot;
+
+  if (millis() - led_timestamp > _speed * 10){
+
+    //progress waves
+    rain_drops[0][0] = 0;
+    rain_drops[PIXEL_COUNT - 1][0] = 0;
+    for (int i = 1; i < PIXEL_COUNT - 1; i++) {
+      if (rain_drops[i][0] > 0) {
+        if (rain_drops[i][1] == 2) {
+          rain_drops[i + 1][0] = 10;
+          rain_drops[i + 1][1] = 0;
+          rain_drops[i - 1][0] = 10;
+          rain_drops[i - 1][1] = 1;
+          rain_drops[i][0] = 0;
+          rain_drops[i][1] = 0;
+        } else if (rain_drops[i][1] == 0) {
+          rain_drops[i + 1][0] = 10;
+          rain_drops[i + 1][1] = 0;
+          rain_drops[i][0] = 0;
+          rain_drops[i][1] = 0;
+          i++;
+        } 
+        else if (rain_drops[i][1] == 1) {
+          rain_drops[i - 1][0] = 10;
+          rain_drops[i - 1][1] = 1;
+          rain_drops[i][0] = 0;
+          rain_drops[i][1] = 0;
+        } 
+        
+      }
+    }
+
+    //spawn new raindrop
+    if (random(0, 100) > 80){
+      random_spot = random(EDGE_SPACING, PIXEL_COUNT - EDGE_SPACING);
+      rain_drops[random_spot][0] = 10;
+      rain_drops[random_spot][1] =  2;
+    }
+    led_timestamp = millis();
+
+    //draw waves
+    for ( int i = 0; i < PIXEL_COUNT; i++) {
+      pixels.setPixelColor(i, pixels.Color((r / 10) * rain_drops[i][0], (g / 10) * rain_drops[i][0], (b / 10) * rain_drops[i][0]));
+    }
+    pixels.show();
+  }
+}
+//rain drops
