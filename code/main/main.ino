@@ -69,6 +69,7 @@ void handle_buttons() {
 }
 
 void change_color_theme(int r, int g, int b) {
-  int temp_theme[3] = {r, g, b};
-  memcpy(color_theme, temp_theme, sizeof(color_theme));
+  color_theme[0] = r;
+  color_theme[1] = g;
+  color_theme[2] = b;
 }
