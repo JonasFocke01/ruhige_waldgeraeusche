@@ -3,9 +3,7 @@
 //setup
 #define DMX_DATA_PIN 3
 
-#define RGB_CHANNEL 0
-#define LASER_CHANNEL 100
-#define STROBE_CHANNEL 200
+#define STAGE_LIGHTS_CHANNEL 0
 //setup
 
 //utility functions

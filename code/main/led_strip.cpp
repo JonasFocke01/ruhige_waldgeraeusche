@@ -3,7 +3,7 @@
 #include "utilities.h"
 
 unsigned long led_timestamp;
-int snake[PIXEL_COUNT], snake_count, blocks[PIXEL_COUNT], blocks_position = 0, rain_drops[PIXEL_COUNT][2];
+int snake[PIXEL_COUNT], blocks[PIXEL_COUNT], blocks_position = 0, rain_drops[PIXEL_COUNT][2], fade_sectors[PIXEL_COUNT][3];
 bool shift_direction_up = true;
 Adafruit_NeoPixel pixels;
 
@@ -25,7 +25,7 @@ void led_strip_init(int r, int g, int b) {
 }
 
 //snake theme
-void led_setup_snake(int _speed) {
+void led_setup_snake() {
 
   memset(snake, 0, sizeof(snake));
 
@@ -34,35 +34,21 @@ void led_setup_snake(int _speed) {
     pixels.setPixelColor(i, pixels.Color(0, 0, 0));
   }
 
-  int tail_length;
-
-  if (_speed == SPEED_SLOW) {
-    snake_count = SNAKE_COUNT_SLOW;
-    tail_length = TAIL_LENGTH_SLOW;
-  } else if (_speed == SPEED_MEDIUM) {
-    snake_count = SNAKE_COUNT_MEDIUM;
-    tail_length = TAIL_LENGTH_MEDIUM;
-  } else if (_speed == SPEED_FAST) {
-    snake_count = SNAKE_COUNT_FAST;
-    tail_length = TAIL_LENGTH_FAST;
-  }
-
-  for (int i = 0; i < snake_count; i++) {
-    for (int j = tail_length; j > 0; j--) {
-      snake[(PIXEL_COUNT - 1 - j) - (i * (PIXEL_COUNT / snake_count))] = map_from_to(map_from_to(j, 0, tail_length, tail_length, 0), 0, tail_length, 0, 10);
+  for (int i = 0; i < SNAKE_COUNT; i++) {
+    for (int j = TAIL_LENGTH; j > 0; j--) {
+      snake[(PIXEL_COUNT - 1 - j) - (i * (PIXEL_COUNT / SNAKE_COUNT))] = map_from_to(map_from_to(j, 0, TAIL_LENGTH, TAIL_LENGTH, 0), 0, TAIL_LENGTH, 0, 10);
     }
   }
 }
 
-void led_loop_snake(int _speed, int r, int g, int b){
-  int speed_increased = 1, i_wrapped;
+void led_loop_snake(int r, int g, int b){
+  int i_wrapped;
   bool wrapped = false;
-  if (_speed == 0) { speed_increased = 1; }
-  if (millis() - led_timestamp > _speed * 10)
+  if (millis() - led_timestamp > 10)
   {
     for (int i = PIXEL_COUNT - 1; i > -1; i--)
     {
-      i_wrapped = i + speed_increased;
+      i_wrapped = i + 10;
       if ( i_wrapped >= PIXEL_COUNT ) {
         i_wrapped -= PIXEL_COUNT;
         wrapped = true;
@@ -109,20 +95,9 @@ void led_setup_shifting_blocks() {
   }
 }
 
-void led_loop_shifting_blocks(int _speed, int r, int g, int b) {
-
-  int shift_by = 0;
-
-  if (millis() - led_timestamp > _speed * 10){
+void led_loop_shifting_blocks(int r, int g, int b) {
+  if (millis() - led_timestamp > 10){
     led_timestamp = millis();
-  
-    if (_speed == SPEED_SLOW) {
-      shift_by = 1;
-    } else if (_speed == SPEED_MEDIUM) {
-      shift_by = 1;
-    } else if (_speed == SPEED_FAST) {
-      shift_by = 1;
-    }
     
     if ( shift_direction_up && blocks_position == EDGE_SPACING ) {
       shift_direction_up = false;
@@ -131,9 +106,9 @@ void led_loop_shifting_blocks(int _speed, int r, int g, int b) {
     }
   
     if ( shift_direction_up ) {
-      blocks_position += shift_by;
+      blocks_position += 1;
     } else {
-      blocks_position -= shift_by;
+      blocks_position -= 1;
     }
 
     //draw blocks
@@ -158,11 +133,11 @@ void led_setup_rain_drops() {
   }
 }
 
-void led_loop_rain_drops(int _speed, int r, int g, int b) {
+void led_loop_rain_drops(int r, int g, int b) {
 
   int random_spot;
 
-  if (millis() - led_timestamp > _speed * 10){
+  if (millis() - led_timestamp > 10){
 
     //progress waves
     rain_drops[0][0] = 0;
@@ -209,3 +184,29 @@ void led_loop_rain_drops(int _speed, int r, int g, int b) {
   }
 }
 //rain drops
+
+//spawn fade sectors
+void led_erase_existing_fade_sectors() {
+  memset(fade_sectors, 0, sizeof(fade_sectors));
+}
+
+void led_spawn_fade_sector(int first_pixel, int sector_length, int r, int g, int b) {
+  for ( int i = first_pixel; i < first_pixel + sector_length; i++ ) {
+    fade_sectors[i][0] = r;
+    fade_sectors[i][1] = g;
+    fade_sectors[i][2] = b;
+  }
+}
+
+void led_fade_out_sectors() {   
+  for ( int i = 0; i < PIXEL_COUNT - 1; i++ ) {
+    if (fade_sectors[i][0] > 0) { fade_sectors[i][0] -= 1; }
+    if (fade_sectors[i][1] > 0) { fade_sectors[i][1] -= 1; }
+    if (fade_sectors[i][2] > 0) { fade_sectors[i][2] -= 1; }
+
+    //draw sectors
+    pixels.setPixelColor(i, pixels.Color(fade_sectors[i][0], fade_sectors[i][1], fade_sectors[i][2]));
+  } 
+  pixels.show();
+}
+//spawn fade sectors

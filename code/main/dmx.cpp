@@ -3,7 +3,6 @@
 #include "utilities.h"
 
 unsigned long dmx_timestamp;
-int dmx_color_store[3];
 
 void dmx_channels_init() {
 
@@ -26,9 +25,9 @@ void dmx_main_loop(int r, int g, int b, bool strobe_mode) {
   } else {
     DmxSimple.write(STROBE_CHANNEL, 0);
     
-    //write to rgb channel
-    DmxSimple.write(RGB_CHANNEL,     r);
-    DmxSimple.write(RGB_CHANNEL + 1, g);
-    DmxSimple.write(RGB_CHANNEL + 2, b);
+    //Stage lights
+    DmxSimple.write(STAGE_LIGHTS_CHANNEL,     r);
+    DmxSimple.write(STAGE_LIGHTS_CHANNEL + 1, g);
+    DmxSimple.write(STAGE_LIGHTS_CHANNEL + 2, b);
   }
 }
