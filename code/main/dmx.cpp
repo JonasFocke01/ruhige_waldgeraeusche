@@ -1,33 +1,51 @@
 #include "Arduino.h"
 #include "dmx.h"
 #include "utilities.h"
+#include "controller.h"
 
 unsigned long dmx_timestamp;
+
+bool strobe_mode = false;
 
 void dmx_channels_init() {
 
   DmxSimple.usePin(DMX_DATA_PIN);
 
-  for (int i = 0; i < 512; i++) {
+  for (int i = 1; i < 512; i++) {
     DmxSimple.write(i, 0);
   }
 
   dmx_timestamp = millis();
 }
 
-void dmx_main_loop(int r, int g, int b, bool strobe_mode) {
+void dmx_loop(uint8_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
 
   if ( strobe_mode ) {
-    for (int i = 0; i < 512; i++) {
-      DmxSimple.write(i, 0);
+    for (int i = 1; i < 512; i++) {
+      if ( i = STROBE_CHANNEL ) {
+        DmxSimple.write(i, 255);
+      } else {
+        DmxSimple.write(i, 0);
+      }
     }
-    DmxSimple.write(STROBE_CHANNEL, 255);
+    set_strobe_mode( false );
   } else {
-    DmxSimple.write(STROBE_CHANNEL, 0);
-    
-    //Stage lights
-    DmxSimple.write(STAGE_LIGHTS_CHANNEL,     r);
-    DmxSimple.write(STAGE_LIGHTS_CHANNEL + 1, g);
-    DmxSimple.write(STAGE_LIGHTS_CHANNEL + 2, b);
+      
+    // write to stage lights
+  
+    // write to ambience
+  
+    // write to moving heads right
+
+    // write to moving heads left
+  
+    // write to laser
+  
+    // write to special channels
+  
   }
+}
+
+void set_strobe_mode ( bool set_to ) {
+  strobe_mode = set_to;
 }
