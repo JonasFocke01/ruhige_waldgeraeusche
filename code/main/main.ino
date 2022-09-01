@@ -105,7 +105,7 @@ void loop(){
 void write_feedback(int mode) {
   if ( mode == FEEDBACK_MODE_LED || mode == FEEDBACK_MODE_DUAL ) {
     //TODO
-  } else if ( mode == FEEDBACK_MODE_SERIAL || mode == FEEDBACK_MODE_DUAL ) {
+  } else if ( ( mode == FEEDBACK_MODE_SERIAL || mode == FEEDBACK_MODE_DUAL ) && millis() - debug_mode_timestamp > 2500 ) {
     Serial.print( "SAVE 0:\n" );
     Serial.print( "    Animations:\n" );
     Serial.print( printf( "       inner_leds:         %i", saves[0][0][3] ) );
@@ -175,7 +175,11 @@ void write_feedback(int mode) {
     Serial.print( printf( "       special_slot_one:   %i, %i, %i", saves[6][7][0], saves[6][7][1], saves[6][7][2] ) );
     Serial.print( printf( "       special_slot_two:   %i, %i, %i", saves[6][8][0], saves[6][8][1], saves[6][8][2] ) );
     Serial.print( printf( "       special_slot_three: %i, %i, %i", saves[6][9][0], saves[6][9][1], saves[6][9][2] ) );
+<<<<<<< HEAD
     
+=======
+    debug_mode_timestamp = millis();
+>>>>>>> 3162ee6 (test: 📝 data is logged to serial)
   }
 }
 
