@@ -14,6 +14,8 @@ unsigned long button_timestamps[BUTTON_COUNT];
 
 unsigned long loop_interval_length;
 
+unsigned long debug_mode_timestamp;
+
 void change_values_in_write_to_save_for_each_active_light(int r, int g, int b, int animation) {
   for (int i = 0; i < NUM_LIGHTS; i++ ) {
     if ( active_lights[i] ) {
@@ -38,6 +40,8 @@ void setup() {
     memset(active_lights, false, sizeof(active_lights));
 
     next_selection_state = false;
+
+    debug_mode_timestamp = millis();
     
     dmx_channels_init();
 
@@ -89,11 +93,90 @@ void loop(){
   
     handle_inputs();
 
+    write_feedback(FEEDBACK_MODE_SERIAL);
+
     led_loop( saves[active_save] );
 
     dmx_loop( saves[active_save] );
 
     loop_interval_length = millis();
+}
+
+void write_feedback(int mode) {
+  if ( mode == FEEDBACK_MODE_LED || mode == FEEDBACK_MODE_DUAL ) {
+    //TODO
+  } else if ( mode == FEEDBACK_MODE_SERIAL || mode == FEEDBACK_MODE_DUAL ) {
+    Serial.print( "SAVE 0:\n" );
+    Serial.print( "    Animations:\n" );
+    Serial.print( printf( "       inner_leds:         %i", saves[0][0][3] ) );
+    Serial.print( printf( "       outer_leds:         %i", saves[0][1][3] ) );
+    Serial.print( printf( "       stage_lights:       %i", saves[0][2][3] ) );
+    Serial.print( printf( "       moving_heads_left:  %i", saves[0][3][3] ) );
+    Serial.print( printf( "       moving_heads_right: %i", saves[0][4][3] ) );
+    Serial.print( printf( "       blinder:            %i", saves[0][5][3] ) );
+    Serial.print( printf( "       laser:              %i", saves[0][6][3] ) );
+    Serial.print( printf( "       special_slot_one:   %i", saves[0][7][3] ) );
+    Serial.print( printf( "       special_slot_two:   %i", saves[0][8][3] ) );
+    Serial.print( printf( "       special_slot_three: %i", saves[0][9][3] ) );
+    Serial.print( "    colors:\n" );
+    Serial.print( printf( "       inner_leds:         %i, %i, %i", saves[0][0][0], saves[0][0][1], saves[0][0][2] ) );
+    Serial.print( printf( "       outer_leds:         %i, %i, %i", saves[0][1][0], saves[0][1][1], saves[0][1][2] ) );
+    Serial.print( printf( "       stage_lights:       %i, %i, %i", saves[0][2][0], saves[0][2][1], saves[0][2][2] ) );
+    Serial.print( printf( "       moving_heads_left:  %i, %i, %i", saves[0][3][0], saves[0][3][1], saves[0][3][2] ) );
+    Serial.print( printf( "       moving_heads_right: %i, %i, %i", saves[0][4][0], saves[0][4][1], saves[0][4][2] ) );
+    Serial.print( printf( "       blinder:            %i, %i, %i", saves[0][5][0], saves[0][5][1], saves[0][5][2] ) );
+    Serial.print( printf( "       laser:              %i, %i, %i", saves[0][6][0], saves[0][6][1], saves[0][6][2] ) );
+    Serial.print( printf( "       special_slot_one:   %i, %i, %i", saves[0][7][0], saves[0][7][1], saves[0][7][2] ) );
+    Serial.print( printf( "       special_slot_two:   %i, %i, %i", saves[0][8][0], saves[0][8][1], saves[0][8][2] ) );
+    Serial.print( printf( "       special_slot_three: %i, %i, %i", saves[0][9][0], saves[0][9][1], saves[0][9][2] ) );
+    Serial.print( "SAVE 1:\n" );
+    Serial.print( "    Animations:\n" );
+    Serial.print( printf( "       inner_leds:         %i", saves[1][0][3] ) );
+    Serial.print( printf( "       outer_leds:         %i", saves[1][1][3] ) );
+    Serial.print( printf( "       stage_lights:       %i", saves[1][2][3] ) );
+    Serial.print( printf( "       moving_heads_left:  %i", saves[1][3][3] ) );
+    Serial.print( printf( "       moving_heads_right: %i", saves[1][4][3] ) );
+    Serial.print( printf( "       blinder:            %i", saves[1][5][3] ) );
+    Serial.print( printf( "       laser:              %i", saves[1][6][3] ) );
+    Serial.print( printf( "       special_slot_one:   %i", saves[1][7][3] ) );
+    Serial.print( printf( "       special_slot_two:   %i", saves[1][8][3] ) );
+    Serial.print( printf( "       special_slot_three: %i", saves[1][9][3] ) );
+    Serial.print( "    colors:\n" );
+    Serial.print( printf( "       inner_leds:         %i, %i, %i", saves[1][0][0], saves[1][0][1], saves[1][0][2] ) );
+    Serial.print( printf( "       outer_leds:         %i, %i, %i", saves[1][1][0], saves[1][1][1], saves[1][1][2] ) );
+    Serial.print( printf( "       stage_lights:       %i, %i, %i", saves[1][2][0], saves[1][2][1], saves[1][2][2] ) );
+    Serial.print( printf( "       moving_heads_left:  %i, %i, %i", saves[1][3][0], saves[1][3][1], saves[1][3][2] ) );
+    Serial.print( printf( "       moving_heads_right: %i, %i, %i", saves[1][4][0], saves[1][4][1], saves[1][4][2] ) );
+    Serial.print( printf( "       blinder:            %i, %i, %i", saves[1][5][0], saves[1][5][1], saves[1][5][2] ) );
+    Serial.print( printf( "       laser:              %i, %i, %i", saves[1][6][0], saves[1][6][1], saves[1][6][2] ) );
+    Serial.print( printf( "       special_slot_one:   %i, %i, %i", saves[1][7][0], saves[1][7][1], saves[1][7][2] ) );
+    Serial.print( printf( "       special_slot_two:   %i, %i, %i", saves[1][8][0], saves[1][8][1], saves[1][8][2] ) );
+    Serial.print( printf( "       special_slot_three: %i, %i, %i", saves[1][9][0], saves[1][9][1], saves[1][9][2] ) );
+    Serial.print( "SAVE 7:\n" );
+    Serial.print( "    Animations:\n" );
+    Serial.print( printf( "       inner_leds:         %i", saves[6][0][3] ) );
+    Serial.print( printf( "       outer_leds:         %i", saves[6][1][3] ) );
+    Serial.print( printf( "       stage_lights:       %i", saves[6][2][3] ) );
+    Serial.print( printf( "       moving_heads_left:  %i", saves[6][3][3] ) );
+    Serial.print( printf( "       moving_heads_right: %i", saves[6][4][3] ) );
+    Serial.print( printf( "       blinder:            %i", saves[6][5][3] ) );
+    Serial.print( printf( "       laser:              %i", saves[6][6][3] ) );
+    Serial.print( printf( "       special_slot_one:   %i", saves[6][7][3] ) );
+    Serial.print( printf( "       special_slot_two:   %i", saves[6][8][3] ) );
+    Serial.print( printf( "       special_slot_three: %i", saves[6][9][3] ) );
+    Serial.print( "    colors:\n" );
+    Serial.print( printf( "       inner_leds:         %i, %i, %i", saves[6][0][0], saves[6][0][1], saves[6][0][2] ) );
+    Serial.print( printf( "       outer_leds:         %i, %i, %i", saves[6][1][0], saves[6][1][1], saves[6][1][2] ) );
+    Serial.print( printf( "       stage_lights:       %i, %i, %i", saves[6][2][0], saves[6][2][1], saves[6][2][2] ) );
+    Serial.print( printf( "       moving_heads_left:  %i, %i, %i", saves[6][3][0], saves[6][3][1], saves[6][3][2] ) );
+    Serial.print( printf( "       moving_heads_right: %i, %i, %i", saves[6][4][0], saves[6][4][1], saves[6][4][2] ) );
+    Serial.print( printf( "       blinder:            %i, %i, %i", saves[6][5][0], saves[6][5][1], saves[6][5][2] ) );
+    Serial.print( printf( "       laser:              %i, %i, %i", saves[6][6][0], saves[6][6][1], saves[6][6][2] ) );
+    Serial.print( printf( "       special_slot_one:   %i, %i, %i", saves[6][7][0], saves[6][7][1], saves[6][7][2] ) );
+    Serial.print( printf( "       special_slot_two:   %i, %i, %i", saves[6][8][0], saves[6][8][1], saves[6][8][2] ) );
+    Serial.print( printf( "       special_slot_three: %i, %i, %i", saves[6][9][0], saves[6][9][1], saves[6][9][2] ) );
+    
+  }
 }
 
 void handle_inputs() {
@@ -132,15 +215,20 @@ void handle_inputs() {
   change_values_in_write_to_save_for_each_active_light( 235, 180, 115, 256 );
 
   // Animations 20
+  change_values_in_write_to_save_for_each_active_light(256, 256, 256, 0); // TODO: this should be the button that is pressed
 
   // select each light 5
-  for ( int i = 0; i < 5; i++ ) {
-    if ( false ) { // button i is pressed
-      active_lights[i] = !active_lights[i];
-    }
-  }
+  active_lights[0] = !active_lights[0];
+  active_lights[1] = !active_lights[1];
+  active_lights[2] = !active_lights[2];
+  active_lights[3] = !active_lights[3];
+  active_lights[4] = !active_lights[4];
 
-  // select all lights 1
+  // select all lights
+  for ( int i = 0; i < 5; i++ ) {
+    active_lights[i] = next_selection_state;
+    next_selection_state = !next_selection_state;
+  }
 
   // turn all lights on
   saves[active_save][0][0] = 0;
@@ -231,23 +319,23 @@ void handle_inputs() {
   }
 
   // strobe 
-  set_strobe_mode( digitalRead( STROBE_TOGGLE ) ); // TODO: STROBE_TOGGLE pin
+  set_strobe_mode( digitalRead( STROBE_TOGGLE ) );
 
   // strobe frequency level 
-  set_strobe_frequency( analogRead( STROBE_FREQUENCY_POTENTIOMETER ) ); // TODO: STROBE_FREQUENCY_POTENTIOMETER pin
+  set_strobe_frequency( analogRead( STROBE_FREQUENCY_POTENTIOMETER ) );
 
   // blinder level 
-  saves[write_to_save][5][0] = analogRead(BLINDER_POTENTIOMETER);     // TODO: BLINDER_POTENTIOMETER pin
+  saves[write_to_save][5][0] = analogRead(BLINDER_POTENTIOMETER);
   
   // special_lights level 
-  saves[write_to_save][7][0] = analogRead(SPECIAL_SLOT_ONE_POTENTIOMETER);     // TODO: SPECIAL_SLOT_ONE_POTENTIOMETER pin
-  saves[write_to_save][8][0] = analogRead(SPECIAL_SLOT_TWO_POTENTIOMETER);     // TODO: SPECIAL_SLOT_TWO_POTENTIOMETER pin
-  saves[write_to_save][9][0] = analogRead(SPECIAL_SLOT_THREE_POTENTIOMETER);   // TODO: SPECIAL_SLOT_THREE_POTENTIOMETER pin
+  saves[write_to_save][7][0] = analogRead(SPECIAL_SLOT_ONE_POTENTIOMETER);
+  saves[write_to_save][8][0] = analogRead(SPECIAL_SLOT_TWO_POTENTIOMETER);
+  saves[write_to_save][9][0] = analogRead(SPECIAL_SLOT_THREE_POTENTIOMETER);
 
   // stage lights rgb 
-  saves[write_to_save][2][0] = analogRead(RED_POTENTIOMETER);   // TODO: RED_POTENTIOMETER pin
-  saves[write_to_save][2][1] = analogRead(GREEN_POTENTIOMETER); // TODO: GREEN_POTENTIOMETER pin
-  saves[write_to_save][2][2] = analogRead(BLUE_POTENTIOMETER);  // TODO: BLUE_POTENTIOMETER pin
+  saves[write_to_save][2][0] = analogRead(RED_POTENTIOMETER);
+  saves[write_to_save][2][1] = analogRead(GREEN_POTENTIOMETER);
+  saves[write_to_save][2][2] = analogRead(BLUE_POTENTIOMETER);
 
   // preset switches
   if ( active_save == write_to_save ) {

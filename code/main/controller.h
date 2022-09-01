@@ -4,6 +4,17 @@
 #define BUTTON_COUNT 66
 
 #define TESTINPUT 2
+
+//TODO: This are only dummy values. This needs to be worked out!
+#define STROBE_TOGGLE 1
+#define STROBE_FREQUENCY_POTENTIOMETER 1
+#define BLINDER_POTENTIOMETER 1
+#define SPECIAL_SLOT_ONE_POTENTIOMETER 1
+#define SPECIAL_SLOT_TWO_POTENTIOMETER 1
+#define SPECIAL_SLOT_THREE_POTENTIOMETER 1
+#define RED_POTENTIOMETER 1
+#define GREEN_POTENTIOMETER 1
+#define BLUE_POTENTIOMETER 1
 // inputs
 
 // saves
@@ -68,3 +79,11 @@ void change_values_in_write_to_save_for_each_active_light(int, int, int, int, in
 
 #define OFF 255
 // available themes
+
+// feedback
+#define FEEDBACK_MODE_LED    0
+#define FEEDBACK_MODE_SERIAL 1
+#define FEEDBACK_MODE_DUAL   2
+
+void write_feedback(int mode);
+// feedback
