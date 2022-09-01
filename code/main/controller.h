@@ -1,6 +1,8 @@
 // inputs
 #define DETECT_CLICKS_LENGTH_IN_MS 500
 
+#define BUTTON_COUNT 66
+
 #define TESTINPUT 2
 // inputs
 
