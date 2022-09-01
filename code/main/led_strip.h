@@ -7,7 +7,7 @@
 #define OUTER_LED_STRIP_PIN 7
 
 void led_setup();
-void led_loop(uint8_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]);
+void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]);
 //setup
 
 //snake theme

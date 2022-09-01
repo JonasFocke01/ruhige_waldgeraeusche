@@ -7,7 +7,10 @@
 // inputs
 
 // saves
-// The saves array contains 5 saves.
+// The saves array contains 7 saves
+// 0 -> active save
+// 1-5 -> button saves
+// 6 -> save used for one-time-overrides like flashing or quick animations
 
 // Each save contians configurations for each available light
 // The lights are
@@ -16,7 +19,7 @@
 // 2 -> stage_lights
 // 3 -> moving_heads_left
 // 4 -> moving_heads_right
-// 5 -> ambience_light
+// 5 -> blinder
 // 6 -> laser
 // 7 -> special_slot_one
 // 8 -> special_slot_two
@@ -28,11 +31,11 @@
 // 2 -> b
 // 3 -> animation
 
-#define NUM_SAVES 5
+#define NUM_SAVES 7
 #define NUM_LIGHTS 9
 #define LIGHT_SAVE_SPACE 4
 
-void change_values_in_save(int, int, int, int, int, int);
+void change_values_in_write_to_save_for_each_active_light(int, int, int, int, int);
 // saves
 
 // available themes

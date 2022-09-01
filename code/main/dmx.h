@@ -17,7 +17,8 @@
 
 // functions
 void dmx_channels_init();
-void dmx_loop(uint8_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]);
+void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]);
 void set_strobe_mode(bool);
-void trigger_animations(uint8_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]);
+void set_strobe_frequency();
+void trigger_animations(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]);
 // functions

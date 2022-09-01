@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "led_strip.h"
-#include "utilities.h"
 #include "controller.h"
 
 unsigned long led_timestamp;
@@ -24,7 +23,7 @@ void led_setup() {
   // hybrid_1
   for (int i = 0; i < SNAKE_COUNT; i++) {
     for (int j = TAIL_LENGTH; j > 0; j--) {
-      snake[(PIXEL_COUNT - 1 - j) - (i * (PIXEL_COUNT / SNAKE_COUNT))] = map_from_to(map_from_to(j, 0, TAIL_LENGTH, TAIL_LENGTH, 0), 0, TAIL_LENGTH, 0, 10);
+      snake[(PIXEL_COUNT - 1 - j) - (i * (PIXEL_COUNT / SNAKE_COUNT))] = map(map(j, 0, TAIL_LENGTH, TAIL_LENGTH, 0), 0, TAIL_LENGTH, 0, 10);
     }
   }
 
@@ -54,7 +53,7 @@ void led_setup() {
   }
 }
 
-void led_loop(uint8_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
+void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
 
   if ( save[0][3] == HYBRID_1 || save[1][3] == HYBRID_1 ) { // snake
     int i_wrapped;

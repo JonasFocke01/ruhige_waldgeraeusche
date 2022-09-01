@@ -1,11 +1,12 @@
 #include "Arduino.h"
 #include "dmx.h"
-#include "utilities.h"
 #include "controller.h"
 
 unsigned long dmx_timestamp;
 
-bool strobe_mode = false;
+bool strobe_mode;
+
+int strobe_frequency;
 
 void dmx_channels_init() {
 
@@ -15,10 +16,14 @@ void dmx_channels_init() {
     DmxSimple.write(i, 0);
   }
 
+  strobe_frequency = 0;
+
+  strobe_mode = false;
+  
   dmx_timestamp = millis();
 }
 
-void dmx_loop(uint8_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
+void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
 
   if ( strobe_mode ) {
     for (int i = 1; i < 512; i++) {
@@ -62,10 +67,14 @@ void dmx_loop(uint8_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
   }
 }
 
-void trigger_animations(uint8_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
+void trigger_animations(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
   
 }
 
 void set_strobe_mode ( bool set_to ) {
   strobe_mode = set_to;
+}
+
+void set_strobe_frequency ( int set_to) {
+  strobe_frequency = set_to;
 }
