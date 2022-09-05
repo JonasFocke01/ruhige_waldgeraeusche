@@ -3,7 +3,12 @@
 
 #define BUTTON_COUNT 66
 
-#define TESTINPUT 2
+#define TESTINPUT_one_out   34
+#define TESTINPUT_one_in    35
+#define TESTINPUT_two_out   38
+#define TESTINPUT_two_in    39
+#define TESTINPUT_three_out 42
+#define TESTINPUT_three_in  43
 
 //TODO: This are only dummy values. This needs to be worked out!
 #define STROBE_TOGGLE 1
@@ -81,9 +86,10 @@ void change_values_in_write_to_save_for_each_active_light(int, int, int, int, in
 // available themes
 
 // feedback
-#define FEEDBACK_MODE_LED    0
-#define FEEDBACK_MODE_SERIAL 1
-#define FEEDBACK_MODE_DUAL   2
+#define FEEDBACK_MODE_OFF    0
+#define FEEDBACK_MODE_LED    1
+#define FEEDBACK_MODE_SERIAL 2
+#define FEEDBACK_MODE_DUAL   3
 
 void write_feedback(int mode);
 // feedback

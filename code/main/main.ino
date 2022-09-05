@@ -10,7 +10,7 @@ uint8_t write_to_save;
 bool active_lights[NUM_LIGHTS];
 bool next_selection_state;
 
-unsigned long button_timestamps[BUTTON_COUNT];
+bool button_click_states[BUTTON_COUNT];
 
 unsigned long loop_interval_length;
 
@@ -46,12 +46,19 @@ void setup() {
     dmx_channels_init();
 
     led_setup();
-
-    for (int i=0;i<BUTTON_COUNT; i++) button_timestamps[i] = 1;
-
-    // button_timestamp = millis();
     
-    pinMode(TESTINPUT, INPUT);
+    
+    //TEST
+    pinMode(TESTINPUT_one_out  , OUTPUT);
+    digitalWrite(TESTINPUT_one_out  , LOW);
+    pinMode(TESTINPUT_one_in   , INPUT_PULLUP );
+    pinMode(TESTINPUT_two_out  , OUTPUT);
+    digitalWrite(TESTINPUT_two_out  , LOW);
+    pinMode(TESTINPUT_two_in   , INPUT_PULLUP);
+    pinMode(TESTINPUT_three_out, OUTPUT);
+    digitalWrite(TESTINPUT_three_out, LOW);
+    pinMode(TESTINPUT_three_in , INPUT_PULLUP);
+    //TEST
     
     Serial.print(" ok\n");
 
@@ -68,6 +75,8 @@ void setup() {
     Serial.print("ok\n");
 
     Serial.print("preparing animations...");
+
+    memset(active_lights, true, sizeof(active_lights));
 
     for ( int i = 0; i < NUM_SAVES; i++ ) {
       for ( int j = 0; j < NUM_LIGHTS; j++ ) {
@@ -87,13 +96,14 @@ void setup() {
 
 void loop(){
 
-    Serial.print("loop took ");
-    Serial.print(millis() - loop_interval_length);
-    Serial.print("ms\n");
+    Serial.println(saves[0][0][3]);
+    // Serial.print("loop took ");
+    // Serial.print(millis() - loop_interval_length);
+    // Serial.print("ms\n");
   
     handle_inputs();
 
-    write_feedback(FEEDBACK_MODE_SERIAL);
+    write_feedback(FEEDBACK_MODE_OFF);
 
     led_loop( saves[active_save] );
 
@@ -184,172 +194,181 @@ void write_feedback(int mode) {
 }
 
 void handle_inputs() {
-  //if (digitalRead(TESTINPUT) == LOW && millis() - button_timestamp > DETECT_CLICKS_LENGTH_IN_MS) {
-  //  active_save += 1;
-  //  button_timestamp = millis();
-  //}
+  if (digitalRead(TESTINPUT_one_in) == HIGH && button_click_states[0] == false) {
+    button_click_states[0] = true;
+    change_values_in_write_to_save_for_each_active_light( 256, 256, 256, 5 );
+  } else if ( digitalRead(TESTINPUT_one_in) == LOW ){
+    button_click_states[0] = false;
+  }
+
+  if (digitalRead(TESTINPUT_two_in) == HIGH && button_click_states[1] == false) {
+    button_click_states[1] = true;
+    change_values_in_write_to_save_for_each_active_light( 256, 256, 256, 6 );
+  } else if ( digitalRead(TESTINPUT_two_in) == LOW ){
+    button_click_states[1] = false;
+  }
 
   // TODO Buttons
 
   //this assumes a ' if pressed ' wrapping each button but is avoided for now for simplicity
 
-  // LED colorthemes 8
+  // LED colorthemes WORKS
   // rainbow
-  change_values_in_write_to_save_for_each_active_light( 10, 255, 160, 256 );
+  // change_values_in_write_to_save_for_each_active_light( 10, 255, 160, 256 );
   
   // red
-  change_values_in_write_to_save_for_each_active_light( 255, 10, 10, 256 );
+  // change_values_in_write_to_save_for_each_active_light( 255, 10, 10, 256 );
  
   // green
-  change_values_in_write_to_save_for_each_active_light( 10, 255, 10, 256 );
+  // change_values_in_write_to_save_for_each_active_light( 10, 255, 10, 256 );
   
   // blue
-  change_values_in_write_to_save_for_each_active_light( 10, 10, 255, 256 );
+  // change_values_in_write_to_save_for_each_active_light( 10, 10, 255, 256 );
   
   // random
-  change_values_in_write_to_save_for_each_active_light( 0, 0, 0, 256 );
+  // change_values_in_write_to_save_for_each_active_light( 0, 0, 0, 256 );
   
   // white
-  change_values_in_write_to_save_for_each_active_light( 200, 200, 200, 256 );
+  // change_values_in_write_to_save_for_each_active_light( 200, 200, 200, 256 );
   
   // purple
-  change_values_in_write_to_save_for_each_active_light( 170, 115, 225, 256 );
+  // change_values_in_write_to_save_for_each_active_light( 170, 115, 225, 256 );
   
   // orange
-  change_values_in_write_to_save_for_each_active_light( 235, 180, 115, 256 );
+  // change_values_in_write_to_save_for_each_active_light( 235, 180, 115, 256 );
 
-  // Animations 20
-  change_values_in_write_to_save_for_each_active_light(256, 256, 256, 0); // TODO: this should be the button that is pressed
+  // Animations 20 TOTEST
+  // change_values_in_write_to_save_for_each_active_light(256, 256, 256, 0); // TODO: this should be the button that is pressed
 
-  // select each light 5
-  active_lights[0] = !active_lights[0];
-  active_lights[1] = !active_lights[1];
-  active_lights[2] = !active_lights[2];
-  active_lights[3] = !active_lights[3];
-  active_lights[4] = !active_lights[4];
+  // select each light TOTEST
+  // active_lights[0] = !active_lights[0];
+  // active_lights[1] = !active_lights[1];
+  // active_lights[2] = !active_lights[2];
+  // active_lights[3] = !active_lights[3];
+  // active_lights[4] = !active_lights[4];
 
   // select all lights
-  for ( int i = 0; i < 5; i++ ) {
-    active_lights[i] = next_selection_state;
-    next_selection_state = !next_selection_state;
-  }
+  // for ( int i = 0; i < 5; i++ ) {
+  //   active_lights[i] = next_selection_state;
+  //   next_selection_state = !next_selection_state;
+  // }
 
-  // turn all lights on
-  saves[active_save][0][0] = 0;
-  saves[active_save][0][1] = 0;
-  saves[active_save][0][2] = 0;
-  saves[active_save][1][0] = 0;
-  saves[active_save][1][1] = 0;
-  saves[active_save][1][2] = 0;
-  saves[active_save][2][0] = 0;
-  saves[active_save][2][1] = 0;
-  saves[active_save][2][2] = 0;
-  saves[active_save][3][0] = 0;
-  saves[active_save][3][1] = 0;
-  saves[active_save][3][2] = 0;
-  saves[active_save][4][0] = 0;
-  saves[active_save][4][1] = 0;
-  saves[active_save][4][2] = 0;
-  saves[active_save][6][0] = 0;
-  saves[active_save][6][1] = 0;
-  saves[active_save][6][2] = 0;
+  // turn all lights off TOTEST
+  // saves[active_save][0][0] = 0;
+  // saves[active_save][0][1] = 0;
+  // saves[active_save][0][2] = 0;
+  // saves[active_save][1][0] = 0;
+  // saves[active_save][1][1] = 0;
+  // saves[active_save][1][2] = 0;
+  // saves[active_save][2][0] = 0;
+  // saves[active_save][2][1] = 0;
+  // saves[active_save][2][2] = 0;
+  // saves[active_save][3][0] = 0;
+  // saves[active_save][3][1] = 0;
+  // saves[active_save][3][2] = 0;
+  // saves[active_save][4][0] = 0;
+  // saves[active_save][4][1] = 0;
+  // saves[active_save][4][2] = 0;
+  // saves[active_save][6][0] = 0;
+  // saves[active_save][6][1] = 0;
+  // saves[active_save][6][2] = 0;
 
   // flash all
   //if pressed
-  if ( saves[6][5][0] == 256 ) {
-    saves[6][5][0] = saves[active_save][5][0];
-    saves[6][7][0] = saves[active_save][7][0];
-    saves[6][2][0] = saves[active_save][2][0];
-    saves[6][2][1] = saves[active_save][2][1];
-    saves[6][2][2] = saves[active_save][2][2];
-    saves[active_save][2][0] = 255;
-    saves[active_save][2][1] = 255;
-    saves[active_save][2][2] = 255;
-    saves[active_save][7][0] = 255;
-    saves[active_save][5][0] = 255;
-  }
+  // if ( saves[6][5][0] == 256 ) {
+    // saves[6][5][0] = saves[active_save][5][0];
+    // saves[6][7][0] = saves[active_save][7][0];
+    // saves[6][2][0] = saves[active_save][2][0];
+    // saves[6][2][1] = saves[active_save][2][1];
+    // saves[6][2][2] = saves[active_save][2][2];
+    // saves[active_save][2][0] = 255;
+    // saves[active_save][2][1] = 255;
+    // saves[active_save][2][2] = 255;
+    // saves[active_save][7][0] = 255;
+    // saves[active_save][5][0] = 255;
+  // }
   //else
-  if ( saves[6][5][0] != 256 ) {
-    saves[active_save][5][0] = saves[6][5][0];
-    saves[active_save][5][0] = saves[6][5][0];
-    saves[active_save][2][0] = saves[6][2][0];
-    saves[active_save][2][1] = saves[6][2][1];
-    saves[active_save][2][2] = saves[6][2][2];
-    saves[6][5][0] = 256;
-    saves[6][2][0] = 256;
-    saves[6][5][7] = 256;
-  }
+  // if ( saves[6][5][0] != 256 ) {
+    // saves[active_save][5][0] = saves[6][5][0];
+    // saves[active_save][5][0] = saves[6][5][0];
+    // saves[active_save][2][0] = saves[6][2][0];
+    // saves[active_save][2][1] = saves[6][2][1];
+    // saves[active_save][2][2] = saves[6][2][2];
+    // saves[6][5][0] = 256;
+    // saves[6][2][0] = 256;
+    // saves[6][5][7] = 256;
+  // }
 
   // flash blinder
   //if pressed
-  if ( saves[6][5][0] == 256 ) {
-    saves[6][5][0] = saves[active_save][5][0];
-    saves[active_save][5][0] = 255;
-  }
+  // if ( saves[6][5][0] == 256 ) {
+    // saves[6][5][0] = saves[active_save][5][0];
+    // saves[active_save][5][0] = 255;
+  // }
   //else
-  if ( saves[6][5][0] != 256 ) {
-    saves[active_save][5][0] = saves[6][5][0];
-    saves[6][5][0] = 256;
-  }
+  // if ( saves[6][5][0] != 256 ) {
+    // saves[active_save][5][0] = saves[6][5][0];
+    // saves[6][5][0] = 256;
+  // }
 
   // flash special one
   //if pressed
-  if ( saves[6][7][0] == 256 ) {
-    saves[6][7][0] = saves[active_save][7][0];
-    saves[active_save][7][0] = 255;
-  }
+  // if ( saves[6][7][0] == 256 ) {
+    // saves[6][7][0] = saves[active_save][7][0];
+    // saves[active_save][7][0] = 255;
+  // }
   //else
-  if ( saves[6][7][0] != 256 ) {
-    saves[active_save][5][0] = saves[6][7][0];
-    saves[6][5][7] = 256;
-  }
+  // if ( saves[6][7][0] != 256 ) {
+    // saves[active_save][5][0] = saves[6][7][0];
+    // saves[6][5][7] = 256;
+  // }
   
   // flash stage
   //if pressed
-  if ( saves[6][2][0] == 256 ) {
-    saves[6][2][0] = saves[active_save][2][0];
-    saves[6][2][1] = saves[active_save][2][1];
-    saves[6][2][2] = saves[active_save][2][2];
-    saves[active_save][2][0] = 255;
-    saves[active_save][2][1] = 255;
-    saves[active_save][2][2] = 255;
-  }
+  // if ( saves[6][2][0] == 256 ) {
+    // saves[6][2][0] = saves[active_save][2][0];
+    // saves[6][2][1] = saves[active_save][2][1];
+    // saves[6][2][2] = saves[active_save][2][2];
+    // saves[active_save][2][0] = 255;
+    // saves[active_save][2][1] = 255;
+    // saves[active_save][2][2] = 255;
+  // }
   //else
-  if ( saves[6][2][0] != 256 ) {
-    saves[active_save][2][0] = saves[6][2][0];
-    saves[active_save][2][1] = saves[6][2][1];
-    saves[active_save][2][2] = saves[6][2][2];
-    saves[6][2][0] = 256;
-  }
+  // if ( saves[6][2][0] != 256 ) {
+    // saves[active_save][2][0] = saves[6][2][0];
+    // saves[active_save][2][1] = saves[6][2][1];
+    // saves[active_save][2][2] = saves[6][2][2];
+    // saves[6][2][0] = 256;
+  // }
 
   // strobe 
-  set_strobe_mode( digitalRead( STROBE_TOGGLE ) );
+  // set_strobe_mode( digitalRead( STROBE_TOGGLE ) );
 
   // strobe frequency level 
-  set_strobe_frequency( analogRead( STROBE_FREQUENCY_POTENTIOMETER ) );
+  // set_strobe_frequency( analogRead( STROBE_FREQUENCY_POTENTIOMETER ) );
 
   // blinder level 
-  saves[write_to_save][5][0] = analogRead(BLINDER_POTENTIOMETER);
+  // saves[write_to_save][5][0] = analogRead(BLINDER_POTENTIOMETER);
   
   // special_lights level 
-  saves[write_to_save][7][0] = analogRead(SPECIAL_SLOT_ONE_POTENTIOMETER);
-  saves[write_to_save][8][0] = analogRead(SPECIAL_SLOT_TWO_POTENTIOMETER);
-  saves[write_to_save][9][0] = analogRead(SPECIAL_SLOT_THREE_POTENTIOMETER);
+  // saves[write_to_save][7][0] = analogRead(SPECIAL_SLOT_ONE_POTENTIOMETER);
+  // saves[write_to_save][8][0] = analogRead(SPECIAL_SLOT_TWO_POTENTIOMETER);
+  // saves[write_to_save][9][0] = analogRead(SPECIAL_SLOT_THREE_POTENTIOMETER);
 
   // stage lights rgb 
-  saves[write_to_save][2][0] = analogRead(RED_POTENTIOMETER);
-  saves[write_to_save][2][1] = analogRead(GREEN_POTENTIOMETER);
-  saves[write_to_save][2][2] = analogRead(BLUE_POTENTIOMETER);
+  // saves[write_to_save][2][0] = analogRead(RED_POTENTIOMETER);
+  // saves[write_to_save][2][1] = analogRead(GREEN_POTENTIOMETER);
+  // saves[write_to_save][2][2] = analogRead(BLUE_POTENTIOMETER);
 
   // preset switches
-  if ( active_save == write_to_save ) {
-    write_to_save = 0;// TODO: this should be the pressed button (0-5)
-  } else {
-    write_to_save = active_save;
-  }
+  // if ( active_save == write_to_save ) {
+    // write_to_save = 0;// TODO: this should be the pressed button (0-5)
+  // } else {
+    // write_to_save = active_save;
+  // }
 
   // preset apply 
-  active_save = 0;// TODO: this should be the pressed button (0-5)
+  // active_save = 0;// TODO: this should be the pressed button (0-5)
 
   // Beat: ( beat + speed[3] + switcher )
   
