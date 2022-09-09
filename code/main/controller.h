@@ -24,9 +24,8 @@
 
 // saves
 // The saves array contains 7 saves
-// 0 -> active save
+// 0 -> save used for one-time-overrides like flashing or quick animations
 // 1-5 -> button saves
-// 6 -> save used for one-time-overrides like flashing or quick animations
 
 // Each save contians configurations for each available light
 // The lights are
