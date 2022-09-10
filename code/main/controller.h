@@ -1,17 +1,30 @@
-// inputs
-#define DETECT_CLICKS_LENGTH_IN_MS 500
+// input pins
+#define BUTTON_ISLANDS 4
+#define BUTTON_ROWS 9
 
-#define BUTTON_COUNT 66
+#define BUTTON_COUNT (BUTTON_ISLANDS * BUTTON_ROWS)
 
-#define TESTINPUT_one_out   34
-#define TESTINPUT_one_in    35
-#define TESTINPUT_two_out   38
-#define TESTINPUT_two_in    39
-#define TESTINPUT_three_out 42
-#define TESTINPUT_three_in  43
+#define ISLAND_ONE   22
+#define ISLAND_TWO   23
+#define ISLAND_THREE 24
+#define ISLAND_FOUR  25
+
+#define ROW_ONE	   28
+#define ROW_TWO	   29
+#define ROW_THREE	 30
+#define ROW_FOUR	 31
+#define ROW_FIVE	 32
+#define ROW_SIX	   33
+#define ROW_SEVEN	 34
+#define ROW_EIGHT	 35
+#define ROW_NINE	 36
+
+#define SOLO_BUTTON_ONE   38
+#define SOLO_BUTTON_TWO   39
+#define SOLO_BUTTON_THREE 40
+#define SOLO_BUTTON_FOUR  41
 
 //TODO: This are only dummy values. This needs to be worked out!
-#define STROBE_TOGGLE 1
 #define STROBE_FREQUENCY_POTENTIOMETER 1
 #define BLINDER_POTENTIOMETER 1
 #define SPECIAL_SLOT_ONE_POTENTIOMETER 1
@@ -20,12 +33,14 @@
 #define RED_POTENTIOMETER 1
 #define GREEN_POTENTIOMETER 1
 #define BLUE_POTENTIOMETER 1
-// inputs
+// input pins
 
 // saves
-// The saves array contains 7 saves
-// 0 -> save used for one-time-overrides like flashing or quick animations
+// The saves array contains 8 saves
+// 0 ->   save used for one-time-overrides like flashing or quick animations
 // 1-5 -> button saves
+// 6 ->   flash save: everything in here is flashed
+// 7 ->   mute save:  everything in here is muted
 
 // Each save contians configurations for each available light
 // The lights are
@@ -46,14 +61,14 @@
 // 2 -> b
 // 3 -> animation
 
-#define NUM_SAVES 7
+#define NUM_SAVES 8
 #define NUM_LIGHTS 9
 #define LIGHT_SAVE_SPACE 4
 
 void change_values_in_write_to_save_for_each_active_light(int, int, int, int, int);
 // saves
 
-// available themes
+// available animations
 #define DROP_1 0
 #define DROP_2 1
 #define DROP_3 2
@@ -81,8 +96,9 @@ void change_values_in_write_to_save_for_each_active_light(int, int, int, int, in
 
 #define ANIMATION_COUNT 20
 
-#define OFF 255
-// available themes
+#define FLASH 254
+#define OFF   255
+// available animations
 
 // feedback
 #define FEEDBACK_MODE_OFF    0

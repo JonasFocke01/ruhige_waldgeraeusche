@@ -196,20 +196,28 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
         }
       }
     }
-  if ( save[0][3] == OFF || save[1][3] == OFF ) { // this is not what off means
-    if ( millis() - led_timestamp > 2500 ) {
-      int random_red =   random(0, 100);
-      int random_green = random(0, 100);
-      int random_blue =  random(0, 100);
-      for ( int i = 0; i < PIXEL_COUNT; i++ ) {
-          if (  save[0][3] == OFF ) {
-            inner_pixels.setPixelColor(i, inner_pixels.Color(random_red, random_blue, random_green));
-          }
-          if ( save[1][3] == OFF ) {
-            outer_pixels.setPixelColor(i, inner_pixels.Color(random_red, random_blue, random_green));
-          }
+
+  // flash every light
+  if ( save[0][3] == FLASH || save[1][3] == FLASH) {
+     for ( int i = 0; i < PIXEL_COUNT; i++ ) {
+        if (  save[0][3] == FLASH ) {
+          inner_pixels.setPixelColor(i, inner_pixels.Color(save[0][0], save[0][1], save[0][2]));
+        }
+        if ( save[1][3] == FLASH ) {
+          outer_pixels.setPixelColor(i, inner_pixels.Color(save[1][0], save[1][1], save[1][2]));
+        }
       }
-      led_timestamp = millis();
+    }
+
+  //turn every light off
+  if ( save[0][3] == OFF || save[1][3] == OFF ) {
+    for ( int i = 0; i < PIXEL_COUNT; i++ ) {
+      if (  save[0][3] == OFF ) {
+        inner_pixels.setPixelColor(i, inner_pixels.Color(0, 0, 0));
+      }
+      if ( save[1][3] == OFF ) {
+        outer_pixels.setPixelColor(i, inner_pixels.Color(0, 0, 0));
+      }
     }
   }
 
