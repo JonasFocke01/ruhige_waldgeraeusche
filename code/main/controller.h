@@ -56,7 +56,7 @@
 // 9 -> special_slot_three
 
 // A save is constructed like this
-// 0 -> r 
+// 0 -> r
 // 1 -> g
 // 2 -> b
 // 3 -> animation

@@ -19,7 +19,7 @@ void dmx_channels_init() {
   strobe_frequency = 0;
 
   strobe_mode = false;
-  
+
   dmx_timestamp = millis();
 }
 
@@ -37,29 +37,29 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
   } else {
 
     trigger_animations(save);
-      
+
     // write to stage lights
     DmxSimple.write(STAGE_LIGHTS_CHANNEL    , save[2][0]);
     DmxSimple.write(STAGE_LIGHTS_CHANNEL + 1, save[2][1]);
     DmxSimple.write(STAGE_LIGHTS_CHANNEL + 2, save[2][2]);
-  
+
     // write to ambience
     DmxSimple.write(AMBIENCE_LIGHT_CHANNEL, save[5][0]);
-    
+
     // write to moving heads right
     DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL    , save[4][0]);
     DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL + 1, save[4][1]);
     DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL + 2, save[4][2]);
-    
-    
+
+
     // write to moving heads left
     DmxSimple.write(MOVING_HEADS_LEFT_CHANNEL    , save[3][0]);
     DmxSimple.write(MOVING_HEADS_LEFT_CHANNEL + 1, save[3][1]);
     DmxSimple.write(MOVING_HEADS_LEFT_CHANNEL + 2, save[3][2]);
-  
+
     // write to laser
     DmxSimple.write(LASER_CHANNEL, save[6][0]);
-  
+
     // write to special channels
     DmxSimple.write(SPECIAL_SLOT_ONE_CHANNEL  , save[7][0]);
     DmxSimple.write(SPECIAL_SLOT_TWO_CHANNEL  , save[8][0]);
@@ -68,7 +68,7 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
 }
 
 void trigger_animations(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
-  
+
 }
 
 void set_strobe_mode ( bool set_to ) {
