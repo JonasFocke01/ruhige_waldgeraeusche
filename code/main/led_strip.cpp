@@ -4,7 +4,7 @@
 
 unsigned long led_timestamp;
 
-int snake[PIXEL_COUNT], blocks[PIXEL_COUNT], blocks_position = 0, rain_drops[PIXEL_COUNT][2], fade_sectors[PIXEL_COUNT][3], likelyhood;
+int snake[PIXEL_COUNT], blocks[PIXEL_COUNT], blocks_position = 0, rain_drops[PIXEL_COUNT][2], fade_sectors[PIXEL_COUNT], likelyhood;
 bool shift_direction_up = true;
 Adafruit_NeoPixel inner_pixels;
 Adafruit_NeoPixel outer_pixels;
@@ -55,44 +55,29 @@ void led_setup() {
 
 void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
 
-  if ( save[0][3] == HYBRID_1 || save[1][3] == HYBRID_1 ) { // snake
-    int i_wrapped;
-    bool wrapped = false;
-    if (millis() - led_timestamp > 10)
+  if ( save[0][3] == HYBRID_1 || save[1][3] == HYBRID_1 ) { // snake        
+    for (int i = PIXEL_COUNT - 3; i > -1; i--)
     {
-      for (int i = PIXEL_COUNT - 1; i > -1; i--)
-      {
-        i_wrapped = i + 5;
-        if ( i_wrapped >= PIXEL_COUNT ) {
-          i_wrapped -= PIXEL_COUNT;
-          wrapped = true;
-        }
-        if (wrapped)
-        {
-          snake[i_wrapped] = snake[i];
-        }
-        else
-        {
-          snake[i_wrapped + 1] = snake[i];
-        }
-      }
-  
-      for (int i = 0; i < sizeof(snake) / 2; i++)
-      {
-        if ( save[0][3] == HYBRID_1 ) {
-          inner_pixels.setPixelColor(i, inner_pixels.Color((save[0][0] / 10) * snake[i], (save[0][1] / 10) * snake[i], (save[0][2] / 10) * snake[i]));
-        } 
-        if ( save[1][3] == HYBRID_1 ){
-          outer_pixels.setPixelColor(i, outer_pixels.Color((save[1][0] / 10) * snake[i], (save[1][1] / 10) * snake[i], (save[1][2] / 10) * snake[i]));        
-        }
-      }
-      led_timestamp = millis();
+        snake[i + 4] = snake[i];
     }
-  } 
+
+    snake[PIXEL_COUNT - 1] = 0;
+    snake[1] = 0;
+    snake[2] = 0;
+    snake[3] = 0;
+
+    for (int i = 0; i < sizeof(snake) / 2; i++)
+    {
+      if ( save[0][3] == HYBRID_1 ) {
+        inner_pixels.setPixelColor(i, inner_pixels.Color((save[0][0] / 10) * snake[i], (save[0][1] / 10) * snake[i], (save[0][2] / 10) * snake[i]));
+      } 
+      if ( save[1][3] == HYBRID_1 ){
+        outer_pixels.setPixelColor(i, outer_pixels.Color((save[1][0] / 10) * snake[i], (save[1][1] / 10) * snake[i], (save[1][2] / 10) * snake[i]));        
+      }
+    }
+  }
   if ( save[0][3] == HYBRID_2 || save[1][3] == HYBRID_2 ) { // raindrops
-    int random_spot;
-  
-    if (millis() - led_timestamp > 10){
+    if (millis() - led_timestamp > 1){
   
       //progress waves
       rain_drops[0][0] = 0;
@@ -100,39 +85,32 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       for (int i = 1; i < PIXEL_COUNT - 1; i++) {
         if (rain_drops[i][0] > 0) {
           if (rain_drops[i][1] == 2) {
-            rain_drops[i + 1][0] = 10;
-            rain_drops[i + 1][1] = 0;
-            rain_drops[i - 1][0] = 10;
-            rain_drops[i - 1][1] = 1;
+            rain_drops[i + 2][0] = 10;
+            rain_drops[i + 2][1] = 0;
+            rain_drops[i - 2][0] = 10;
+            rain_drops[i - 2][1] = 1;
             rain_drops[i][0] = 0;
             rain_drops[i][1] = 0;
           } else if (rain_drops[i][1] == 0) {
-            rain_drops[i + 1][0] = 10;
-            rain_drops[i + 1][1] = 0;
+            rain_drops[i + 2][0] = 10;
+            rain_drops[i + 2][1] = 0;
             rain_drops[i][0] = 0;
             rain_drops[i][1] = 0;
             i++;
           } 
           else if (rain_drops[i][1] == 1) {
-            rain_drops[i - 1][0] = 10;
-            rain_drops[i - 1][1] = 1;
+            rain_drops[i - 2][0] = 10;
+            rain_drops[i - 2][1] = 1;
             rain_drops[i][0] = 0;
             rain_drops[i][1] = 0;
           }
         }
       }
   
-      //spawn new raindrop
-      if (random(0, 100) > 80){
-        random_spot = random(EDGE_SPACING, PIXEL_COUNT - EDGE_SPACING);
-        rain_drops[random_spot][0] = 10;
-        rain_drops[random_spot][1] =  2;
-      }
-  
       //draw waves
       for ( int i = 0; i < PIXEL_COUNT; i++) {
         if ( save[0][3] == HYBRID_2 ) {
-          inner_pixels.setPixelColor(i, inner_pixels.Color((save[0][0] / 10) * rain_drops[i][0], (save[0][1] / 10) * rain_drops[i][0], (save[0][2] / 10) * rain_drops[i][0]));
+          inner_pixels.setPixelColor(i, inner_pixels.Color((save[0][0] / 10) * rain_drops[i][0] + rain_drops[i][1], (save[0][1] / 10) * rain_drops[i][0], (save[0][2] / 10) * rain_drops[i][0]));
         } 
         if ( save[1][3] == HYBRID_2 ) {
           outer_pixels.setPixelColor(i, outer_pixels.Color((save[1][0] / 10) * rain_drops[i][0], (save[1][1] / 10) * rain_drops[i][0], (save[1][2] / 10) * rain_drops[i][0]));
@@ -142,13 +120,9 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     }
   }
   if ( save[0][3] == HYBRID_3 || save[1][3] == HYBRID_3 ) { // shifting blocks
-    if (millis() - led_timestamp > 10){
-      if ( shift_direction_up && blocks_position == EDGE_SPACING ) {
-        shift_direction_up = false;
-      } else if ( shift_direction_up == false && blocks_position == -8  ){
-        shift_direction_up = true;
-      }
-    
+    if (millis() - led_timestamp > 5){
+      
+      // shift blocks
       if ( shift_direction_up ) {
         blocks_position += 1;
       } else {
@@ -166,36 +140,31 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
         }
         j++;
       }
+
+      Serial.println(blocks_position);
+      Serial.println(EDGE_SPACING);
+      // toggle shift direction if neccesarry
+      if ( blocks_position - 2 * EDGE_SPACING > 0 ) shift_direction_up = false;
+      if ( blocks_position + EDGE_SPACING < 0 ) shift_direction_up = true;
+      
       led_timestamp = millis();
     }
   } 
   if ( save[0][3] == HYBRID_4 || save[1][3] == HYBRID_4 ) { // fading sectors
-     for ( int i = 0; i < PIXEL_COUNT - 1; i++ ) {
-      if (fade_sectors[i][0] > 0) { fade_sectors[i][0] -= 1; }
-      if (fade_sectors[i][1] > 0) { fade_sectors[i][1] -= 1; }
-      if (fade_sectors[i][2] > 0) { fade_sectors[i][2] -= 1; }
-
-      if ( save[0][3] == HYBRID_4 ) {
-        inner_pixels.setPixelColor(i, inner_pixels.Color(fade_sectors[i][0], fade_sectors[i][1], fade_sectors[i][2]));
-      } 
-      if ( save[1][3] == HYBRID_4 ) {
-        outer_pixels.setPixelColor(i, outer_pixels.Color(fade_sectors[i][0], fade_sectors[i][1], fade_sectors[i][2]));
-      }
-    }
-    if (random(0, 100) > 90){
-      int random_spot = random(0, PIXEL_COUNT);
-      int random_length = random(5, 35);
-      for ( int i = random_spot; i < random_spot + random_length; i++ ) {
-          fade_sectors[i][0] = save[0][0];
-          fade_sectors[i][1] = save[0][1];
-          fade_sectors[i][2] = save[0][2];
-          
-          fade_sectors[i][0] = save[1][0];
-          fade_sectors[i][1] = save[2][1];
-          fade_sectors[i][2] = save[3][2];
+    if (millis() - led_timestamp > 20){
+       for ( int i = 0; i < PIXEL_COUNT - 1; i++ ) {
+        if (fade_sectors[i] > 0) { fade_sectors[i]--; }
+  
+        if ( save[0][3] == HYBRID_4 ) {
+          inner_pixels.setPixelColor(i, inner_pixels.Color((save[0][0] / 10) * fade_sectors[i], (save[0][1] / 10) * fade_sectors[i], (save[0][2] / 10) * fade_sectors[i]));
+        } 
+        if ( save[1][3] == HYBRID_4 ) {
+          outer_pixels.setPixelColor(i, outer_pixels.Color((save[1][0] / 10) * fade_sectors[i], (save[1][1] / 10) * fade_sectors[i], (save[1][2] / 10) * fade_sectors[i]));
         }
       }
+      led_timestamp = millis();
     }
+  }
 
   // flash every light
   if ( save[0][3] == FLASH || save[1][3] == FLASH) {
@@ -223,4 +192,29 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
 
   inner_pixels.show();
   outer_pixels.show();
+}
+
+void spawn_fade_sector() {
+  int random_spot = random(0, PIXEL_COUNT);
+  int random_length = random(5, 35);
+  for ( int i = random_spot; i < random_spot + random_length; i++ ) {
+      fade_sectors[i] = 10;
+  }
+}
+
+void spawn_snake() {
+  for (int i = 10; i > 0; i--) {
+    snake[i] = i;
+  }
+}
+
+void spawn_rain_drop() {
+  int random_spot;
+  random_spot = random(EDGE_SPACING, PIXEL_COUNT - EDGE_SPACING);
+  rain_drops[random_spot][0] = 10;
+  rain_drops[random_spot][1] =  2;
+}
+
+void turn_shifting_blocks_direction() {
+  shift_direction_up = !shift_direction_up;
 }
