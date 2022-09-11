@@ -5,16 +5,20 @@
 
 uint16_t saves[NUM_SAVES][NUM_LIGHTS][LIGHT_SAVE_SPACE];
 
+uint8_t active_animation;
+
 uint8_t active_save;
 uint8_t write_to_save;
-bool active_lights[NUM_LIGHTS];
+bool active_lights[NUM_LIGHTS], display_beat;
 
 bool button_click_states            [BUTTON_ISLANDS][BUTTON_ROWS];
 bool button_click_prevent_ghosting  [BUTTON_ISLANDS][BUTTON_ROWS];
 
-unsigned long beat_timestamp;
+bool solo_button_click_states            [4];
+bool solo_button_click_prevent_ghosting  [4];
 
-unsigned long debug_mode_timestamp;
+unsigned long beat_timestamp, debug_mode_timestamp;
+
 
 void change_values_in_write_to_save_for_each_active_light(int r, int g, int b, int animation) {
   for (int i = 0; i < NUM_LIGHTS; i++ ) {
@@ -108,6 +112,11 @@ void setup() {
   pinMode(ROW_EIGHT, INPUT_PULLUP);
   pinMode(ROW_NINE , INPUT_PULLUP);
 
+  pinMode(SOLO_BUTTON_ONE,   INPUT_PULLUP);
+  pinMode(SOLO_BUTTON_TWO,   INPUT_PULLUP);
+  pinMode(SOLO_BUTTON_THREE, INPUT_PULLUP);
+  pinMode(SOLO_BUTTON_FOUR,  INPUT_PULLUP);
+
   Serial.print("ok\n");
 
   Serial.print("\nbooting complete in ");
@@ -127,19 +136,27 @@ void loop() {
   led_loop( saves[active_save] );
 
   dmx_loop( saves[active_save] );
+}
 
-  if ( millis() - beat_timestamp > 600) {
-    // Serial.println("spawning");
-    // Serial.println(beat_timestamp);
-    // Serial.println(millis());
-    // spawn_snake();
-    // spawn_rain_drop();
+void read_mic() {
+  //this reads the mic and decides, if a beat is detected
+  // IMPORTANT: This should only be true for a single itteration
+  //IMPORTANT_2: Take into account, if a animation was pressed recently OR the position of the toggle MANUEL-AUTO 
+
+  // dummy stuff
+  if ( !display_beat && millis() - beat_timestamp > 400 ) {
+    display_beat = true;
     beat_timestamp = millis();
+  } else {
+    display_beat = false;
   }
-
 }
 
 void read_buttons() {
+  solo_button_click_states[0] = !digitalRead(SOLO_BUTTON_ONE);
+  solo_button_click_states[1] = !digitalRead(SOLO_BUTTON_TWO);
+  solo_button_click_states[2] = !digitalRead(SOLO_BUTTON_THREE);
+  solo_button_click_states[3] = !digitalRead(SOLO_BUTTON_FOUR);
   for (int i = 0; i < BUTTON_ISLANDS; i++) {
     if (i > 0) {
       digitalWrite(ISLAND_ONE + i - 1, HIGH);
@@ -167,6 +184,9 @@ void handle_inputs() {
   // read buttons into button_click_states array
   read_buttons();
 
+  // read the mic and decide, if a beat is detected
+  read_mic();
+
   // flash
   while (button_click_states[2][5]) {
     for (int i = 0; i < NUM_LIGHTS; i++) {
@@ -186,7 +206,7 @@ void handle_inputs() {
     read_buttons();
   }
 
-  //strobo
+  //strobe
   while (button_click_states[0][5]) {
     led_loop( saves[7] );
     dmx_loop( saves[7] );
@@ -288,6 +308,7 @@ void handle_inputs() {
   //animation HYBRID_1
   if (button_click_states[0][2] && button_click_prevent_ghosting[0][2] == false) {
     spawn_snake();
+    active_animation = HYBRID_1;
     change_values_in_write_to_save_for_each_active_light(256, 256, 256, HYBRID_1);
     button_click_prevent_ghosting[0][2] = true;
   } else if ( !button_click_states[0][2] ) {
@@ -297,6 +318,8 @@ void handle_inputs() {
   //animation HYBRID_2
   if (button_click_states[0][3] && button_click_prevent_ghosting[0][3] == false) {
     spawn_rain_drop();
+    beat_timestamp = millis();
+    active_animation = HYBRID_2;
     change_values_in_write_to_save_for_each_active_light(256, 256, 256, HYBRID_2);
     button_click_prevent_ghosting[0][3] = true;
   } else if ( !button_click_states[0][3] ) {
@@ -306,6 +329,8 @@ void handle_inputs() {
   //animation HYBRID_3
   if (button_click_states[1][2] && button_click_prevent_ghosting[1][2] == false) {
     turn_shifting_blocks_direction();
+    beat_timestamp = millis();
+    active_animation = HYBRID_3;
     change_values_in_write_to_save_for_each_active_light(256, 256, 256, HYBRID_3);
     button_click_prevent_ghosting[1][2] = true;
   } else if ( !button_click_states[1][2] ) {
@@ -315,6 +340,8 @@ void handle_inputs() {
   //animation HYBRID_4
   if (button_click_states[2][2] && button_click_prevent_ghosting[2][2] == false) {
     spawn_fade_sector();
+    beat_timestamp = millis();
+    active_animation = HYBRID_4;
     change_values_in_write_to_save_for_each_active_light(256, 256, 256, HYBRID_4);
     button_click_prevent_ghosting[2][2] = true;
   } else if ( !button_click_states[2][2] ) {
@@ -369,11 +396,45 @@ void handle_inputs() {
     button_click_prevent_ghosting[2][6] = false;
   }
 
-  // set_strobe_mode( digitalRead(  ) );
+  // quickanimation 1
+  if (solo_button_click_states[0] && solo_button_click_prevent_ghosting[0] == false) {
+    fill_countdown();
+    beat_timestamp = millis();
+    active_animation = FILLING_COUNTDOWN;
+    solo_button_click_prevent_ghosting[0] = true;
+  } else if ( !solo_button_click_states[0] ) {
+    solo_button_click_prevent_ghosting[0] = false;
+  }
 
-  // Beat: ( beat + speed[3] + switcher )
+  // quickanimation 2
+  if (solo_button_click_states[1] && solo_button_click_prevent_ghosting[1] == false) {
+    erase_countdown();
+    active_animation = ERASING_COUNTDOWN;
+    solo_button_click_prevent_ghosting[1] = true;
+  } else if ( !solo_button_click_states[1] ) {
+    solo_button_click_prevent_ghosting[1] = false;
+  }
 
-  // Quick animations 5
+  // quickanimation 3
+  // solo_button_click_states[2]
+
+  // quickanimation 4
+  // solo_button_click_states[3]
+
+  // Trigger spawn functions according to the beat detected
+  if ( display_beat ) {
+    if ( active_animation == HYBRID_1 ) {
+      spawn_snake();
+    } else if ( active_animation == HYBRID_2 ) {
+      spawn_rain_drop();
+    } else if ( active_animation == HYBRID_3 ) {
+      turn_shifting_blocks_direction();
+    } else if ( active_animation == HYBRID_4 ) {
+      spawn_fade_sector();
+    } else if ( active_animation == FILLING_COUNTDOWN ) {
+      fill_countdown();
+    }
+  }
 }
 
 void write_feedback(int mode) {

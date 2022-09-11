@@ -25,3 +25,8 @@ void spawn_snake();
 void spawn_rain_drop();
 void turn_shifting_blocks_direction();
 // spawner
+
+// quickanimations
+void fill_countdown();
+void erase_countdown();
+// quickanimations

@@ -69,6 +69,7 @@ void change_values_in_write_to_save_for_each_active_light(int, int, int, int, in
 // saves
 
 // available animations
+// normal animations
 #define DROP_1 0
 #define DROP_2 1
 #define DROP_3 2
@@ -95,6 +96,11 @@ void change_values_in_write_to_save_for_each_active_light(int, int, int, int, in
 #define SETTLE_4 19
 
 #define ANIMATION_COUNT 20
+
+
+// quickanimations
+#define FILLING_COUNTDOWN 253
+#define ERASING_COUNTDOWN 252
 
 #define FLASH 254
 #define OFF   255

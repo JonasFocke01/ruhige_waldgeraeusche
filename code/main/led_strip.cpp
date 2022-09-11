@@ -2,10 +2,10 @@
 #include "led_strip.h"
 #include "controller.h"
 
-unsigned long led_timestamp;
+unsigned long led_timestamp, countdown_timestamp;
 
-int snake[PIXEL_COUNT], blocks[PIXEL_COUNT], blocks_position = 0, rain_drops[PIXEL_COUNT][2], fade_sectors[PIXEL_COUNT], likelyhood;
-bool shift_direction_up = true;
+int snake[PIXEL_COUNT], blocks[PIXEL_COUNT], blocks_position = 0, rain_drops[PIXEL_COUNT][2], fade_sectors[PIXEL_COUNT], likelyhood, countdown_state = 0;
+bool shift_direction_up = true, erase_countdown_bool = false;
 Adafruit_NeoPixel inner_pixels;
 Adafruit_NeoPixel outer_pixels;
 
@@ -180,7 +180,7 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     }
   }
 
-  //turn every light off
+  // turn every light off
   if ( save[0][3] == OFF || save[1][3] == OFF ) {
     for ( int i = 0; i < PIXEL_COUNT; i++ ) {
       if (  save[0][3] == OFF ) {
@@ -189,6 +189,34 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       if ( save[1][3] == OFF ) {
         outer_pixels.setPixelColor(i, inner_pixels.Color(0, 0, 0));
       }
+    }
+  }
+
+  
+
+  // draw countdown
+  if ( countdown_state > 0 ) {
+    if ( millis() - countdown_timestamp > 2000 ) {
+      countdown_state = 0;
+    } else {
+      for ( int i = 0; i < countdown_state; i++ ) {
+        inner_pixels.setPixelColor(i, inner_pixels.Color(save[0][0], save[0][1], save[0][2]));
+        outer_pixels.setPixelColor(i, outer_pixels.Color(save[1][0], save[1][1], save[1][2]));
+        if ( i > PIXEL_COUNT - 2 ) break;
+      }
+    }
+  }
+
+  // handle erase countdown
+  if ( erase_countdown_bool ) {
+    if ( countdown_state > 0 ) {
+      countdown_state -= 4;
+      countdown_timestamp = millis();
+    } else {
+      erase_countdown_bool = false;
+    }
+    if ( millis() - countdown_timestamp > 2000 ) {
+      erase_countdown_bool = false;
     }
   }
 
@@ -219,4 +247,13 @@ void spawn_rain_drop() {
 
 void turn_shifting_blocks_direction() {
   shift_direction_up = !shift_direction_up;
+}
+
+void fill_countdown() {
+  countdown_state += 5;
+  countdown_timestamp = millis();
+}
+
+void erase_countdown() {
+  erase_countdown_bool = true;
 }
