@@ -26,7 +26,7 @@ bool button_click_prevent_ghosting  [BUTTON_ISLANDS][BUTTON_ROWS];
 bool solo_button_click_states            [4];
 bool solo_button_click_prevent_ghosting  [4];
 
-unsigned long beat_timestamp, debug_mode_timestamp, last_beat_timestamp;
+unsigned long beat_timestamp, debug_mode_timestamp, last_beat_timestamp, last_animation_two_timestamp;
 
 
 void change_values_in_write_to_save_for_each_active_light(int r, int g, int b, int animation) {
@@ -75,9 +75,9 @@ void setup() {
 
   for ( int i = 1; i < NUM_SAVES; i++ ) {
     for ( int j = 0; j < NUM_LIGHTS; j++ ) {
-      saves[i][j][0] = random(0, 255);
-      saves[i][j][1] = random(0, 255);
-      saves[i][j][2] = random(0, 255);
+      saves[i][j][0] = 255;
+      saves[i][j][1] = 10;
+      saves[i][j][2] = 10;
     }
   }
 
@@ -100,6 +100,10 @@ void setup() {
 
   for ( int i = 0; i < NUM_LIGHTS; i++ ) {
     saves[7][i][3] = OFF;
+  }
+
+  for ( int i = 0; i < NUM_LIGHTS; i++ ) {
+    saves[8][i][3] = BRIZZLE;
   }
 
   Serial.print("ok\n");
@@ -175,33 +179,55 @@ void read_buttons() {
       } else {
         button_click_states[i][j] = false;
       }
-      // if ( button_click_states[i][j] ) {
-      // Serial.print("    ");
-      // Serial.print(i);
-      // Serial.print("/");
-      // Serial.print(j);
-      // Serial.print("\n");
-      // }
+      if ( button_click_states[i][j] ) {
+        // Serial.print("    ");
+        // Serial.print(i);
+        // Serial.print("/");
+        // Serial.print(j);
+        // Serial.print("\n");
+      }
     }
   }
 }
 
+int detect_beat_state = true;
 void detect_beat() {
-   if ( millis() - last_beat_timestamp > map( analogRead( POTENTIOMETER ), 0, 1024, 50, 800) ) {
-      digitalWrite(LED_BUILTIN, HIGH);
-     spawn_fade_sector();
-     spawn_snake();
-     spawn_rain_drop();
-     turn_shifting_blocks_direction();
-     digitalWrite(LED_BUILTIN, LOW);
-     last_beat_timestamp = millis();
-   }
+  Serial.println( detect_beat_state );
+  if ( detect_beat_state && millis() - last_beat_timestamp > map( analogRead( POTENTIOMETER ), 0, 1024, 50, 800) ) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    spawn_fade_sector();
+    spawn_snake();
+    spawn_rain_drop();
+    turn_shifting_blocks_direction();
+    digitalWrite(LED_BUILTIN, LOW);
+    last_beat_timestamp = millis();
+  }
 }
 
 void handle_inputs() {
 
   // read buttons into button_click_states array
   read_buttons();
+
+  if ( solo_button_click_states[3] && solo_button_click_prevent_ghosting[3] == false ) {
+    detect_beat_state = !detect_beat_state;
+    solo_button_click_prevent_ghosting[3] = true;
+  } else {
+    solo_button_click_prevent_ghosting[3] = false;
+  }
+
+  while (solo_button_click_states[3]) { // turn detect beat off
+    read_buttons();
+  }
+
+  bool erase_pixel = false;
+  while (solo_button_click_states[2]) { // pitch
+    set_pitch_position( map(analogRead( POTENTIOMETER ), 0, 1024, 0, PIXEL_COUNT ) );
+    led_loop( saves[OFF] );
+    dmx_loop( saves[OFF] );
+    read_buttons();
+    erase_pixel = true;
+  }
 
   // flash
   while (button_click_states[2][5]) {
@@ -230,7 +256,6 @@ void handle_inputs() {
   }
 
   // fill pixels
-  bool erase_pixel = false;
   while (solo_button_click_states[0]) {
     fill_pixels( map(analogRead( POTENTIOMETER ), 0, 1024, 0, 100 ) );
     led_loop( saves[active_save] );
@@ -238,8 +263,19 @@ void handle_inputs() {
     read_buttons();
     erase_pixel = true;
   }
-  if ( erase_pixel ) { erase_pixels(); }
-  
+  if ( erase_pixel ) {
+    erase_pixels();
+  }
+
+  while (solo_button_click_states[1]) {
+    if ( millis() - last_animation_two_timestamp > analogRead( POTENTIOMETER ) ) {
+      led_loop( saves[8] );
+      dmx_loop( saves[8] );
+      last_animation_two_timestamp = millis();
+    }
+    read_buttons();
+  }
+
   // active lights to red
   if (button_click_states[0][8] && button_click_prevent_ghosting[0][8] == false) {
     change_values_in_write_to_save_for_each_active_light( 255, 10, 10, 256 );
@@ -375,6 +411,30 @@ void handle_inputs() {
     button_click_prevent_ghosting[2][2] = false;
   }
 
+  // HIER
+  //animation HYBRID_4
+  // if (button_click_states[2][2] && button_click_prevent_ghosting[2][2] == false) {
+  //   spawn_fade_sector();
+  //   beat_timestamp = millis();
+  //   active_animation = HYBRID_4;
+  //   change_values_in_write_to_save_for_each_active_light(256, 256, 256, HYBRID_4);
+  //   button_click_prevent_ghosting[2][2] = true;
+  // } else if ( !button_click_states[2][2] ) {
+  //   button_click_prevent_ghosting[2][2] = false;
+  // }
+
+  //animation HYBRID_4
+  // if (button_click_states[2][2] && button_click_prevent_ghosting[2][2] == false) {
+  //   spawn_fade_sector();
+  //   beat_timestamp = millis();
+  //   active_animation = HYBRID_4;
+  //   change_values_in_write_to_save_for_each_active_light(256, 256, 256, HYBRID_4);
+  //   button_click_prevent_ghosting[2][2] = true;
+  // } else if ( !button_click_states[2][2] ) {
+  //   button_click_prevent_ghosting[2][2] = false;
+  // }
+  // HIER
+
   // switch editing mode to preset 1
   if (button_click_states[0][7] && button_click_prevent_ghosting[0][7] == false) {
     write_to_save = 1;
@@ -424,7 +484,7 @@ void handle_inputs() {
   }
 
   // quickanimation 1
-  
+
 
   // quickanimation 2
   // solo_button_click_states[1]

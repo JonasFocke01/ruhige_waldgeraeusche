@@ -28,5 +28,6 @@ void turn_shifting_blocks_direction();
 
 // quickanimations
 void fill_pixels(int percentage);
+void set_pitch_position(int pitch);
 void erase_pixels();
 // quickanimations

@@ -9,12 +9,12 @@
 #define ISLAND_THREE 24
 #define ISLAND_FOUR  25
 
-#define ROW_ONE	   28
-#define ROW_TWO	   29
+#define ROW_ONE	         28
+#define ROW_TWO	         29
 #define ROW_THREE	 30
 #define ROW_FOUR	 31
 #define ROW_FIVE	 32
-#define ROW_SIX	   33
+#define ROW_SIX	         33
 #define ROW_SEVEN	 34
 #define ROW_EIGHT	 35
 #define ROW_NINE	 36
@@ -26,17 +26,18 @@
 
 #define AUDIO_JACK        A3
 
-#define MICROPHONE A1
+#define MICROPHONE 	  A1
 
-#define POTENTIOMETER A2
+#define POTENTIOMETER 	  A2
 // input pins
 
 // saves
-// The saves array contains 8 saves
+// The saves array contains 9 saves
 // 0 ->   save used for one-time-overrides like flashing or quick animations
 // 1-5 -> button saves
 // 6 ->   flash save: everything in here is flashed
 // 7 ->   mute save:  everything in here is muted
+// 8 ->   brizzle save:  pixels in here are alternating on and off
 
 // Each save contians configurations for each available light
 // The lights are
@@ -57,7 +58,7 @@
 // 2 -> b
 // 3 -> animation
 
-#define NUM_SAVES 8
+#define NUM_SAVES  9
 #define NUM_LIGHTS 9
 #define LIGHT_SAVE_SPACE 4
 
@@ -91,6 +92,7 @@ void change_values_in_write_to_save_for_each_active_light(int, int, int, int, in
 #define SETTLE_3 18
 #define SETTLE_4 19
 
+
 #define ANIMATION_COUNT 20
 
 
@@ -98,8 +100,10 @@ void change_values_in_write_to_save_for_each_active_light(int, int, int, int, in
 #define FILLING_COUNTDOWN 253
 #define ERASING_COUNTDOWN 252
 
-#define FLASH 254
-#define OFF   255
+#define PITCH   252
+#define BRIZZLE 253
+#define FLASH   254
+#define OFF     255
 // available animations
 
 // feedback

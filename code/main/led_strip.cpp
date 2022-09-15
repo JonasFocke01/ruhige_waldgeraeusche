@@ -4,7 +4,7 @@
 
 unsigned long led_timestamp, countdown_timestamp;
 
-int snake[PIXEL_COUNT], blocks[PIXEL_COUNT], blocks_position = 0, rain_drops[PIXEL_COUNT][2], fade_sectors[PIXEL_COUNT], likelyhood, countdown_state = 0;
+int snake[PIXEL_COUNT], blocks[PIXEL_COUNT], blocks_position = 0, rain_drops[PIXEL_COUNT][2], fade_sectors[PIXEL_COUNT], likelyhood, countdown_state = 0, pitch_position = 0;
 bool shift_direction_up = true, erase_countdown_bool = false;
 Adafruit_NeoPixel inner_pixels;
 Adafruit_NeoPixel outer_pixels;
@@ -167,6 +167,17 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       led_timestamp = millis();
     }
   }
+  if ( save[0][3] == BRIZZLE || save[1][3] == BRIZZLE ) { // brizzle
+    int brightness = random(0, 255);
+    for (int i = 0; i < PIXEL_COUNT - 1; i++) {
+      if (  save[0][3] == BRIZZLE ) {
+        inner_pixels.setPixelColor(i, inner_pixels.Color(brightness, brightness, brightness));
+      }
+      if ( save[1][3] == BRIZZLE ) {
+        outer_pixels.setPixelColor(i, inner_pixels.Color(brightness, brightness, brightness));
+      }
+    }
+  }
 
   // flash every light
   if ( save[0][3] == FLASH || save[1][3] == FLASH) {
@@ -192,15 +203,28 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     }
   }
 
-  
+
 
   // draw countdown
-  Serial.println(countdown_state);
   if ( countdown_state > 0 ) {
     for ( int i = 0; i < countdown_state; i++ ) {
       inner_pixels.setPixelColor(i, inner_pixels.Color(save[0][0], save[0][1], save[0][2]));
       outer_pixels.setPixelColor(i, outer_pixels.Color(save[1][0], save[1][1], save[1][2]));
       if ( i > PIXEL_COUNT - 2 ) break;
+    }
+  }
+
+  // draw pitch
+  const uint8_t bleeding_amount = 5;
+  if ( pitch_position > 0 ) {
+    inner_pixels.setPixelColor(pitch_position, inner_pixels.Color(save[0][0], save[0][1], save[0][2]));
+    outer_pixels.setPixelColor(pitch_position, outer_pixels.Color(save[1][0], save[1][1], save[1][2]));
+    for ( int i = bleeding_amount; i > 0; i-- ) {
+      if ( pitch_position - i < bleeding_amount || pitch_position + i > PIXEL_COUNT - bleeding_amount ) break;
+      inner_pixels.setPixelColor(pitch_position - i, inner_pixels.Color((save[0][0] / 10) * i, (save[0][1] / 10) * i, (save[0][2] / 10) * i));
+      inner_pixels.setPixelColor(pitch_position + i, inner_pixels.Color((save[0][0] / 10) * i, (save[0][1] / 10) * i, (save[0][2] / 10) * i));
+      outer_pixels.setPixelColor(pitch_position - i, outer_pixels.Color((save[1][0] / 10) * i, (save[1][1] / 10) * i, (save[1][2] / 10) * i));
+      outer_pixels.setPixelColor(pitch_position + i, outer_pixels.Color((save[1][0] / 10) * i, (save[1][1] / 10) * i, (save[1][2] / 10) * i));
     }
   }
 
@@ -239,4 +263,9 @@ void fill_pixels(int percentage) {
 
 void erase_pixels() {
   countdown_state = 0;
+  pitch_position  = 0;
+}
+
+void set_pitch_position(int pitch) {
+  pitch_position = pitch;
 }
