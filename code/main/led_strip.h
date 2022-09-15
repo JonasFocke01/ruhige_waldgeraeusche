@@ -27,6 +27,6 @@ void turn_shifting_blocks_direction();
 // spawner
 
 // quickanimations
-void fill_countdown();
-void erase_countdown();
+void fill_pixels(int percentage);
+void erase_pixels();
 // quickanimations

@@ -24,15 +24,11 @@
 #define SOLO_BUTTON_THREE 40
 #define SOLO_BUTTON_FOUR  41
 
-//TODO: This are only dummy values. This needs to be worked out!
-#define STROBE_FREQUENCY_POTENTIOMETER 1
-#define BLINDER_POTENTIOMETER 1
-#define SPECIAL_SLOT_ONE_POTENTIOMETER 1
-#define SPECIAL_SLOT_TWO_POTENTIOMETER 1
-#define SPECIAL_SLOT_THREE_POTENTIOMETER 1
-#define RED_POTENTIOMETER 1
-#define GREEN_POTENTIOMETER 1
-#define BLUE_POTENTIOMETER 1
+#define AUDIO_JACK        A3
+
+#define MICROPHONE A1
+
+#define POTENTIOMETER A2
 // input pins
 
 // saves

@@ -7,6 +7,15 @@ uint16_t saves[NUM_SAVES][NUM_LIGHTS][LIGHT_SAVE_SPACE];
 
 uint8_t active_animation;
 
+// uint8_t  energy_history[256], current_index;
+// uint16_t min_ms_between_beats = 1000;
+// unsigned long  last_beat_timestamp = 0;
+// uint8_t last_beat_pegel;
+unsigned long time_between_beats = 1000;
+bool pressed = false;
+
+int potentiometer;
+
 uint8_t active_save;
 uint8_t write_to_save;
 bool active_lights[NUM_LIGHTS], display_beat;
@@ -17,7 +26,7 @@ bool button_click_prevent_ghosting  [BUTTON_ISLANDS][BUTTON_ROWS];
 bool solo_button_click_states            [4];
 bool solo_button_click_prevent_ghosting  [4];
 
-unsigned long beat_timestamp, debug_mode_timestamp;
+unsigned long beat_timestamp, debug_mode_timestamp, last_beat_timestamp;
 
 
 void change_values_in_write_to_save_for_each_active_light(int r, int g, int b, int animation) {
@@ -39,9 +48,11 @@ void setup() {
 
   randomSeed(analogRead(9)); // 9 is an unconnected analog pin
 
+  pinMode( MICROPHONE , INPUT );
+
   write_to_save = 1;
   active_save = 1;
-  memset(active_lights, false, sizeof(active_lights));
+  memset(active_lights, false, sizeof(active_lights) / sizeof(active_lights[0]));
 
   for (int i = 0; i < NUM_LIGHTS; i++) {
     for (int j = 0; j < LIGHT_SAVE_SPACE; j++) {
@@ -54,6 +65,8 @@ void setup() {
   dmx_channels_init();
 
   led_setup();
+
+  pinMode(LED_BUILTIN, OUTPUT);
 
 
   Serial.print(" ok\n");
@@ -73,7 +86,7 @@ void setup() {
 
   Serial.print("preparing animations...");
 
-  memset(active_lights, true, sizeof(active_lights));
+  memset(active_lights, true, sizeof(active_lights) / sizeof(active_lights[0]));
 
   for ( int i = 1; i < NUM_SAVES; i++ ) {
     for ( int j = 0; j < NUM_LIGHTS; j++ ) {
@@ -117,6 +130,8 @@ void setup() {
   pinMode(SOLO_BUTTON_THREE, INPUT_PULLUP);
   pinMode(SOLO_BUTTON_FOUR,  INPUT_PULLUP);
 
+  pinMode(AUDIO_JACK, INPUT);
+
   Serial.print("ok\n");
 
   Serial.print("\nbooting complete in ");
@@ -128,8 +143,13 @@ void setup() {
 }
 
 void loop() {
+  //Serial.println( millis() - debug_mode_timestamp );
+
+  debug_mode_timestamp = millis();
 
   handle_inputs();
+
+  detect_beat();
 
   write_feedback(FEEDBACK_MODE_OFF);
 
@@ -138,21 +158,8 @@ void loop() {
   dmx_loop( saves[active_save] );
 }
 
-void read_mic() {
-  //this reads the mic and decides, if a beat is detected
-  // IMPORTANT: This should only be true for a single itteration
-  //IMPORTANT_2: Take into account, if a animation was pressed recently OR the position of the toggle MANUEL-AUTO 
-
-  // dummy stuff
-  if ( !display_beat && millis() - beat_timestamp > 400 ) {
-    display_beat = true;
-    beat_timestamp = millis();
-  } else {
-    display_beat = false;
-  }
-}
-
 void read_buttons() {
+
   solo_button_click_states[0] = !digitalRead(SOLO_BUTTON_ONE);
   solo_button_click_states[1] = !digitalRead(SOLO_BUTTON_TWO);
   solo_button_click_states[2] = !digitalRead(SOLO_BUTTON_THREE);
@@ -179,13 +186,22 @@ void read_buttons() {
   }
 }
 
+void detect_beat() {
+   if ( millis() - last_beat_timestamp > map( analogRead( POTENTIOMETER ), 0, 1024, 50, 800) ) {
+      digitalWrite(LED_BUILTIN, HIGH);
+     spawn_fade_sector();
+     spawn_snake();
+     spawn_rain_drop();
+     turn_shifting_blocks_direction();
+     digitalWrite(LED_BUILTIN, LOW);
+     last_beat_timestamp = millis();
+   }
+}
+
 void handle_inputs() {
 
   // read buttons into button_click_states array
   read_buttons();
-
-  // read the mic and decide, if a beat is detected
-  read_mic();
 
   // flash
   while (button_click_states[2][5]) {
@@ -206,13 +222,24 @@ void handle_inputs() {
     read_buttons();
   }
 
-  //strobe
+  // strobe
   while (button_click_states[0][5]) {
     led_loop( saves[7] );
     dmx_loop( saves[7] );
     read_buttons();
   }
 
+  // fill pixels
+  bool erase_pixel = false;
+  while (solo_button_click_states[0]) {
+    fill_pixels( map(analogRead( POTENTIOMETER ), 0, 1024, 0, 100 ) );
+    led_loop( saves[active_save] );
+    dmx_loop( saves[active_save] );
+    read_buttons();
+    erase_pixel = true;
+  }
+  if ( erase_pixel ) { erase_pixels(); }
+  
   // active lights to red
   if (button_click_states[0][8] && button_click_prevent_ghosting[0][8] == false) {
     change_values_in_write_to_save_for_each_active_light( 255, 10, 10, 256 );
@@ -397,44 +424,16 @@ void handle_inputs() {
   }
 
   // quickanimation 1
-  if (solo_button_click_states[0] && solo_button_click_prevent_ghosting[0] == false) {
-    fill_countdown();
-    beat_timestamp = millis();
-    active_animation = FILLING_COUNTDOWN;
-    solo_button_click_prevent_ghosting[0] = true;
-  } else if ( !solo_button_click_states[0] ) {
-    solo_button_click_prevent_ghosting[0] = false;
-  }
+  
 
   // quickanimation 2
-  if (solo_button_click_states[1] && solo_button_click_prevent_ghosting[1] == false) {
-    erase_countdown();
-    active_animation = ERASING_COUNTDOWN;
-    solo_button_click_prevent_ghosting[1] = true;
-  } else if ( !solo_button_click_states[1] ) {
-    solo_button_click_prevent_ghosting[1] = false;
-  }
+  // solo_button_click_states[1]
 
   // quickanimation 3
   // solo_button_click_states[2]
 
   // quickanimation 4
   // solo_button_click_states[3]
-
-  // Trigger spawn functions according to the beat detected
-  if ( display_beat ) {
-    if ( active_animation == HYBRID_1 ) {
-      spawn_snake();
-    } else if ( active_animation == HYBRID_2 ) {
-      spawn_rain_drop();
-    } else if ( active_animation == HYBRID_3 ) {
-      turn_shifting_blocks_direction();
-    } else if ( active_animation == HYBRID_4 ) {
-      spawn_fade_sector();
-    } else if ( active_animation == FILLING_COUNTDOWN ) {
-      fill_countdown();
-    }
-  }
 }
 
 void write_feedback(int mode) {

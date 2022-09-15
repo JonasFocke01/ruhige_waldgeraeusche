@@ -56,9 +56,11 @@ void led_setup() {
 void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
 
   if ( save[0][3] == HYBRID_1 || save[1][3] == HYBRID_1 ) { // snake
-    for (int i = PIXEL_COUNT - 3; i > -1; i--)
-    {
-      snake[i + 4] = snake[i];
+    for ( int i = 0; i < 5; i++ ) {
+      for (int j = PIXEL_COUNT - 2; j > -1; j--)
+      {
+        snake[j + 1] = snake[j];
+      }
     }
 
     snake[PIXEL_COUNT - 1] = 0;
@@ -141,8 +143,6 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
         j++;
       }
 
-      Serial.println(blocks_position);
-      Serial.println(EDGE_SPACING);
       // toggle shift direction if neccesarry
       if ( blocks_position - 2 * EDGE_SPACING > 0 ) shift_direction_up = false;
       if ( blocks_position + EDGE_SPACING < 0 ) shift_direction_up = true;
@@ -195,28 +195,12 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
   
 
   // draw countdown
+  Serial.println(countdown_state);
   if ( countdown_state > 0 ) {
-    if ( millis() - countdown_timestamp > 2000 ) {
-      countdown_state = 0;
-    } else {
-      for ( int i = 0; i < countdown_state; i++ ) {
-        inner_pixels.setPixelColor(i, inner_pixels.Color(save[0][0], save[0][1], save[0][2]));
-        outer_pixels.setPixelColor(i, outer_pixels.Color(save[1][0], save[1][1], save[1][2]));
-        if ( i > PIXEL_COUNT - 2 ) break;
-      }
-    }
-  }
-
-  // handle erase countdown
-  if ( erase_countdown_bool ) {
-    if ( countdown_state > 0 ) {
-      countdown_state -= 4;
-      countdown_timestamp = millis();
-    } else {
-      erase_countdown_bool = false;
-    }
-    if ( millis() - countdown_timestamp > 2000 ) {
-      erase_countdown_bool = false;
+    for ( int i = 0; i < countdown_state; i++ ) {
+      inner_pixels.setPixelColor(i, inner_pixels.Color(save[0][0], save[0][1], save[0][2]));
+      outer_pixels.setPixelColor(i, outer_pixels.Color(save[1][0], save[1][1], save[1][2]));
+      if ( i > PIXEL_COUNT - 2 ) break;
     }
   }
 
@@ -249,11 +233,10 @@ void turn_shifting_blocks_direction() {
   shift_direction_up = !shift_direction_up;
 }
 
-void fill_countdown() {
-  countdown_state += 5;
-  countdown_timestamp = millis();
+void fill_pixels(int percentage) {
+  countdown_state = map( percentage, 0, 100, 0, PIXEL_COUNT - 1 );
 }
 
-void erase_countdown() {
-  erase_countdown_bool = true;
+void erase_pixels() {
+  countdown_state = 0;
 }
