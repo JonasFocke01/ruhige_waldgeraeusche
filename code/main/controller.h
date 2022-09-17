@@ -9,12 +9,12 @@
 #define ISLAND_THREE 24
 #define ISLAND_FOUR  25
 
-#define ROW_ONE	         28
-#define ROW_TWO	         29
+#define ROW_ONE	   28
+#define ROW_TWO	   29
 #define ROW_THREE	 30
 #define ROW_FOUR	 31
 #define ROW_FIVE	 32
-#define ROW_SIX	         33
+#define ROW_SIX	   33
 #define ROW_SEVEN	 34
 #define ROW_EIGHT	 35
 #define ROW_NINE	 36
@@ -24,11 +24,11 @@
 #define SOLO_BUTTON_THREE 40
 #define SOLO_BUTTON_FOUR  41
 
-#define AUDIO_JACK        A3
+#define AUDIO_JACK    A3
 
 #define MICROPHONE 	  A1
 
-#define POTENTIOMETER 	  A2
+#define POTENTIOMETER A2
 // input pins
 
 // saves

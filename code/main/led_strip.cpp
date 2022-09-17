@@ -84,7 +84,7 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       //progress waves
       rain_drops[0][0] = 0;
       rain_drops[PIXEL_COUNT - 1][0] = 0;
-      for (int i = 1; i < PIXEL_COUNT - 1; i++) {
+      for (int i = 2; i < PIXEL_COUNT - 3; i++) {
         if (rain_drops[i][0] > 0) {
           if (rain_drops[i][1] == 2) {
             rain_drops[i + 2][0] = 10;
@@ -133,7 +133,7 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
 
       //draw blocks
       int j = 0;
-      for ( int i = 0; i < PIXEL_COUNT; i++) {
+      for ( int i = 0; i < PIXEL_COUNT - 1; i++) {
         if ( save[0][3] == HYBRID_3 ) {
           inner_pixels.setPixelColor(i + blocks_position, inner_pixels.Color((save[0][0] / 10) * blocks[j], (save[0][1] / 10) * blocks[j], (save[0][2] / 10) * blocks[j]));
         }
@@ -150,17 +150,30 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       led_timestamp = millis();
     }
   }
-  if ( save[0][3] == HYBRID_4 || save[1][3] == HYBRID_4 ) { // fading sectors
+  if ( save[0][3] == DROP_1 || save[1][3] == DROP_1 ) { // fixed blocks
+    //draw blocks
+    int j = 0;
+    for ( int i = 0; i < PIXEL_COUNT; i++) {
+      if ( save[0][3] == DROP_1 ) {
+        inner_pixels.setPixelColor(i + blocks_position, inner_pixels.Color((save[0][0] / 10) * blocks[j], (save[0][1] / 10) * blocks[j], (save[0][2] / 10) * blocks[j]));
+      }
+      if ( save[1][3] == DROP_1 ) {
+        outer_pixels.setPixelColor(i + blocks_position, outer_pixels.Color((save[1][0] / 10) * blocks[j], (save[1][1] / 10) * blocks[j], (save[1][2] / 10) * blocks[j]));
+      }
+      j++;
+    }
+  }
+  if ( save[0][3] == HYBRID_4 || save[1][3] == HYBRID_4 || save[0][3] == DROP_2 || save[1][3] == DROP_2 ) { // fading sectors
     if (millis() - led_timestamp > 20) {
       for ( int i = 0; i < PIXEL_COUNT - 1; i++ ) {
         if (fade_sectors[i] > 0) {
           fade_sectors[i]--;
         }
 
-        if ( save[0][3] == HYBRID_4 ) {
+        if ( save[0][3] == HYBRID_4 || save[0][3] == DROP_2 ) {
           inner_pixels.setPixelColor(i, inner_pixels.Color((save[0][0] / 10) * fade_sectors[i], (save[0][1] / 10) * fade_sectors[i], (save[0][2] / 10) * fade_sectors[i]));
         }
-        if ( save[1][3] == HYBRID_4 ) {
+        if ( save[1][3] == HYBRID_4 || save[1][3] == DROP_2 ) {
           outer_pixels.setPixelColor(i, outer_pixels.Color((save[1][0] / 10) * fade_sectors[i], (save[1][1] / 10) * fade_sectors[i], (save[1][2] / 10) * fade_sectors[i]));
         }
       }
@@ -232,11 +245,17 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
   outer_pixels.show();
 }
 
-void spawn_fade_sector() {
-  int random_spot = random(0, PIXEL_COUNT);
-  int random_length = random(5, 35);
-  for ( int i = random_spot; i < random_spot + random_length; i++ ) {
-    fade_sectors[i] = 10;
+void spawn_fade_sector(int mode) {
+  if ( mode == 0 ) {
+    int random_spot = random(0, PIXEL_COUNT);
+    int random_length = random(5, 35);
+    for ( int i = random_spot; i < random_spot + random_length; i++ ) {
+      fade_sectors[i] = 10;
+    }
+  } else {
+    for ( int i = 0; i < PIXEL_COUNT - 1; i++ ) {
+      fade_sectors[i] = 10;
+    }
   }
 }
 
@@ -268,4 +287,14 @@ void erase_pixels() {
 
 void set_pitch_position(int pitch) {
   pitch_position = pitch;
+}
+
+void invert_shifting_blocks() {
+  for (int i = 0; i < PIXEL_COUNT - 1; i++) {
+    if ( blocks[i] > 0 ) {
+      blocks[i] = 0;
+    } else {
+      blocks[i] = 10;
+    }
+  }
 }

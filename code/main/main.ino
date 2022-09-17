@@ -147,9 +147,6 @@ void setup() {
 }
 
 void loop() {
-  //Serial.println( millis() - debug_mode_timestamp );
-
-  debug_mode_timestamp = millis();
 
   handle_inputs();
 
@@ -192,19 +189,31 @@ void read_buttons() {
 
 int detect_beat_state = true;
 void detect_beat() {
-  Serial.println( detect_beat_state );
   if ( detect_beat_state && millis() - last_beat_timestamp > map( analogRead( POTENTIOMETER ), 0, 1024, 50, 800) ) {
     digitalWrite(LED_BUILTIN, HIGH);
-    spawn_fade_sector();
+    if ( active_animation == DROP_2 ) {
+      spawn_fade_sector(1);
+    } else {
+      spawn_fade_sector(0);
+    }
     spawn_snake();
     spawn_rain_drop();
-    turn_shifting_blocks_direction();
+    if ( active_animation == HYBRID_3 ) {
+      turn_shifting_blocks_direction();
+    } else {
+      invert_shifting_blocks();
+    }
     digitalWrite(LED_BUILTIN, LOW);
     last_beat_timestamp = millis();
   }
 }
 
 void handle_inputs() {
+
+  // weird memory writing prevention
+  if ( write_to_save == 0 ) {
+    write_to_save = 1;
+  }
 
   // read buttons into button_click_states array
   read_buttons();
@@ -402,7 +411,7 @@ void handle_inputs() {
 
   //animation HYBRID_4
   if (button_click_states[2][2] && button_click_prevent_ghosting[2][2] == false) {
-    spawn_fade_sector();
+    spawn_fade_sector(0);
     beat_timestamp = millis();
     active_animation = HYBRID_4;
     change_values_in_write_to_save_for_each_active_light(256, 256, 256, HYBRID_4);
@@ -411,29 +420,28 @@ void handle_inputs() {
     button_click_prevent_ghosting[2][2] = false;
   }
 
-  // HIER
-  //animation HYBRID_4
-  // if (button_click_states[2][2] && button_click_prevent_ghosting[2][2] == false) {
-  //   spawn_fade_sector();
-  //   beat_timestamp = millis();
-  //   active_animation = HYBRID_4;
-  //   change_values_in_write_to_save_for_each_active_light(256, 256, 256, HYBRID_4);
-  //   button_click_prevent_ghosting[2][2] = true;
-  // } else if ( !button_click_states[2][2] ) {
-  //   button_click_prevent_ghosting[2][2] = false;
-  // }
 
-  //animation HYBRID_4
-  // if (button_click_states[2][2] && button_click_prevent_ghosting[2][2] == false) {
-  //   spawn_fade_sector();
-  //   beat_timestamp = millis();
-  //   active_animation = HYBRID_4;
-  //   change_values_in_write_to_save_for_each_active_light(256, 256, 256, HYBRID_4);
-  //   button_click_prevent_ghosting[2][2] = true;
-  // } else if ( !button_click_states[2][2] ) {
-  //   button_click_prevent_ghosting[2][2] = false;
-  // }
-  // HIER
+  //animation DROP_1
+  if (button_click_states[1][3] && button_click_prevent_ghosting[1][3] == false) {
+    invert_shifting_blocks();
+    beat_timestamp = millis();
+    active_animation = DROP_1;
+    change_values_in_write_to_save_for_each_active_light(256, 256, 256, DROP_1);
+    button_click_prevent_ghosting[1][3] = true;
+  } else if ( !button_click_states[1][3] ) {
+    button_click_prevent_ghosting[1][3] = false;
+  }
+
+  //animation DROP_2
+  if (button_click_states[2][3] && button_click_prevent_ghosting[2][3] == false) {
+    spawn_fade_sector(1);
+    beat_timestamp = millis();
+    active_animation = DROP_2;
+    change_values_in_write_to_save_for_each_active_light(256, 256, 256, DROP_2);
+    button_click_prevent_ghosting[2][3] = true;
+  } else if ( !button_click_states[2][3] ) {
+    button_click_prevent_ghosting[2][3] = false;
+  }
 
   // switch editing mode to preset 1
   if (button_click_states[0][7] && button_click_prevent_ghosting[0][7] == false) {
@@ -482,18 +490,6 @@ void handle_inputs() {
   } else if ( !button_click_states[2][6] ) {
     button_click_prevent_ghosting[2][6] = false;
   }
-
-  // quickanimation 1
-
-
-  // quickanimation 2
-  // solo_button_click_states[1]
-
-  // quickanimation 3
-  // solo_button_click_states[2]
-
-  // quickanimation 4
-  // solo_button_click_states[3]
 }
 
 void write_feedback(int mode) {

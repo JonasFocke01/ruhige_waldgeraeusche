@@ -20,10 +20,11 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]);
 //shifting blocks theme
 
 // spawner
-void spawn_fade_sector();
+void spawn_fade_sector(int mode);
 void spawn_snake();
 void spawn_rain_drop();
 void turn_shifting_blocks_direction();
+void invert_shifting_blocks();
 // spawner
 
 // quickanimations
