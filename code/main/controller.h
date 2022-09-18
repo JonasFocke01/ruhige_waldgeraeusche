@@ -41,16 +41,9 @@
 
 // Each save contians configurations for each available light
 // The lights are
-// 0 -> inner_leds
-// 1 -> outer_leds
-// 2 -> stage_lights
-// 3 -> moving_heads_left
-// 4 -> moving_heads_right
-// 5 -> blinder
+// 1 -> leds
+// 3 -> moving_heads
 // 6 -> laser
-// 7 -> special_slot_one
-// 8 -> special_slot_two
-// 9 -> special_slot_three
 
 // A save is constructed like this
 // 0 -> r

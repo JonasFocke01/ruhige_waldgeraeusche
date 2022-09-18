@@ -41,7 +41,7 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     }
     set_strobe_mode( false );
   } else {
-    if ( save[4][3] == HYBRID_1 || save[4][3] == HYBRID_2 ) {
+    if ( save[1][3] == HYBRID_1 || save[2][3] == HYBRID_2 ) {
       dimmer = 255;
       if ( rising ) {
         moving_heads_position = 180;
@@ -58,7 +58,7 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
       }
     }
-    if ( save[4][3] == HYBRID_3 || save[4][3] == HYBRID_4 ) {
+    if ( save[1][3] == HYBRID_3 || save[2][3] == HYBRID_4 ) {
       dimmer = 255;
       if ( rising ) {
         moving_heads_position = 115;
@@ -75,7 +75,7 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
       }
     }
-    if ( save[4][3] == DROP_1 ) {
+    if ( save[1][3] == DROP_1 ) {
       dimmer = 255;
       if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
         light = 0;
@@ -89,7 +89,7 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
       }
     }
-    if ( save[4][3] == DROP_2 ) {
+    if ( save[1][3] == DROP_2 ) {
       if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
         light = 0;
         dmx_timestamp = millis();
@@ -108,12 +108,12 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       }
     }
     // flash every light
-    if ( save[4][3] == FLASH ) {
+    if ( save[1][3] == FLASH ) {
       DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 8 );
     }
   
     // turn every light off
-    if ( save[4][3] == OFF ) {
+    if ( save[1][3] == OFF ) {
       DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 0 );
     }
 
