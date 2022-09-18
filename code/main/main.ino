@@ -303,7 +303,7 @@ void handle_inputs() {
     button_click_prevent_ghosting[2][8] = false;
   }
 
-  // select inner_leds
+  // select leds
   if (button_click_states[0][1] && button_click_prevent_ghosting[0][1] == false) {
     active_lights[0] = !active_lights[0];
     button_click_prevent_ghosting[0][1] = true;
@@ -311,7 +311,7 @@ void handle_inputs() {
     button_click_prevent_ghosting[0][1] = false;
   }
 
-  // select outer_leds
+  // select moving heads
   if (button_click_states[1][1] && button_click_prevent_ghosting[1][1] == false) {
     active_lights[1] = !active_lights[1];
     button_click_prevent_ghosting[1][1] = true;
@@ -319,7 +319,7 @@ void handle_inputs() {
     button_click_prevent_ghosting[1][1] = false;
   }
 
-  // select light 3
+  // select laser
   if (button_click_states[2][1] && button_click_prevent_ghosting[2][1] == false) {
     active_lights[2] = !active_lights[2];
     button_click_prevent_ghosting[2][1] = true;
@@ -347,25 +347,25 @@ void handle_inputs() {
     button_click_prevent_ghosting[2][4] = false;
   }
 
-  // turn inner leds off
+  // turn leds off
   if (button_click_states[0][0] && button_click_prevent_ghosting[0][0] == false) {
-    saves[1][0][3] = 255;
+    saves[write_to_save][0][3] = 255;
     button_click_prevent_ghosting[0][0] = true;
   } else if ( !button_click_states[0][0] ) {
     button_click_prevent_ghosting[0][0] = false;
   }
 
-  // turn outer leds off
+  // turn moving heads off
   if (button_click_states[1][0] && button_click_prevent_ghosting[1][0] == false) {
-    saves[1][1][3] = 255;
+    saves[write_to_save][1][3] = 255;
     button_click_prevent_ghosting[1][0] = true;
   } else if ( !button_click_states[1][0] ) {
     button_click_prevent_ghosting[1][0] = false;
   }
 
-  // turn light three off
+  // turn laser off
   if (button_click_states[2][0] && button_click_prevent_ghosting[2][0] == false) {
-    saves[1][2][3] = 255;
+    saves[write_to_save][2][3] = 255;
     button_click_prevent_ghosting[2][0] = true;
   } else if ( !button_click_states[2][0] ) {
     button_click_prevent_ghosting[2][0] = false;

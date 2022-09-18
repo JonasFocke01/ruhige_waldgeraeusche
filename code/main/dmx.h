@@ -23,3 +23,17 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]);
 void set_strobe_mode(bool);
 void set_strobe_frequency(int);
 // functions
+
+// moving heads
+
+// colors
+#define  MV_WHITE        0
+#define  MV_RED         20
+#define  MV_BLUE        40
+#define  MV_ORANGE      50
+#define  MV_DARK_BLUE   70
+#define  MV_YELLOW      90
+#define  MV_GREEN      100
+#define  MV_VIOLET     120
+
+// moving heads
