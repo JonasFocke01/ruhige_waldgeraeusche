@@ -6,13 +6,12 @@
 
 #define STAGE_LIGHTS_CHANNEL        1
 #define MOVING_HEADS_RIGHT_CHANNEL  4
-#define MOVING_HEADS_LEFT_CHANNEL   25
+#define LASER_CHANNEL              30
 
 // those are dummy values
 #define SPECIAL_SLOT_ONE_CHANNEL   55
 #define SPECIAL_SLOT_TWO_CHANNEL   56
 #define SPECIAL_SLOT_THREE_CHANNEL 57
-#define LASER_CHANNEL              58
 #define STROBE_CHANNEL             59
 #define AMBIENCE_LIGHT_CHANNEL     60
 // setup
@@ -22,6 +21,7 @@ void dmx_channels_init();
 void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]);
 void set_strobe_mode(bool);
 void set_strobe_frequency(int);
+void randomize_laser_animation();
 // functions
 
 // moving heads
@@ -34,6 +34,16 @@ void set_strobe_frequency(int);
 #define  MV_DARK_BLUE   70
 #define  MV_YELLOW      90
 #define  MV_GREEN      100
-#define  MV_VIOLET     120
+#define  MV_PURPLE     120
 
 // moving heads
+
+// laser
+#define  LS_WHITE       56
+#define  LS_RED          8
+#define  LS_BLUE        32
+#define  LS_YELLOW      24
+#define  LS_GREEN       16
+#define  LS_PURPLE      40
+
+// laser

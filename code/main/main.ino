@@ -171,11 +171,11 @@ void read_buttons() {
         button_click_states[i][j] = false;
       }
       if ( button_click_states[i][j] ) {
-       // Serial.print("    ");
-       // Serial.print(i);
-       // Serial.print("/");
-       // Serial.print(j);
-       // Serial.print("\n");
+        // Serial.print("    ");
+        // Serial.print(i);
+        // Serial.print("/");
+        // Serial.print(j);
+        // Serial.print("\n");
       }
     }
   }
@@ -192,6 +192,7 @@ void detect_beat() {
     }
     spawn_snake();
     spawn_rain_drop();
+    randomize_laser_animation();
     if ( active_animation == HYBRID_3 ) {
       turn_shifting_blocks_direction();
     } else {
@@ -279,14 +280,14 @@ void handle_inputs() {
     read_buttons();
   }
 
-  // All lights continously on
+  // change laser animation
   if (button_click_states[0][7] && button_click_prevent_ghosting[0][7] == false) {
-    change_values_in_write_to_save_for_each_active_light( 256, 256, 256, ALL_ON );
+    randomize_laser_animation();
     button_click_prevent_ghosting[0][7] = true;
   } else if ( !button_click_states[0][7] ) {
     button_click_prevent_ghosting[0][7] = false;
   }
-  
+
   // active lights to white
   if (button_click_states[0][6] && button_click_prevent_ghosting[0][6] == false) {
     change_values_in_write_to_save_for_each_active_light( 250, 250, 250, 256 );

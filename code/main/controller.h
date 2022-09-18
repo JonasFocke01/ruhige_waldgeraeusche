@@ -42,8 +42,8 @@
 // Each save contians configurations for each available light
 // The lights are
 // 1 -> leds
-// 3 -> moving_heads
-// 6 -> laser
+// 2 -> moving_heads
+// 3 -> laser
 
 // A save is constructed like this
 // 0 -> r

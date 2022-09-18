@@ -25,6 +25,9 @@ void dmx_channels_init() {
 
   strobe_mode = false;
 
+  DmxSimple.write( LASER_CHANNEL     , 255 );
+  DmxSimple.write( LASER_CHANNEL + 11, 128 );
+
   dmx_timestamp = millis();
 }
 
@@ -45,6 +48,24 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 4, MV_GREEN  );
     } else {
       DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 4, MV_DARK_BLUE );
+    }
+  }
+
+  // laser
+  // map rgb to single digit number
+  if ( save[2][0] == save[2][1] && save[2][0] == save[2][2] ) {
+    DmxSimple.write( LASER_CHANNEL + 3, LS_WHITE );
+  } else if ( save[2][0] > save[2][1] ) {
+    if ( save[2][0] > save[2][2] ) {
+      DmxSimple.write( LASER_CHANNEL + 3, LS_RED );
+    } else {
+      DmxSimple.write( LASER_CHANNEL + 3, LS_GREEN );
+    }
+  } else {
+    if ( save[2][1] > save[2][2] ) {
+      DmxSimple.write( LASER_CHANNEL + 3, LS_GREEN  );
+    } else {
+      DmxSimple.write( LASER_CHANNEL + 3, LS_BLUE );
     }
   }
 
@@ -126,9 +147,9 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       }
     }
     if ( save[1][3] == ALL_ON ) {
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 255 );
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 255 );
     }
-    
+
     // flash every light
     if ( save[1][3] == FLASH ) {
       DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 8 );
@@ -139,11 +160,17 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 0 );
     }
 
+    // turn every light off
+    if ( save[2][3] == OFF ) {
+      DmxSimple.write( LASER_CHANNEL,   0 );
+    } else {
+      DmxSimple.write( LASER_CHANNEL, 255 );
+    }
+
     // write to moving heads
     DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 7, dimmer );
 
-    // laser
-
+    DmxSimple.write( LASER_CHANNEL + 12, map( analogRead( POTENTIOMETER ), 0, 1024, 0, 35 )  );
 
 
   }
@@ -155,4 +182,9 @@ void set_strobe_mode ( bool set_to ) {
 
 void set_strobe_frequency ( int set_to) {
   strobe_frequency = set_to;
+}
+
+void randomize_laser_animation() {
+  DmxSimple.write( LASER_CHANNEL + 1, random(0, 100) );
+  DmxSimple.write( LASER_CHANNEL + 2, random(0, 255) );
 }
