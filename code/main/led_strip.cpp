@@ -172,10 +172,6 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     }
   }
 
-
-  SHIFTING BLOCKS ?? ?? ?? ??
-
-
   // draw countdown
   if ( countdown_state > 0 ) {
     for ( int i = 0; i < countdown_state; i++ ) {

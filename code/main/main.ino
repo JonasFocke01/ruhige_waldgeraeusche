@@ -7,10 +7,6 @@ uint16_t saves[NUM_SAVES][NUM_LIGHTS][LIGHT_SAVE_SPACE];
 
 uint8_t active_animation;
 
-// uint8_t  energy_history[256], current_index;
-// uint16_t min_ms_between_beats = 1000;
-// unsigned long  last_beat_timestamp = 0;
-// uint8_t last_beat_pegel;
 unsigned long time_between_beats = 1000;
 bool pressed = false;
 
@@ -30,7 +26,7 @@ unsigned long beat_timestamp, debug_mode_timestamp, last_beat_timestamp, last_an
 
 
 void change_values_in_write_to_save_for_each_active_light(int r, int g, int b, int animation) {
-  for (int i = 0; i < NUM_LIGHTS; i++ ) {
+  for (int i = 0; i < NUM_LIGHTS - 1; i++ ) {
     if ( active_lights[i] ) {
       if ( r != 256 )         saves[write_to_save][i][0] = r;
       if ( g != 256 )         saves[write_to_save][i][1] = b;
@@ -47,8 +43,6 @@ void setup() {
   Serial.print("booting...");
 
   randomSeed(analogRead(9)); // 9 is an unconnected analog pin
-
-  pinMode( MICROPHONE , INPUT );
 
   write_to_save = 1;
   active_save = 1;
@@ -177,11 +171,11 @@ void read_buttons() {
         button_click_states[i][j] = false;
       }
       if ( button_click_states[i][j] ) {
-        // Serial.print("    ");
-        // Serial.print(i);
-        // Serial.print("/");
-        // Serial.print(j);
-        // Serial.print("\n");
+        Serial.print("    ");
+        Serial.print(i);
+        Serial.print("/");
+        Serial.print(j);
+        Serial.print("\n");
       }
     }
   }
