@@ -69,8 +69,8 @@ void setup() {
 
   for ( int i = 1; i < NUM_SAVES; i++ ) {
     for ( int j = 0; j < NUM_LIGHTS; j++ ) {
-      saves[i][j][0] = 255;
-      saves[i][j][1] = 10;
+      saves[i][j][0] = 10;
+      saves[i][j][1] = 250;
       saves[i][j][2] = 10;
     }
   }
@@ -84,7 +84,7 @@ void setup() {
 
   for ( int i = 1; i < NUM_SAVES; i++ ) {
     for ( int j = 0; j < NUM_LIGHTS; j++ ) {
-      saves[i][j][3] = HYBRID_1;
+      saves[i][j][3] = DROP_2;
     }
   }
 
@@ -171,11 +171,11 @@ void read_buttons() {
         button_click_states[i][j] = false;
       }
       if ( button_click_states[i][j] ) {
-        Serial.print("    ");
-        Serial.print(i);
-        Serial.print("/");
-        Serial.print(j);
-        Serial.print("\n");
+       // Serial.print("    ");
+       // Serial.print(i);
+       // Serial.print("/");
+       // Serial.print(j);
+       // Serial.print("\n");
       }
     }
   }
@@ -277,6 +277,22 @@ void handle_inputs() {
       last_animation_two_timestamp = millis();
     }
     read_buttons();
+  }
+
+  // All lights continously on
+  if (button_click_states[0][7] && button_click_prevent_ghosting[0][7] == false) {
+    change_values_in_write_to_save_for_each_active_light( 256, 256, 256, ALL_ON );
+    button_click_prevent_ghosting[0][7] = true;
+  } else if ( !button_click_states[0][7] ) {
+    button_click_prevent_ghosting[0][7] = false;
+  }
+  
+  // active lights to white
+  if (button_click_states[0][6] && button_click_prevent_ghosting[0][6] == false) {
+    change_values_in_write_to_save_for_each_active_light( 250, 250, 250, 256 );
+    button_click_prevent_ghosting[0][6] = true;
+  } else if ( !button_click_states[0][6] ) {
+    button_click_prevent_ghosting[0][6] = false;
   }
 
   // active lights to red
@@ -437,14 +453,6 @@ void handle_inputs() {
     button_click_prevent_ghosting[2][3] = false;
   }
 
-  // switch editing mode to preset 1
-  if (button_click_states[0][7] && button_click_prevent_ghosting[0][7] == false) {
-    write_to_save = 1;
-    button_click_prevent_ghosting[0][7] = true;
-  } else if ( !button_click_states[0][7] ) {
-    button_click_prevent_ghosting[0][7] = false;
-  }
-
   // switch editing mode to preset 2
   if (button_click_states[1][7] && button_click_prevent_ghosting[1][7] == false) {
     write_to_save = 2;
@@ -459,14 +467,6 @@ void handle_inputs() {
     button_click_prevent_ghosting[2][7] = true;
   } else if ( !button_click_states[2][7] ) {
     button_click_prevent_ghosting[2][7] = false;
-  }
-
-  // switch active save to 1
-  if (button_click_states[0][6] && button_click_prevent_ghosting[0][6] == false) {
-    active_save = 1;
-    button_click_prevent_ghosting[0][6] = true;
-  } else if ( !button_click_states[0][6] ) {
-    button_click_prevent_ghosting[0][6] = false;
   }
 
   // switch active save to 2

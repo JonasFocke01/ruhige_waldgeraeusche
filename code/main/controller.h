@@ -93,6 +93,7 @@ void change_values_in_write_to_save_for_each_active_light(int, int, int, int, in
 #define FILLING_COUNTDOWN 253
 #define ERASING_COUNTDOWN 252
 
+#define ALL_ON  251
 #define PITCH   252
 #define BRIZZLE 253
 #define FLASH   254

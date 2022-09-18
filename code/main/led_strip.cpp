@@ -40,6 +40,11 @@ void led_setup() {
 void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
   j = 0;
 
+  if ( save[1][3] == ALL_ON ) {
+    for ( int i = 0; i < PIXEL_COUNT - 1; i++ ) {
+      pixels.setPixelColor(i, pixels.Color(save[0][0], save[0][1], save[0][2]));
+    }
+  }
   if ( save[0][3] == HYBRID_1 ) { // snake
     for ( int i = 0; i < 5; i++ ) {
       for (int j = PIXEL_COUNT - 2; j > -1; j--)
@@ -92,7 +97,7 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       }
 
       //draw waves
-      for ( int i = 0; i < PIXEL_COUNT; i++) {
+      for ( int i = 0; i < PIXEL_COUNT - 1; i++) {
         if ( save[0][3] == HYBRID_2 ) {
           pixels.setPixelColor(i, pixels.Color((save[0][0] / 10) * rain_drops[i][0], (save[0][1] / 10) * rain_drops[i][0], (save[0][2] / 10) * rain_drops[i][0]));
         }
@@ -140,7 +145,7 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
         if (fade_sectors[i] > 0) {
           fade_sectors[i]--;
         }
-          pixels.setPixelColor(i, pixels.Color((save[0][0] / 10) * fade_sectors[i], (save[0][1] / 10) * fade_sectors[i], (save[0][2] / 10) * fade_sectors[i]));
+        pixels.setPixelColor(i, pixels.Color((save[0][0] / 10) * fade_sectors[i], (save[0][1] / 10) * fade_sectors[i], (save[0][2] / 10) * fade_sectors[i]));
       }
       led_timestamp = millis();
     }
@@ -156,7 +161,7 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
 
   // flash every light
   if ( save[0][3] == FLASH ) {
-    for ( int i = 0; i < PIXEL_COUNT; i++ ) {
+    for ( int i = 0; i < PIXEL_COUNT - 1; i++ ) {
       if ( save[0][3] == FLASH ) {
         pixels.setPixelColor(i, pixels.Color(save[0][0], save[0][1], save[0][2]));
       }
@@ -165,7 +170,7 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
 
   // turn every light off
   if ( save[0][3] == OFF ) {
-    for ( int i = 0; i < PIXEL_COUNT; i++ ) {
+    for ( int i = 0; i < PIXEL_COUNT - 1; i++ ) {
       if ( save[0][3] == OFF ) {
         pixels.setPixelColor(i, pixels.Color(0, 0, 0));
       }

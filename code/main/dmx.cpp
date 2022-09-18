@@ -30,6 +30,7 @@ void dmx_channels_init() {
 
 void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
 
+  // moving heads
   // map rgb to single digit number
   if ( save[1][0] == save[1][1] && save[1][0] == save[1][2] ) {
     DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 4, MV_WHITE );
@@ -124,6 +125,10 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 7, dimmer );
       }
     }
+    if ( save[1][3] == ALL_ON ) {
+        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 255 );
+    }
+    
     // flash every light
     if ( save[1][3] == FLASH ) {
       DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 8 );
@@ -134,24 +139,11 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 0 );
     }
 
-    // write to stage lights
-    DmxSimple.write(STAGE_LIGHTS_CHANNEL    , save[2][0]);
-    DmxSimple.write(STAGE_LIGHTS_CHANNEL + 1, save[2][1]);
-    DmxSimple.write(STAGE_LIGHTS_CHANNEL + 2, save[2][2]);
-
-    // write to ambience
-    DmxSimple.write(AMBIENCE_LIGHT_CHANNEL, save[5][0]);
-
-    // write to moving heads left
+    // write to moving heads
     DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 7, dimmer );
 
-    // write to laser
-    DmxSimple.write(LASER_CHANNEL, save[6][0]);
+    // laser
 
-    // write to special channels
-    DmxSimple.write(SPECIAL_SLOT_ONE_CHANNEL  , save[7][0]);
-    DmxSimple.write(SPECIAL_SLOT_TWO_CHANNEL  , save[8][0]);
-    DmxSimple.write(SPECIAL_SLOT_THREE_CHANNEL, save[9][0]);
 
 
   }
