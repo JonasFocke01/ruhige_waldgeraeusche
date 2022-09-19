@@ -2,9 +2,10 @@
 #include "controller.h"
 
 //setup
-#define PIXEL_COUNT 150
-#define INNER_LED_STRIP_PIN 4
-#define OUTER_LED_STRIP_PIN 7
+#define PIXEL_OFFSET         80
+#define PIXEL_COUNT         150
+
+#define LED_STRIP_PIN   7
 
 void led_setup();
 void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]);
