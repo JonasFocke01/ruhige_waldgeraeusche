@@ -8,6 +8,9 @@ bool strobe_mode;
 
 int strobe_frequency;
 
+int circle_position = 0;
+bool increase_circle_position = true;
+
 int moving_heads_position = 0;
 bool rising = false;
 int light = 0;
@@ -80,7 +83,7 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     }
     set_strobe_mode( false );
   } else {
-    if ( save[1][3] == DROP_1 || save[2][3] == HYBRID_2 ) {
+    if ( save[1][3] == DROP_1) {
       dimmer = 255;
       if ( rising ) {
         moving_heads_position = 180;
@@ -97,7 +100,7 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
       }
     }
-    if ( save[1][3] == HYBRID_3 || save[2][3] == HYBRID_4 ) {
+    if ( save[1][3] == HYBRID_3) {
       dimmer = 255;
       if ( rising ) {
         moving_heads_position = 115;
@@ -138,13 +141,29 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 5, random(0, 63) );
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
       } else if ( millis() - dmx_timestamp > 150 ) {
-        if ( dimmer > 10 ) {
-          dimmer -= 10;
-        }
         light = 190;
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light  );
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 7, dimmer );
       }
+    }
+    if ( save[1][3] == HYBRID_2 || save[1][3] == HYBRID_4 ) {
+      DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL, (circle_position * circle_position) / 300 - 100);
+      DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL + 2, circle_position);
+      if ( circle_position > 100 ) {
+        increase_circle_position = false;
+      }
+      else if (circle_position < 1) {
+        increase_circle_position = true;
+      }
+      if ( dmx_timestamp % 5 == 0 ) {
+
+        if ( increase_circle_position ) {
+          circle_position++;
+        } else {
+          circle_position--;
+        }
+      } 
+      dmx_timestamp = millis();
     }
     if ( save[1][3] == ALL_ON ) {
       DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 255 );

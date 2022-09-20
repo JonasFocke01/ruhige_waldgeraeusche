@@ -22,7 +22,7 @@ bool button_click_prevent_ghosting  [BUTTON_ISLANDS][BUTTON_ROWS];
 bool solo_button_click_states            [4];
 bool solo_button_click_prevent_ghosting  [4];
 
-unsigned long beat_timestamp, debug_mode_timestamp, last_beat_timestamp, last_animation_two_timestamp;
+unsigned long beat_timestamp, debug_mode_timestamp, last_beat_timestamp, last_animation_two_timestamp, loop_timestamp;
 
 
 void change_values_in_write_to_save_for_each_active_light(int r, int g, int b, int animation) {
@@ -38,7 +38,7 @@ void change_values_in_write_to_save_for_each_active_light(int r, int g, int b, i
 
 void setup() {
 
-  Serial.begin(9600);
+  Serial.begin(2000000);
 
   Serial.print("booting...");
 
@@ -74,7 +74,6 @@ void setup() {
       saves[i][j][2] = 10;
     }
   }
-
 
   Serial.print("ok\n");
 
@@ -138,9 +137,13 @@ void setup() {
   Serial.print("----------------\n");
 
   beat_timestamp = millis();
+  loop_timestamp = millis();
 }
 
 void loop() {
+
+  Serial.println( millis() - loop_timestamp );
+  loop_timestamp = millis();
 
   handle_inputs();
 
