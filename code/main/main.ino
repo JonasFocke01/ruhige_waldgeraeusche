@@ -82,20 +82,20 @@ void setup() {
   memset(active_lights, true, sizeof(active_lights) / sizeof(active_lights[0]));
 
   for ( int i = 1; i < NUM_SAVES; i++ ) {
-    for ( int j = 0; j < NUM_LIGHTS; j++ ) {
+    for ( int j = 0; j < NUM_LIGHTS - 1; j++ ) {
       saves[i][j][3] = DROP_2;
     }
   }
 
-  for ( int i = 0; i < NUM_LIGHTS; i++ ) {
+  for ( int i = 0; i < NUM_LIGHTS - 1; i++ ) {
     saves[6][i][3] = FLASH;
   }
 
-  for ( int i = 0; i < NUM_LIGHTS; i++ ) {
+  for ( int i = 0; i < NUM_LIGHTS - 1; i++ ) {
     saves[7][i][3] = OFF;
   }
 
-  for ( int i = 0; i < NUM_LIGHTS; i++ ) {
+  for ( int i = 0; i < NUM_LIGHTS - 1; i++ ) {
     saves[8][i][3] = BRIZZLE;
   }
 
@@ -142,7 +142,7 @@ void setup() {
 
 void loop() {
 
-  Serial.println( millis() - loop_timestamp );
+  // Serial.println( millis() - loop_timestamp );
   loop_timestamp = millis();
 
   handle_inputs();

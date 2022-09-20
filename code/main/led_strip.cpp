@@ -46,7 +46,7 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     }
   }
   if ( save[0][3] == HYBRID_1 ) { // snake
-    for ( int i = 0; i < 5; i++ ) {
+    for ( int i = 0; i < 2; i++ ) {
       for (int j = PIXEL_COUNT - 2; j > -1; j--)
       {
         snake[j + 1] = snake[j];

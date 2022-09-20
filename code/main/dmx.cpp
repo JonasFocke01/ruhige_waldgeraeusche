@@ -31,10 +31,13 @@ void dmx_channels_init() {
   DmxSimple.write( LASER_CHANNEL     , 255 );
   DmxSimple.write( LASER_CHANNEL + 11, 128 );
 
+  DmxSimple.write(STROBE_CHANNEL + 21, 255);
+
   dmx_timestamp = millis();
 }
 
 void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
+  DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 7, dimmer );
 
   // moving heads
   // map rgb to single digit number
@@ -72,17 +75,6 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     }
   }
 
-  if ( strobe_mode ) {
-    dimmer = 255;
-    for (int i = 1; i < 512; i++) {
-      if ( i == STROBE_CHANNEL ) {
-        DmxSimple.write(i, 255);
-      } else {
-        DmxSimple.write(i, 0);
-      }
-    }
-    set_strobe_mode( false );
-  } else {
     if ( save[1][3] == DROP_1) {
       dimmer = 255;
       if ( rising ) {
@@ -143,12 +135,12 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       } else if ( millis() - dmx_timestamp > 150 ) {
         light = 190;
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light  );
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 7, dimmer );
       }
     }
     if ( save[1][3] == HYBRID_2 || save[1][3] == HYBRID_4 ) {
       DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL, (circle_position * circle_position) / 300 - 100);
       DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL + 2, circle_position);
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 255 );
       if ( circle_position > 100 ) {
         increase_circle_position = false;
       }
@@ -162,8 +154,18 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
         } else {
           circle_position--;
         }
-      } 
+      }
       dmx_timestamp = millis();
+    }
+    if ( save[2][3] == BRIZZLE || save[2][3] == OFF ) { // brizzle / off
+      DmxSimple.write( LASER_CHANNEL     ,   0 );
+      DmxSimple.write(STROBE_CHANNEL     ,  10);
+      DmxSimple.write( STROBE_CHANNEL + 1, map( analogRead( POTENTIOMETER ), 1024, 0, 9, 255 ) );
+      DmxSimple.write( STROBE_CHANNEL + 2, map( analogRead( POTENTIOMETER ), 0, 1024, 0, 100 ) );
+    } else {
+      DmxSimple.write(STROBE_CHANNEL     ,   0);
+      DmxSimple.write( STROBE_CHANNEL + 1,   0 );
+      DmxSimple.write( LASER_CHANNEL     , 255 );
     }
     if ( save[1][3] == ALL_ON ) {
       DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 255 );
@@ -175,15 +177,8 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     }
 
     // turn every light off
-    if ( save[1][3] == OFF ) {
+    if ( save[1][3] == BRIZZLE || save[1][3] == OFF ) { // brizzle /off
       DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 0 );
-    }
-
-    // turn every light off
-    if ( save[2][3] == OFF ) {
-      DmxSimple.write( LASER_CHANNEL,   0 );
-    } else {
-      DmxSimple.write( LASER_CHANNEL, 255 );
     }
 
     // write to moving heads
@@ -192,7 +187,6 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     DmxSimple.write( LASER_CHANNEL + 12, map( analogRead( POTENTIOMETER ), 0, 1024, 0, 35 )  );
 
 
-  }
 }
 
 void set_strobe_mode ( bool set_to ) {
