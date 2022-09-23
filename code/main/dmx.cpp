@@ -130,7 +130,7 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
         dimmer = 255;
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , random(50, 150) );
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, random(50, 150) );
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 5, random(0, 63) );
+        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 5, random( 0,  63) );
         DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
       } else if ( millis() - dmx_timestamp > 150 ) {
         light = 190;
@@ -159,12 +159,11 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     }
     if ( save[2][3] == BRIZZLE || save[2][3] == OFF ) { // brizzle / off
       DmxSimple.write( LASER_CHANNEL     ,   0 );
-      DmxSimple.write(STROBE_CHANNEL     ,  10);
+      DmxSimple.write( STROBE_CHANNEL    ,  255);
       DmxSimple.write( STROBE_CHANNEL + 1, map( analogRead( POTENTIOMETER ), 1024, 0, 9, 255 ) );
-      DmxSimple.write( STROBE_CHANNEL + 2, map( analogRead( POTENTIOMETER ), 0, 1024, 0, 100 ) );
+      DmxSimple.write( STROBE_CHANNEL + 2, 10 );
     } else {
-      DmxSimple.write(STROBE_CHANNEL     ,   0);
-      DmxSimple.write( STROBE_CHANNEL + 1,   0 );
+      DmxSimple.write( STROBE_CHANNEL    ,   0);
       DmxSimple.write( LASER_CHANNEL     , 255 );
     }
     if ( save[1][3] == ALL_ON ) {
