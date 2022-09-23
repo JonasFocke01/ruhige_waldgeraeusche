@@ -21,7 +21,7 @@
 
 #include <DmxSimple.h>
 
-#define CHANNEL_OFFSET 29
+#define CHANNEL_OFFSET 99
 
 void setup() {
   Serial.begin(9600);
@@ -44,12 +44,15 @@ void setup() {
   //DmxSimple.write(7 + CHANNEL_OFFSET, 8);
   //DmxSimple.write(8 + CHANNEL_OFFSET, 255);
 
+// strobe
+  DmxSimple.write(22 + CHANNEL_OFFSET, 255);
+
   // laser
-  DmxSimple.write( CHANNEL_OFFSET + 1, 255 );
-  DmxSimple.write( CHANNEL_OFFSET + 12, 128 );
-  DmxSimple.write( CHANNEL_OFFSET + 13, 15 );
-  DmxSimple.write( CHANNEL_OFFSET + 2, 103 );
-  DmxSimple.write( CHANNEL_OFFSET + 3, 200 );
+  // DmxSimple.write( CHANNEL_OFFSET + 1, 255 );
+  // DmxSimple.write( CHANNEL_OFFSET + 12, 128 );
+  // DmxSimple.write( CHANNEL_OFFSET + 13, 15 );
+  // DmxSimple.write( CHANNEL_OFFSET + 2, 103 );
+  // DmxSimple.write( CHANNEL_OFFSET + 3, 200 );
 }
 
 int value = 0;
@@ -59,13 +62,32 @@ unsigned long timestamp;
 void loop() {
   int c;
 
+  while (!Serial.available());
+  c = Serial.read();
+  if ((c >= '0') && (c <= '9')) {
+    value = 10 * value + c - '0';
+  } else {
+    if (c == 'c') channel = value;
+    else if (c == 'v') {
+      timestamp = millis();
+      DmxSimple.write(channel + CHANNEL_OFFSET, value);
+      Serial.print(millis() - timestamp);
+      Serial.print("Ch:");
+      Serial.print(channel + CHANNEL_OFFSET);
+      Serial.print(" Value:");
+      Serial.print(value);
+      Serial.println();
+    }
+    value = 0;
+  }
+
   
 
   //laser
-  DmxSimple.write( CHANNEL_OFFSET + 2, random(0, 100) );
-  DmxSimple.write( CHANNEL_OFFSET + 3, random(0, 255) );
-  Serial.println("TEST");
-  delay(5000);
+  // DmxSimple.write( CHANNEL_OFFSET + 2, random(0, 100) );
+  // DmxSimple.write( CHANNEL_OFFSET + 3, random(0, 255) );
+  // Serial.println("TEST");
+  // delay(5000);
   // moving heads
   // DmxSimple.write(7 + CHANNEL_OFFSET, 8);
   // DmxSimple.write(8 + CHANNEL_OFFSET, 255);
