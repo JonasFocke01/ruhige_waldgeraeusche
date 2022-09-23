@@ -9,10 +9,12 @@
 # Using
 
 You can download this repo and use it on your arduino as you please, or you can customize the behavior by changing your local copy or contribute to this repository.
-The ready-to-compile code for your arduino lives in code/main. There you can find a main.ino file which depends on all other files in that directory.
-You can find a how-to-use description in the concept folder.
 
 # Contributing
 
 Any contributing is highly appreciated!
 Feel free to raise pull requests or simply write ideas as an issue.
+
+# Concept
+
+The releaseversion of ruhige_waldgeräusche ( 1.0 ) will feature an arduino as keyboard, an rpi running rust for the logic bits and another arduino to connect to dmx and to led.
