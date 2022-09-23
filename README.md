@@ -1,20 +1,22 @@
-# Ruhige-Waldgeräusche is a lightcontroller wich is capable of
+# Ruhige-Waldgeräusche is a lightcontroller wich is, depending on the verison, capable of
 
 - sending via DMX
 - directly adressing lightstrips
-
-- running in predefined color sets
-- running predefined light-action sets
+- changing colors on the fly
+- changing animations on the fly
+- displaying quickanimations
+- some other stuff a lightcontroller needs
 
 # Using
 
-You can download this repo and use it on your arduino as you please, or you can customize the behavior by changing your local copy or contribute to this repository.
+You can download this repo and use it as you please, or you can customize the behavior by changing your local copy or contribute to this repository.
 
 # Contributing
 
 Any contributing is highly appreciated!
 Feel free to raise pull requests or simply write ideas as an issue.
 
-# Concept
+# Versioning
 
-The releaseversion of ruhige_waldgeräusche ( 1.0 ) will feature an arduino as keyboard, an rpi running rust for the logic bits and another arduino to connect to dmx and to led.
+This is explained, because the versioning in this repo is handled differently to be able to work on the different verisons simultaneously.
+Each Releaseversion of rw lives in its own branch, which is labeld as the version itself.
