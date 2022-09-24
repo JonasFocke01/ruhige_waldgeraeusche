@@ -29,7 +29,12 @@ void dmx_channels_init() {
   strobe_mode = false;
 
   DmxSimple.write( LASER_CHANNEL     , 255 );
-  DmxSimple.write( LASER_CHANNEL + 11, 128 );
+  DmxSimple.write( LASER_CHANNEL + 5,  128 );
+  DmxSimple.write( LASER_CHANNEL + 6,   30 );
+  DmxSimple.write( LASER_CHANNEL + 7,  128 );
+  DmxSimple.write( LASER_CHANNEL + 8,  100 );
+  DmxSimple.write( LASER_CHANNEL + 1 ,  60 );
+  DmxSimple.write( LASER_CHANNEL + 2 ,  80 );
 
   DmxSimple.write(STROBE_CHANNEL + 21, 255);
 
@@ -75,115 +80,124 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     }
   }
 
-    if ( save[1][3] == DROP_1) {
-      dimmer = 255;
-      if ( rising ) {
-        moving_heads_position = 180;
-        light = 8;
-      } else {
-        moving_heads_position = 30;
-        light = 0;
-      }
-      if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
-        rising = !rising;
-        dmx_timestamp = millis();
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , 0 );
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, moving_heads_position );
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
-      }
-    }
-    if ( save[1][3] == HYBRID_3) {
-      dimmer = 255;
-      if ( rising ) {
-        moving_heads_position = 115;
-        light = 8;
-      } else {
-        moving_heads_position = 60;
-        light = 0;
-      }
-      if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
-        rising = !rising;
-        dmx_timestamp = millis();
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , moving_heads_position );
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, 180 );
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
-      }
-    }
-    if ( save[1][3] == HYBRID_1 ) {
-      dimmer = 255;
-      if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
-        light = 0;
-        dmx_timestamp = millis();
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , random(50, 150) );
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, random(50, 150) );
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 5, random(0, 63) );
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
-      } else if ( millis() - dmx_timestamp > 150 ) {
-        light = 190;
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
-      }
-    }
-    if ( save[1][3] == DROP_2 ) {
-      if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
-        light = 0;
-        dmx_timestamp = millis();
-        dimmer = 255;
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , random(50, 150) );
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, random(50, 150) );
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 5, random( 0,  63) );
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
-      } else if ( millis() - dmx_timestamp > 150 ) {
-        light = 190;
-        DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light  );
-      }
-    }
-    if ( save[1][3] == HYBRID_2 || save[1][3] == HYBRID_4 ) {
-      DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL, (circle_position * circle_position) / 300 - 100);
-      DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL + 2, circle_position);
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 255 );
-      if ( circle_position > 100 ) {
-        increase_circle_position = false;
-      }
-      else if (circle_position < 1) {
-        increase_circle_position = true;
-      }
-      if ( dmx_timestamp % 5 == 0 ) {
-
-        if ( increase_circle_position ) {
-          circle_position++;
-        } else {
-          circle_position--;
-        }
-      }
-      dmx_timestamp = millis();
-    }
-    if ( save[2][3] == BRIZZLE || save[2][3] == OFF ) { // brizzle / off
-      DmxSimple.write( LASER_CHANNEL     ,   0 );
-      DmxSimple.write( STROBE_CHANNEL    ,  255);
-      DmxSimple.write( STROBE_CHANNEL + 1, map( analogRead( POTENTIOMETER ), 1024, 0, 9, 255 ) );
-      DmxSimple.write( STROBE_CHANNEL + 2, 10 );
+  if ( save[1][3] == DROP_1) {
+    dimmer = 255;
+    if ( rising ) {
+      moving_heads_position = 180;
+      light = 8;
     } else {
-      DmxSimple.write( STROBE_CHANNEL    ,   0);
-      DmxSimple.write( LASER_CHANNEL     , 255 );
+      moving_heads_position = 30;
+      light = 0;
     }
-    if ( save[1][3] == ALL_ON ) {
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 255 );
+    if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
+      rising = !rising;
+      dmx_timestamp = millis();
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , 0 );
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, moving_heads_position );
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
     }
-
-    // flash every light
-    if ( save[1][3] == FLASH ) {
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 8 );
+  }
+  if ( save[1][3] == HYBRID_3) {
+    dimmer = 255;
+    if ( rising ) {
+      moving_heads_position = 115;
+      light = 8;
+    } else {
+      moving_heads_position = 60;
+      light = 0;
     }
-
-    // turn every light off
-    if ( save[1][3] == BRIZZLE || save[1][3] == OFF ) { // brizzle /off
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 0 );
+    if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
+      rising = !rising;
+      dmx_timestamp = millis();
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , moving_heads_position );
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, 180 );
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
     }
+  }
+  if ( save[1][3] == HYBRID_1 ) {
+    dimmer = 255;
+    if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
+      light = 0;
+      dmx_timestamp = millis();
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , random(50, 150) );
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, random(50, 150) );
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 5, random(0, 63) );
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
+    } else if ( millis() - dmx_timestamp > 150 ) {
+      light = 8;
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
+    }
+  }
+  if ( save[1][3] == DROP_2 ) {
+    if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
+      light = 0;
+      dmx_timestamp = millis();
+      dimmer = 255;
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , random(50, 150) );
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, random(50, 150) );
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 5, random( 0,  63) );
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
+    } else if ( millis() - dmx_timestamp > 150 ) {
+      light = 8;
+      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light  );
+    }
+  }
+  if ( save[1][3] == HYBRID_2 || save[1][3] == HYBRID_4 ) {
+    DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL, (circle_position * circle_position) / 300 - 100);
+    DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL + 2, circle_position);
+    DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 255 );
+    light = 8;
+    if ( circle_position > 100 ) {
+      increase_circle_position = false;
+    }
+    else if (circle_position < 1) {
+      increase_circle_position = true;
+    }
+    if ( dmx_timestamp % 5 == 0 ) {
 
-    // write to moving heads
-    DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 7, dimmer );
+      if ( increase_circle_position ) {
+        circle_position++;
+      } else {
+        circle_position--;
+      }
+    }
+    dmx_timestamp = millis();
+  }
+  if ( save[2][3] == BRIZZLE || save[2][3] == OFF ) { // brizzle / off
 
-    DmxSimple.write( LASER_CHANNEL + 12, map( analogRead( POTENTIOMETER ), 0, 1024, 0, 35 )  );
+    DmxSimple.write( LASER_CHANNEL, 0 );
+    DmxSimple.write( STROBE_CHANNEL    ,  255);
+    DmxSimple.write( STROBE_CHANNEL + 1, map( analogRead( POTENTIOMETER ), 1024, 0, 9, 255 ) );
+    DmxSimple.write( STROBE_CHANNEL + 2, 10 );
+    return;
+  } else {
+    DmxSimple.write( STROBE_CHANNEL    ,   0);
+  }
+   if ( light == 8 ) {
+    DmxSimple.write( LASER_CHANNEL     ,   0 );
+  } else {
+    DmxSimple.write( LASER_CHANNEL     , 255 );
+
+  }
+  
+  if ( save[1][3] == ALL_ON ) {
+    DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 255 );
+  }
+
+  // flash every light
+  if ( save[1][3] == FLASH ) {
+    DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 8 );
+  }
+
+  // turn every light off
+  if ( save[1][3] == BRIZZLE || save[1][3] == OFF ) { // brizzle /off
+    DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 0 );
+  }
+
+  // write to moving heads
+  DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 7, dimmer );
+
+  DmxSimple.write( LASER_CHANNEL + 12, map( analogRead( POTENTIOMETER ), 0, 1024, 0, 35 )  );
 
 
 }
@@ -194,9 +208,4 @@ void set_strobe_mode ( bool set_to ) {
 
 void set_strobe_frequency ( int set_to) {
   strobe_frequency = set_to;
-}
-
-void randomize_laser_animation() {
-  DmxSimple.write( LASER_CHANNEL + 1, random(0, 100) );
-  DmxSimple.write( LASER_CHANNEL + 2, random(0, 255) );
 }

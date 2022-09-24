@@ -195,7 +195,6 @@ void detect_beat() {
     }
     spawn_snake();
     spawn_rain_drop();
-    randomize_laser_animation();
     if ( active_animation == HYBRID_3 ) {
       turn_shifting_blocks_direction();
     } else {
@@ -275,7 +274,7 @@ void handle_inputs() {
   }
 
   while (solo_button_click_states[1]) {
-    if ( millis() - last_animation_two_timestamp > analogRead( POTENTIOMETER ) ) {
+    if ( millis() - last_animation_two_timestamp > analogRead( POTENTIOMETER ) / 2) {
       led_loop( saves[8] );
       dmx_loop( saves[8] );
       last_animation_two_timestamp = millis();
@@ -285,7 +284,6 @@ void handle_inputs() {
 
   // change laser animation
   if (button_click_states[0][7] && button_click_prevent_ghosting[0][7] == false) {
-    randomize_laser_animation();
     button_click_prevent_ghosting[0][7] = true;
   } else if ( !button_click_states[0][7] ) {
     button_click_prevent_ghosting[0][7] = false;
