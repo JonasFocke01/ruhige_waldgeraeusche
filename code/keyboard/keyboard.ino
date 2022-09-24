@@ -1,10 +1,16 @@
 #include <stdlib.h>
 #include "keyboard.h"
 
+<<<<<<< HEAD
 int saves[NUM_SAVES][BUTTON_COUNT];
 int active_save = 0;
 
 bool active_buttons    [BUTTON_ISLANDS][BUTTON_ROWS];
+=======
+int active_save = 0;
+int write_to_save = 0;
+int saves[NUM_SAVES][BUTTON_ISLANDS][BUTTON_ROWS];
+>>>>>>> 085e93e (feat: 🎉 first untested implementation for the keyboard component)
 bool prevent_ghosting  [BUTTON_ISLANDS][BUTTON_ROWS];
 
 unsigned long fps_timestamp, debug_mode_timestamp;
@@ -79,10 +85,17 @@ void calculate_active_buttons() {
 
     // !EXAMPLELOGIC: if this button was not active previously, set it to active. 
     // !If the button for Out->In is active, set button state for random to inactive 
+<<<<<<< HEAD
     if ( !active_buttons[2][5] ) {
       active_buttons[2][5] = true;
       if ( active_buttons[2][3] ) {
         active_buttons[2][8] = false;
+=======
+    if ( !saves[write_to_save][2][5] ) {
+      saves[write_to_save][2][5] = true;
+      if ( saves[write_to_save][2][3] ) {
+        saves[write_to_save][2][8] = false;
+>>>>>>> 085e93e (feat: 🎉 first untested implementation for the keyboard component)
       }
     }
 
