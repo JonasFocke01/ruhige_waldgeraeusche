@@ -40,6 +40,17 @@ void led_setup() {
 void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
   j = 0;
 
+  if ( save[1][3] == STROBE ) {
+    Serial.println(random(0, 100));
+    for ( int i = 0; i < PIXEL_COUNT - 1; i++ ) {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+      
+    }
+    pixels.show();
+    return;
+    Serial.println("test");
+  }
+  Serial.println("IMPOSTER");
   if ( save[1][3] == ALL_ON ) {
     for ( int i = PIXEL_OFFSET; i < PIXEL_COUNT - 1; i++ ) {
       pixels.setPixelColor(i, pixels.Color(save[0][0], save[0][1], save[0][2]));

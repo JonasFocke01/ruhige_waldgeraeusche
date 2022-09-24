@@ -99,6 +99,10 @@ void setup() {
     saves[8][i][3] = BRIZZLE;
   }
 
+  for ( int i = 0; i < NUM_LIGHTS - 1; i++ ) {
+    saves[9][i][3] = STROBE;
+  }
+
   Serial.print("ok\n");
 
   Serial.print("preparing intputs...");
@@ -257,8 +261,9 @@ void handle_inputs() {
 
   // strobe
   while (button_click_states[0][5]) {
-    led_loop( saves[7] );
-    dmx_loop( saves[7] );
+    
+    led_loop( saves[9] );
+    dmx_loop( saves[9] );
     read_buttons();
   }
 

@@ -38,6 +38,7 @@
 // 6 ->   flash save: everything in here is flashed
 // 7 ->   mute save:  everything in here is muted
 // 8 ->   brizzle save:  pixels in here are alternating on and off
+// 9 ->   strobe: ONLY strobe
 
 // Each save contians configurations for each available light
 // The lights are
@@ -51,7 +52,7 @@
 // 2 -> b
 // 3 -> animation
 
-#define NUM_SAVES  9
+#define NUM_SAVES  10
 #define NUM_LIGHTS 9
 #define LIGHT_SAVE_SPACE 4
 
@@ -93,6 +94,7 @@ void change_values_in_write_to_save_for_each_active_light(int, int, int, int, in
 #define FILLING_COUNTDOWN 253
 #define ERASING_COUNTDOWN 252
 
+#define STROBE  250
 #define ALL_ON  251
 #define PITCH   252
 #define BRIZZLE 253
