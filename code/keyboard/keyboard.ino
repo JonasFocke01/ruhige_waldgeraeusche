@@ -85,17 +85,10 @@ void calculate_active_buttons() {
 
     // !EXAMPLELOGIC: if this button was not active previously, set it to active. 
     // !If the button for Out->In is active, set button state for random to inactive 
-<<<<<<< HEAD
-    if ( !active_buttons[2][5] ) {
-      active_buttons[2][5] = true;
-      if ( active_buttons[2][3] ) {
-        active_buttons[2][8] = false;
-=======
     if ( !saves[write_to_save][2][5] ) {
       saves[write_to_save][2][5] = true;
       if ( saves[write_to_save][2][3] ) {
         saves[write_to_save][2][8] = false;
->>>>>>> 085e93e (feat: 🎉 first untested implementation for the keyboard component)
       }
     }
 
