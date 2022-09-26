@@ -33,7 +33,7 @@ fn calculate_leds(button_states: [u8; BUTTON_COUNT], debug: bool) -> [[[u8; 3]; 
 fn read_serial(debug: bool) -> [u8; BUTTON_COUNT] {
     let mut parsed_button_states: [u8; BUTTON_COUNT] = [0; BUTTON_COUNT];
 
-    if PRODUCTION {
+    if !PRODUCTION { // !retrue after development
         //TODO: read from serial
     } else {
         for i in 0..BUTTON_COUNT {
@@ -81,12 +81,11 @@ fn main() {
     let mut loop_counter: u32 = 0;
     while loop_counter < u32::MAX {
         loop_counter += 1;
-        print!("\rItteration {}", loop_counter);
 
         let fps_limit_timestamp = Instant::now();
         
         serial_writing_thread  = thread::Builder::new().name(String::from("serial writing")).spawn(move || write_serial(dmx_values, led_values, false));
-        serial_reading_thread  = thread::Builder::new().name(String::from("serial reading")).spawn(move || read_serial(false));
+        serial_reading_thread  = thread::Builder::new().name(String::from("serial reading")).spawn(move || read_serial(true));
         led_calculating_thread = thread::Builder::new().name(String::from("led calculation")).spawn(move || calculate_leds(button_states, false));
         dmx_calculating_thread = thread::Builder::new().name(String::from("dmx calculation")).spawn(move || calculate_dmx(button_states, false));
 
