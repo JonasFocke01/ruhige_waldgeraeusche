@@ -57,7 +57,6 @@ def change_rendercolors(r, g, b):
 # this function processes strips array to print it to the physical led strips
 def render():
     while True:
-        print(strips_colors["red"])
         if current_time_in_millis() - timestamps[0] > FRAME_TIMING:
             # fading brightness
             for strip_i in range(len(strips)):
