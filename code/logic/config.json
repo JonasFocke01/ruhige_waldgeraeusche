@@ -18,6 +18,7 @@
         "led_invert": false,
         "led_channel": 0,
         "strip_count": 4,
-        "pixel_offset": 0
+        "pixel_offset": 0,
+        "frame_timing": 34
     }
 }
