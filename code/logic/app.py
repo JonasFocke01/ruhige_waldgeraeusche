@@ -1,5 +1,5 @@
 # run 'pip install -U Flask cd \py-script' before 
-# to run the app: 'python -m flask run -host 192.168.2.17'
+# to run the app: 'python -m flask run --host 192.168.2.17'
 
 from flask import Flask
 import os
