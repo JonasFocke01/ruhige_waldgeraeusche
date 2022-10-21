@@ -1,20 +1,23 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <Controller_Gui />
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Controller_Gui from './components/Controller-Gui.vue';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
-  }
-}
+    Controller_Gui,
+  },
+};
 </script>
 
 <style>
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
