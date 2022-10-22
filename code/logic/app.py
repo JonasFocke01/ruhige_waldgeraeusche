@@ -29,29 +29,25 @@ def http_toggle_beat():
     toggle_beat()
     return "beat toggled"
 
-# TODO
 @app.route('/color_mode_white/')
 def http_color_mode_white():
     color_mode_white()
     return 'color changed to white'
 
-# TODO
 @app.route('/color_mode_inherit/')
 def http_color_mode_inherit():
     color_mode_inherit()
     return 'color changed to inherit color'
 
-# TODO
-@app.route('/all_as_one/')
+@app.route('/switch_to_group_movement/')
 def http_all_as_one():
-    all_as_one()
+    switch_to_group_movement()
     return 'changed to act all as one'
 
-# TODO
-@app.route('/individualy/')
+@app.route('/switch_to_individual_movement/')
 def http_individualy():
-    individualy()
-    return 'changed to act all as individuence'
+    switch_to_individual_movement()
+    return 'changed to act all as individuals'
 
 # TODO
 @app.route('/animation_off/')

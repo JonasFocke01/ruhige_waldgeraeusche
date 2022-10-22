@@ -56,7 +56,6 @@ def change_rendercolors(r, g, b):
     strips_colors["blue"] = int(b)
 
 def color_mode_white():
-    print('changed')
     global inherit_color
     inherit_color = False
 
@@ -64,19 +63,40 @@ def color_mode_inherit():
     global inherit_color
     inherit_color = True
 
+move_individualy = False
+
+def switch_to_individual_movement():
+    global move_individualy
+    move_individualy = True
+
+def switch_to_group_movement():
+    global move_individualy
+    move_individualy = False
+
 # spawns a snake
 # @param strip: on which strip should the snake spawn where -1 is all. default: -1
 # @param speed: how fast should the snake go. default 1
+temp_helper = 0
 def animation_snake(strip_num = -1, speed = 1):
+    global temp_helper
+    if temp_helper == 0:
+        temp_helper = 1
+    else:
+        temp_helper = 0
     if strip_num == -1:
-        for strip_i in range(len(strips)):
-            if len(strips[strip_i]) > 15:
+        print(move_individualy)
+        if move_individualy:
+            if len(strips[temp_helper]) > 15:
                 for j in range(15):
-                    strips[strip_i][j] = [speed, mapFromTo(j, 0, 15, 0, 1), 0]
+                    strips[temp_helper][j] = [speed, mapFromTo(j, 0, 15, 0, 1), 0]
+        else:
+            for strip_i in range(len(strips)):
+                if len(strips[strip_i]) > 15:
+                    for j in range(15):
+                        strips[strip_i][j] = [speed, mapFromTo(j, 0, 15, 0, 1), 0]
 
 # this function processes strips array to print it to the physical led strips
 def render():
-    print("rendering running")
     while True:
         if current_time_in_millis() - timestamps[0] > FRAME_TIMING:
             # fading brightness
