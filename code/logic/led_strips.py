@@ -73,6 +73,22 @@ def switch_to_group_movement():
     global move_individualy
     move_individualy = False
 
+move_up = True
+move_down = False
+move_sideways = False
+
+def toggle_move_up():
+    global move_up
+    move_up = not move_up
+
+def toggle_move_down():
+    global move_down
+    move_down = not move_down
+
+def toggle_move_sideways():
+    global move_sideways
+    move_sideways = not move_sideways
+    
 # spawns a snake
 # @param strip: on which strip should the snake spawn where -1 is all. default: -1
 # @param speed: how fast should the snake go. default 1
@@ -84,7 +100,6 @@ def animation_snake(strip_num = -1, speed = 1):
     else:
         temp_helper = 0
     if strip_num == -1:
-        print(move_individualy)
         if move_individualy:
             if len(strips[temp_helper]) > 15:
                 for j in range(15):

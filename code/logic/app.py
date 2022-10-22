@@ -55,19 +55,16 @@ def http_animation_off():
     animation_off()
     return 'changed to display no animation'
 
-# TODO
 @app.route('/toggle_move_up/')
 def http_toggle_move_up():
     toggle_move_up()
     return 'toggled moving up'
 
-# TODO
 @app.route('/toggle_move_down/')
 def http_toggle_move_down():
     toggle_move_down()
     return 'toggled moving down'
 
-# TODO
 @app.route('/toggle_move_sideways/')
 def http_toggle_move_sideways():
     toggle_move_sideways()
