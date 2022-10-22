@@ -10,9 +10,9 @@
     </div>
   </div>
   <ButtonComponent v-on:click="spawn_snake" v-bind="propsToPass" />
-  <SliderComponent @change="change_color" v-model:value="redSlider" />
+  <SliderComponent v-on:change="processkeypressed" />
   <div class="bg-green-100">
-    {{ redSlider }}
+    {{ sees }}
   </div>
 </template>
 
@@ -31,26 +31,23 @@ export default {
       propsToPass: {
         label: 'John',
       },
-      redSlider: 150,
+      sees: 150,
     };
   },
   methods: {
     processkeypressed(e) {
-      if (e.key === 's') {
-        this.spawn_snake();
-      } else if (e.key === 'c') {
-        console.log('HALLO');
-        //this.change_color();
+      if (e) {
+        if (e.key === 's') {
+          this.spawn_snake();
+        } else {
+          this.click_counter += 1;
+        }
       }
     },
     spawn_snake() {
       console.log('snake');
       this.click_counter += 1;
-      fetch('http://192.168.2.17:5000/snake/');
-    },
-    change_color() {
-      this.click_counter += 1;
-      fetch('http://192.168.2.17:5000/color/');
+      fetch('http://192.168.2.17:5000/animation_snake/');
     },
   },
   mounted() {
