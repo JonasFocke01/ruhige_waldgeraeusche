@@ -17,81 +17,97 @@ def http_start():
     return "Test passed!\nRest api is online!"
 
 # leds
+# TODO
 @app.route('/master_level/')
 def http_master_level():
     master_level()
     return 'changed master level of leds'
 
+# TODO
 @app.route("/toggle_beat/")
 def http_toggle_beat():
     toggle_beat()
     return "beat toggled"
 
-@app.route('/color_white/')
-def http_color_white():
-    color_white()
+# TODO
+@app.route('/color_mode_white/')
+def http_color_mode_white():
+    color_mode_white()
     return 'color changed to white'
 
-@app.route('/color_color/')
-def http_color_color():
-    color_color()
+# TODO
+@app.route('/color_mode_inherit/')
+def http_color_mode_inherit():
+    color_mode_inherit()
     return 'color changed to inherit color'
 
+# TODO
 @app.route('/all_as_one/')
 def http_all_as_one():
     all_as_one()
     return 'changed to act all as one'
 
+# TODO
 @app.route('/individualy/')
 def http_individualy():
     individualy()
     return 'changed to act all as individuence'
 
+# TODO
 @app.route('/animation_off/')
 def http_animation_off():
     animation_off()
     return 'changed to display no animation'
 
+# TODO
 @app.route('/toggle_move_up/')
 def http_toggle_move_up():
     toggle_move_up()
     return 'toggled moving up'
 
+# TODO
 @app.route('/toggle_move_down/')
 def http_toggle_move_down():
     toggle_move_down()
     return 'toggled moving down'
 
+# TODO
 @app.route('/toggle_move_sideways/')
 def http_toggle_move_sideways():
     toggle_move_sideways()
     return 'toggled moving sideways'
 
+# TODO
 @app.route('/short_flash/')
 def http_short_flash():
     short_flash()
     return 'flashed leds shortly'
 
+# TODO
 @app.route('/flash_fade/')
 def http_flash_fade():
     flash_fade()
     return 'flashed leds and faded them out'
 
+# TODO
 @app.route('/animation_trigger/')
 def http_animation_trigger():
     animation_trigger()
     return 'triggered animation'
 
+# TODO
 @app.route('/animation_snake/')
 def http_animation_snake():
     animation_snake()
     return 'switched animation to snake'
 
+# TODO
 @app.route('/animation_raindrop/')
 def http_animation_raindrop():
     animation_raindrop()
     return 'switched animation to raindrop'
 
+# TODO
 @app.route('/animation_level/')
 def http_animation_level():
     animation_level()

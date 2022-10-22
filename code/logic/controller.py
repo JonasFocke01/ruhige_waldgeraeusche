@@ -17,14 +17,13 @@ def start_controller():
     try:
         render_thread.start()
         led_setup()
+        while True:
+            t.sleep(1)
     except RuntimeError:
         pass
-    while True:
-        t.sleep(1)
 
 if __name__ == '__main__':
     start_controller()
-    # led_setup()
     # while True:
         # button_states = read_input()
         # parse_input()

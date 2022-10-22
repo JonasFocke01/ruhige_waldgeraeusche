@@ -34,11 +34,6 @@ PARAMETER_COUNT = 3
 timestamps = [current_time_in_millis()] * 1
 
 strips = []
-strips_colors = {
-    "red": 50,
-    "green": 50,
-    "blue": 50
-}
 
 def led_setup():
     physical_strip.begin()
@@ -47,12 +42,37 @@ def led_setup():
         for _ in range(PIXELS_PER_STRIP):
             strips[i].append([0, 0, 0])
 
+inherit_color = True
+strips_colors = {
+    "red": 50,
+    "green": 50,
+    "blue": 50
+}
+
 # @parameters r, g, b: this parameters represent the colors, the pixels should be rendered in
 def change_rendercolors(r, g, b):
     strips_colors["red"] = int(r)
     strips_colors["green"] = int(g)
     strips_colors["blue"] = int(b)
 
+def color_mode_white():
+    print('changed')
+    global inherit_color
+    inherit_color = False
+
+def color_mode_inherit():
+    global inherit_color
+    inherit_color = True
+
+# spawns a snake
+# @param strip: on which strip should the snake spawn where -1 is all. default: -1
+# @param speed: how fast should the snake go. default 1
+def animation_snake(strip_num = -1, speed = 1):
+    if strip_num == -1:
+        for strip_i in range(len(strips)):
+            if len(strips[strip_i]) > 15:
+                for j in range(15):
+                    strips[strip_i][j] = [speed, mapFromTo(j, 0, 15, 0, 1), 0]
 
 # this function processes strips array to print it to the physical led strips
 def render():
@@ -85,10 +105,22 @@ def render():
             # drawing
             for strip_i in range(len(strips)):
                 for pixel_i in range(len(strips[0])):
-                    if strip_i % 2 == 0:
-                        physical_strip.setPixelColor(int(mapFromTo(pixel_i, 0, PIXELS_PER_STRIP - 1, (strip_i * PIXELS_PER_STRIP), ((strip_i * PIXELS_PER_STRIP) + PIXELS_PER_STRIP) - 1)) , Color(int(strips_colors["red"] * strips[strip_i][pixel_i][1]), int(strips_colors["green"] * strips[strip_i][pixel_i][1]), int(strips_colors["blue"] * strips[strip_i][pixel_i][1])))
+                    red   = 0
+                    green = 0
+                    blue  = 0
+                    if inherit_color:
+                        red   = int(strips_colors["red"]   * strips[strip_i][pixel_i][1])
+                        green = int(strips_colors["green"] * strips[strip_i][pixel_i][1])
+                        blue  = int(strips_colors["blue"] * strips[strip_i][pixel_i][1])
                     else:
-                        physical_strip.setPixelColor(int(mapFromTo(pixel_i, 0, PIXELS_PER_STRIP - 1, ((strip_i * PIXELS_PER_STRIP) + PIXELS_PER_STRIP) - 1, (strip_i * PIXELS_PER_STRIP))) , Color(int(strips_colors["red"] * strips[strip_i][pixel_i][1]), int(strips_colors["green"] * strips[strip_i][pixel_i][1]), int(strips_colors["blue"] * strips[strip_i][pixel_i][1])))
+                        red   = int(250 * strips[strip_i][pixel_i][1])
+                        green = int(250 * strips[strip_i][pixel_i][1])
+                        blue  = int(250 * strips[strip_i][pixel_i][1])
+                    if strip_i % 2 == 0:
+                        position = int(mapFromTo(pixel_i, 0, PIXELS_PER_STRIP - 1, (strip_i * PIXELS_PER_STRIP), ((strip_i * PIXELS_PER_STRIP) + PIXELS_PER_STRIP) - 1))
+                    else:
+                        position = int(mapFromTo(pixel_i, 0, PIXELS_PER_STRIP - 1, ((strip_i * PIXELS_PER_STRIP) + PIXELS_PER_STRIP) - 1, (strip_i * PIXELS_PER_STRIP)))
+                    physical_strip.setPixelColor(position , Color(red, green, blue))
 
 
             physical_strip.show()
@@ -101,18 +133,6 @@ class Renderthread (threading.Thread):
     def run(self):
         t.sleep(2)
         render()
-
-# spawns a snake
-# @param strip: on which strip should the snake spawn where -1 is all. default: -1
-# @param speed: how fast should the snake go. default 1
-def animation_snake(strip_num = -1, speed = 1):
-    if strip_num == -1:
-        for strip_i in range(len(strips)):
-            if len(strips[strip_i]) > 15:
-                for j in range(15):
-                    strips[strip_i][j] = [speed, mapFromTo(j, 0, 15, 0, 1), 0]
-
-      
 
 threadLock = threading.Lock()
 
