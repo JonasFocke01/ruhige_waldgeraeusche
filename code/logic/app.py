@@ -49,12 +49,6 @@ def http_individualy():
     switch_to_individual_movement()
     return 'changed to act all as individuals'
 
-# TODO
-@app.route('/animation_off/')
-def http_animation_off():
-    animation_off()
-    return 'changed to display no animation'
-
 @app.route('/toggle_move_up/')
 def http_toggle_move_up():
     toggle_move_up()
@@ -87,6 +81,11 @@ def http_flash_fade():
 def http_animation_trigger():
     animation_trigger()
     return 'triggered animation'
+
+@app.route('/toggle_active_animation_off/')
+def http_toggle_active_animation_off():
+    toggle_active_animation_off()
+    return 'changed to display no animation'
 
 # TODO
 @app.route('/animation_snake/')

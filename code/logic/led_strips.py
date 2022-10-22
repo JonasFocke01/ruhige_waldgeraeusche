@@ -89,12 +89,21 @@ def toggle_move_sideways():
     global move_sideways
     move_sideways = not move_sideways
     
+active_animation = 'off'
+
+def toggle_active_animation_off():
+    global active_animation
+    active_animation = 'off'
+
 # spawns a snake
 # @param strip: on which strip should the snake spawn where -1 is all. default: -1
 # @param speed: how fast should the snake go. default 1
 temp_helper = 0
 def animation_snake(strip_num = -1, speed = 1):
     global temp_helper
+    global active_animation
+    print(active_animation)
+    active_animation = 'snake'
     if temp_helper == 0:
         temp_helper = 1
     else:
