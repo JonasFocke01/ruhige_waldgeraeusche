@@ -70,13 +70,11 @@ def http_short_flash():
     short_flash()
     return 'flashed leds shortly'
 
-# TODO
 @app.route('/flash_fade/')
 def http_flash_fade():
     flash_fade()
     return 'flashed leds and faded them out'
 
-# TODO
 @app.route('/animation_trigger/')
 def http_animation_trigger():
     animation_trigger()
@@ -98,12 +96,6 @@ def http_animation_snake():
 def http_animation_raindrop():
     animation_raindrop()
     return 'switched animation to raindrop'
-
-# TODO
-@app.route('/animation_level/')
-def http_animation_level():
-    animation_level()
-    return 'switched animation to level'
 
 # color panel
 @app.route('/change_colors/',methods = ['POST'])
