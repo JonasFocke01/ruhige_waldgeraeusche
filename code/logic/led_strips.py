@@ -64,6 +64,11 @@ def color_mode_inherit():
     inherit_color = True
 
 move_individualy = False
+strip_to_display_on = 0
+
+def randomize_strip_to_display_on():
+    global strip_to_display_on
+    strip_to_display_on = random.randrange(STRIP_COUNT)
 
 def switch_to_individual_movement():
     global move_individualy
@@ -91,6 +96,12 @@ def toggle_move_sideways():
     
 active_animation = 'off'
 
+def animation_trigger():
+    if active_animation == 'off':
+        pass
+    elif active_animation == 'snake':
+        animation_snake()
+
 def toggle_active_animation_off():
     global active_animation
     active_animation = 'off'
@@ -98,26 +109,30 @@ def toggle_active_animation_off():
 # spawns a snake
 # @param strip: on which strip should the snake spawn where -1 is all. default: -1
 # @param speed: how fast should the snake go. default 1
-temp_helper = 0
 def animation_snake(strip_num = -1, speed = 1):
-    global temp_helper
     global active_animation
-    print(active_animation)
     active_animation = 'snake'
-    if temp_helper == 0:
-        temp_helper = 1
-    else:
-        temp_helper = 0
+    strip_to_display_on
+    randomize_strip_to_display_on()
     if strip_num == -1:
         if move_individualy:
-            if len(strips[temp_helper]) > 15:
+            if len(strips[strip_to_display_on]) > 15:
                 for j in range(15):
-                    strips[temp_helper][j] = [speed, mapFromTo(j, 0, 15, 0, 1), 0]
+                    strips[strip_to_display_on][j] = [speed, mapFromTo(j, 0, 15, 0, 1), 0]
         else:
             for strip_i in range(len(strips)):
                 if len(strips[strip_i]) > 15:
                     for j in range(15):
                         strips[strip_i][j] = [speed, mapFromTo(j, 0, 15, 0, 1), 0]
+
+def flash_fade():
+    if move_individualy:
+        for pixel_i in range(len(strips[strip_to_display_on])):
+            strips[strip_to_display_on][pixel_i] = [0, 1, 0.1]
+    else:
+        for strip_i in range(len(strips)):
+            for pixel_i in range(len(strips[strip_i])):
+                strips[strip_i][pixel_i] = [0, 1, 0.1]
 
 # this function processes strips array to print it to the physical led strips
 def render():
@@ -179,6 +194,8 @@ class Renderthread (threading.Thread):
         render()
 
 threadLock = threading.Lock()
+
+
 
 if __name__ == '__main__':
     print("starting...")
