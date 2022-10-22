@@ -14,12 +14,11 @@ CORS(app)
 @app.route("/")
 def http_start():
     start_controller()
-    return "Hello World"
+    return "Test passed!\nRest api is online!"
 
 # leds
 @app.route('/master_level/')
 def http_master_level():
-    # TODO: This is a post request because the level of the potentiometer has to come though
     master_level()
     return 'changed master level of leds'
 
@@ -86,7 +85,6 @@ def http_animation_trigger():
 @app.route('/animation_snake/')
 def http_animation_snake():
     animation_snake()
-    print("test")
     return 'switched animation to snake'
 
 @app.route('/animation_raindrop/')

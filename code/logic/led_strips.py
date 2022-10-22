@@ -35,9 +35,9 @@ timestamps = [current_time_in_millis()] * 1
 
 strips = []
 strips_colors = {
-    "red": 0,
-    "green": 0,
-    "blue": 0
+    "red": 50,
+    "green": 50,
+    "blue": 50
 }
 
 def led_setup():
@@ -56,6 +56,7 @@ def change_rendercolors(r, g, b):
 
 # this function processes strips array to print it to the physical led strips
 def render():
+    print("rendering running")
     while True:
         if current_time_in_millis() - timestamps[0] > FRAME_TIMING:
             # fading brightness
@@ -98,6 +99,7 @@ class Renderthread (threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
     def run(self):
+        t.sleep(2)
         render()
 
 # spawns a snake
@@ -106,8 +108,9 @@ class Renderthread (threading.Thread):
 def animation_snake(strip_num = -1, speed = 1):
     if strip_num == -1:
         for strip_i in range(len(strips)):
-            for j in range(30):
-                strips[strip_i][j] = [speed, mapFromTo(j, 0, 30, 0, 1), 0]
+            if len(strips[strip_i]) > 15:
+                for j in range(15):
+                    strips[strip_i][j] = [speed, mapFromTo(j, 0, 15, 0, 1), 0]
 
       
 

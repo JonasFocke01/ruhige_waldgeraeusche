@@ -3,6 +3,8 @@ from led_strips import *
 # from input import *
 # from dmx import *
 
+render_thread = Renderthread()
+
 def start_controller():
     with open("config.json") as json_data_file:
         config = json.load(json_data_file)
@@ -12,9 +14,11 @@ def start_controller():
     button_states = [0] * BUTTON_COUNT
 
     # led stuff
-    led_setup()
-    render_thread = Renderthread()
-    render_thread.start()
+    try:
+        render_thread.start()
+        led_setup()
+    except RuntimeError:
+        pass
     while True:
         t.sleep(1)
 
