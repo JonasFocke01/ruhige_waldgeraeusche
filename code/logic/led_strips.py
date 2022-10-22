@@ -49,9 +49,9 @@ def led_setup():
 
 # @parameters r, g, b: this parameters represent the colors, the pixels should be rendered in
 def change_rendercolors(r, g, b):
-    strips_colors["red"] = r
-    strips_colors["green"] = g
-    strips_colors["blue"] = b
+    strips_colors["red"] = int(r)
+    strips_colors["green"] = int(g)
+    strips_colors["blue"] = int(b)
 
 
 # this function processes strips array to print it to the physical led strips
@@ -71,8 +71,8 @@ def render():
                     temp_strips[i].append([0, 0, 0])
 
             for strip_i in range(len(strips)):
-                for pixel_i in range(PIXELS_PER_STRIP):
-                    if strips[strip_i][pixel_i][1] > 0:
+                for pixel_i in range(len(strips[strip_i])):
+                    if len(strips[strip_i][pixel_i]) > 1 and strips[strip_i][pixel_i][1] > 0:
                         try:
                             temp_strips[strip_i][pixel_i + strips[strip_i][pixel_i][0]] = strips[strip_i][pixel_i]
                         except IndexError:
@@ -103,7 +103,7 @@ class Renderthread (threading.Thread):
 # spawns a snake
 # @param strip: on which strip should the snake spawn where -1 is all. default: -1
 # @param speed: how fast should the snake go. default 1
-def spawn_snake(strip_num = -1, speed = 1):
+def animation_snake(strip_num = -1, speed = 1):
     if strip_num == -1:
         for strip_i in range(len(strips)):
             for j in range(30):
