@@ -2,11 +2,13 @@
 # and 'pip install flask-cors
 # to run the app: 'python -m flask run --host 192.168.2.17'
 
-from flask import Flask, request
-from flask_cors import CORS
-import os
+from flask import Flask
+import sys
+sys.path.insert(0, '../logic/controller.py')
+sys.path.insert(0, '../logic/led_strips.py')
 from controller import *
 from led_strips import *
+import random
 
 app = Flask(__name__)
 CORS(app)
