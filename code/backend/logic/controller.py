@@ -1,12 +1,10 @@
 import json
-from led_strips import *
-# from input import *
-# from dmx import *
+from logic.led_strips import *
 
 render_thread = Renderthread()
 
 def start_controller():
-    with open("../config.json") as json_data_file:
+    with open("config.json") as json_data_file:
         config = json.load(json_data_file)
 
     BUTTON_COUNT = config['input']['button_count']
@@ -24,10 +22,3 @@ def start_controller():
 
 if __name__ == '__main__':
     start_controller()
-    # while True:
-        # button_states = read_input()
-        # parse_input()
-        # calculate_leds()
-        # caluclate_dmx()
-        # write_leds()
-        # write_dmx()

@@ -1,9 +1,8 @@
 from rpi_ws281x import *
 import time as t
 import random
-from utilities import *
+from logic.utilities import *
 import json
-import math
 import threading
 
 with open("config.json") as json_data_file:
