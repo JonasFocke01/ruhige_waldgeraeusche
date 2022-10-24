@@ -123,6 +123,14 @@ def animation_snake(strip_num = -1, speed = 1):
                 if len(strips[strip_i]) > 15:
                     for j in range(15):
                         strips[strip_i][j] = [speed, mapFromTo(j, 0, 15, 0, 1), 0]
+def short_flash():
+    if move_individualy:
+        for pixel_i in range(len(strips[strip_to_display_on])):
+            strips[strip_to_display_on][pixel_i] = [0, 1, 0.5]
+    else:
+        for strip_i in range(len(strips)):
+            for pixel_i in range(len(strips[strip_i])):
+                strips[strip_i][pixel_i] = [0, 1, 0.5]
 
 def flash_fade():
     if move_individualy:

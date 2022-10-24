@@ -63,11 +63,10 @@ def http_toggle_move_sideways():
     toggle_move_sideways()
     return 'toggled moving sideways'
 
-# TODO
 @app.route('/short_flash/')
 def http_short_flash():
     short_flash()
-    return 'flashed leds shortly'
+    return 'flashed leds'
 
 @app.route('/flash_fade/')
 def http_flash_fade():

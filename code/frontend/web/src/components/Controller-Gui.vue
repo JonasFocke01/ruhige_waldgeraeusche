@@ -10,6 +10,7 @@
     </div>
   </div>
   <ButtonComponent v-on:click="spawn_snake" v-bind="propsToPass" />
+  <ButtonComponent v-on:click="short_flash" v-bind="holdProps" />
   <SliderComponent v-on:change="processkeypressed" />
   <div class="bg-green-100">
     {{ sees }}
@@ -31,6 +32,9 @@ export default {
       propsToPass: {
         label: 'John',
       },
+      holdProps: {
+        label: 'flash me'
+      },
       sees: 150,
     };
   },
@@ -45,10 +49,13 @@ export default {
       }
     },
     spawn_snake() {
-      console.log('snake');
       this.click_counter += 1;
       fetch('http://192.168.2.17:5000/animation_snake/');
     },
+    short_flash() {
+      this.click_counter += 1;
+      fetch('http://192.168.2.17:5000/short_flash/');
+    }
   },
   mounted() {
     console.log('test');
