@@ -11,6 +11,7 @@
   </div>
   <ButtonComponent v-on:click="spawn_snake" v-bind="propsToPass" />
   <ButtonComponent v-on:click="short_flash" v-bind="holdProps" />
+  <ButtonComponent v-on:click="clear_strips" v-bind="clearProps" />
   <SliderComponent v-on:change="processkeypressed" />
   <div class="bg-green-100">
     {{ sees }}
@@ -31,6 +32,9 @@ export default {
       click_counter: 0,
       propsToPass: {
         label: 'John',
+      },
+clearProps: {
+        label: 'clear_strips',
       },
       holdProps: {
         label: 'flash me'
@@ -55,6 +59,10 @@ export default {
     short_flash() {
       this.click_counter += 1;
       fetch('http://192.168.2.17:5000/short_flash/');
+    },
+    clear_strips()  {
+      this.click_counter += 1;
+      fetch('http://192.168.2.17:5000/clear_strips/');
     }
   },
   mounted() {

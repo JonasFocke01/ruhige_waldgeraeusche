@@ -105,6 +105,13 @@ def toggle_active_animation_off():
     global active_animation
     active_animation = 'off'
 
+def clear_strips():
+    global active_animation
+    active_animation = 'off'
+    for strip_i in range(len(strips)):
+        for pixel_i in range(len(strips[strip_i])):
+            strips[strip_i][pixel_i] = [0, 0, 0]
+
 # spawns a snake
 # @param strip: on which strip should the snake spawn where -1 is all. default: -1
 # @param speed: how fast should the snake go. default 1
@@ -135,7 +142,7 @@ def short_flash():
 def flash_fade():
     if move_individualy:
         for pixel_i in range(len(strips[strip_to_display_on])):
-            strips[strip_to_display_on][pixel_i] = [0, 1, 0.1]
+            strips[strip_to_display_on][pixel_i] = [0, 1, 0.05]
     else:
         for strip_i in range(len(strips)):
             for pixel_i in range(len(strips[strip_i])):

@@ -83,6 +83,11 @@ def http_toggle_active_animation_off():
     toggle_active_animation_off()
     return 'changed to display no animation'
 
+@app.route('/clear_strips/')
+def http_clear_strips():
+    clear_strips()
+    return 'cleared strips'
+
 # TODO
 @app.route('/animation_snake/')
 def http_animation_snake():
