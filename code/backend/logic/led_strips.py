@@ -48,7 +48,12 @@ strips_colors = {
     "blue": 50
 }
 
-# @parameters r, g, b: this parameters represent the colors, the pixels should be rendered in
+master_level_var = 1
+
+def master_level(value):
+    global master_level_var
+    master_level_var = float(value) 
+
 def change_rendercolors(r, g, b):
     strips_colors["red"] = int(r)
     strips_colors["green"] = int(g)
@@ -189,6 +194,10 @@ def render():
                         red   = int(250 * strips[strip_i][pixel_i][1])
                         green = int(250 * strips[strip_i][pixel_i][1])
                         blue  = int(250 * strips[strip_i][pixel_i][1])
+                    
+                    red   = int(red   * master_level_var)
+                    green = int(green * master_level_var)
+                    blue  = int(blue  * master_level_var)
                     if strip_i % 2 == 0:
                         position = int(mapFromTo(pixel_i, 0, PIXELS_PER_STRIP - 1, (strip_i * PIXELS_PER_STRIP), ((strip_i * PIXELS_PER_STRIP) + PIXELS_PER_STRIP) - 1))
                     else:

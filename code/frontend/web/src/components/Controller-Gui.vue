@@ -13,6 +13,7 @@
   <ButtonComponent v-on:click="short_flash" v-bind="holdProps" />
   <ButtonComponent v-on:click="clear_strips" v-bind="clearProps" />
   <SliderComponent v-on:change="processkeypressed" />
+  <LEDMasterLevelComponent v-on:change="master_level" />
   <div class="bg-green-100">
     {{ sees }}
   </div>
@@ -21,11 +22,13 @@
 <script>
 import ButtonComponent from '../components/Button-Component.vue';
 import SliderComponent from '../components/Slider-Component.vue';
+import LEDMasterLevelComponent from '../components/LED_Strip_master_level.vue';
 
 export default {
   components: {
     ButtonComponent,
     SliderComponent,
+    LEDMasterLevelComponent
   },
   data() {
     return {
@@ -63,6 +66,9 @@ clearProps: {
     clear_strips()  {
       this.click_counter += 1;
       fetch('http://192.168.2.17:5000/clear_strips/');
+    },
+    master_level() {
+      this.click_counter += 1;
     }
   },
   mounted() {

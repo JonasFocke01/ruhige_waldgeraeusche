@@ -16,10 +16,9 @@ def http_start():
     return "Test passed!\nRest api is online!"
 
 # leds
-# TODO
-@app.route('/master_level/')
+@app.route('/master_level/',methods = ['POST'])
 def http_master_level():
-    master_level()
+    master_level(request.json['value'])
     return 'changed master level of leds'
 
 # TODO
