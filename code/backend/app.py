@@ -87,16 +87,16 @@ def http_clear_strips():
     clear_strips()
     return 'cleared strips'
 
-# TODO
+# TODO: refactor
 @app.route('/animation_snake/')
 def http_animation_snake():
     animation_snake()
     return 'switched animation to snake'
 
-# TODO
-@app.route('/animation_raindrop/')
+# TODO: refactor
+@app.route('/animation_rain_drops/')
 def http_animation_raindrop():
-    animation_raindrop()
+    animation_rain_drops()
     return 'switched animation to raindrop'
 
 # color panel

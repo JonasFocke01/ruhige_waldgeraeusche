@@ -131,6 +131,25 @@ def animation_snake(strip_num = -1, speed = 2):
                 if len(strips[strip_i]) > 15:
                     for j in range(15):
                         strips[strip_i][j] = [speed, mapFromTo(j, 0, 15, 0, 1), 0]
+
+def animation_rain_drops(strip_num = -1):
+    global active_animation
+    active_animation = 'rain_drops'
+    randomize_strip_to_display_on()
+    if strip_num == -1:
+        if move_individualy:
+            if len(strips[strip_to_display_on]) > 1:
+                random_number = random.randrange(0, len(strips[strip_to_display_on]) -2)
+                strips[strip_to_display_on][random_number] = [1, 1, 0.01]
+                strips[strip_to_display_on][random_number] = [-1, 1, 0.01]
+        else:
+            for strip_i in range(len(strips)):
+                if len(strips[strip_i]) > 1:
+                    random_number = random.randrange(0, len(strips[strip_i]) -2)
+                    strips[strip_i][random_number] = [1, 1, 0.01]
+                    strips[strip_i][random_number] = [-1, 1, 0.01]
+
+
 def short_flash():
     if move_individualy:
         for pixel_i in range(len(strips[strip_to_display_on])):
@@ -143,11 +162,11 @@ def short_flash():
 def flash_fade():
     if move_individualy:
         for pixel_i in range(len(strips[strip_to_display_on])):
-            strips[strip_to_display_on][pixel_i] = [0, 1, 0.05]
+            strips[strip_to_display_on][pixel_i] = [0, 1, 0.01]
     else:
         for strip_i in range(len(strips)):
             for pixel_i in range(len(strips[strip_i])):
-                strips[strip_i][pixel_i] = [0, 1, 0.1]
+                strips[strip_i][pixel_i] = [0, 1, 0.01]
 
 # this function processes strips array to print it to the physical led strips
 def render():
