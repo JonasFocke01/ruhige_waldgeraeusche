@@ -134,9 +134,7 @@ export default {
               green: 132,
               blue: 74,
             }),
-            headers: {
-              'Content-Type': 'application / json',
-            },
+            headers: { 'Content-Type': 'application/json' },
           });
         } else if (e.key === '.') {
           this.currentColor = '#4ab3f0';
