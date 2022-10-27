@@ -19,6 +19,6 @@
         "led_channel": 0,
         "strip_count": 2,
         "pixel_offset": 0,
-        "frame_timing": 34
+        "frame_timing": 0
     }
 }

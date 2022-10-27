@@ -117,13 +117,9 @@ def clear_strips():
         for pixel_i in range(len(strips[strip_i])):
             strips[strip_i][pixel_i] = [0, 0, 0]
 
-# spawns a snake
-# @param strip: on which strip should the snake spawn where -1 is all. default: -1
-# @param speed: how fast should the snake go. default 1
-def animation_snake(strip_num = -1, speed = 1):
+def animation_snake(strip_num = -1, speed = 2):
     global active_animation
     active_animation = 'snake'
-    strip_to_display_on
     randomize_strip_to_display_on()
     if strip_num == -1:
         if move_individualy:
