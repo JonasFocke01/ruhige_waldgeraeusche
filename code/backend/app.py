@@ -94,6 +94,18 @@ def http_animation_snake():
     return 'switched animation to snake'
 
 # TODO
+@app.route('/animation_pitch/')
+def http_animation_pitch():
+    animation_pitch()
+    return 'switched animation to pitch'
+
+# TODO
+@app.route('/animation_shifting_blocks/')
+def http_animation_shifting_blocks():
+    animation_shifting_blocks()
+    return 'switched animation to shifting_blocks'
+
+# TODO
 @app.route('/animation_raindrop/')
 def http_animation_raindrop():
     animation_raindrop()
