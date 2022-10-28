@@ -22,12 +22,4 @@ void setup() {
 
 void loop() {
   Serial.print("B");
-  index++;
-  if ( index > 10000 ) {
-    Serial.print("\n");
-    Serial.print(millis() - debug_timestamp);  
-    Serial.print(": ");
-    Serial.println(index);  
-    delay(20000);
-  }
 }
