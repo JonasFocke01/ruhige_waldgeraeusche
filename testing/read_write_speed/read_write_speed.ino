@@ -1,25 +1,21 @@
-#define BYTEARRAY_SIZE 16
-
-
-byte testbyte;
-
-unsigned int debug_timestamp, index = 0;
+int testbyte;
 
 void setup() {
-	Serial.begin(2000000);
+  Serial.begin(2000000);
 
- // memset(testbyte, 0x01000001, BYTEARRAY_SIZE / 8);
+ testbyte = 70;
 
- // for ( int i = 0; i < BYTEARRAY_SIZE - 1; i++ ) {
- //  testbyte[i] = 0x41;
- // }
-
- testbyte = 0x42;
-
-  debug_timestamp = millis(); 
+ pinMode(LED_BUILTIN, OUTPUT);
 }
 
-
 void loop() {
-  Serial.print("B");
+
+  
+    
+  while(!Serial.available());
+
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(Serial.read());
+digitalWrite(LED_BUILTIN, LOW);
+  
 }

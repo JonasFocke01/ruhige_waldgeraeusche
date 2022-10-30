@@ -1,5 +1,6 @@
 use std::io::{Read, Write};
 use std::sync::Arc;
+use std::{thread, time};
 
 use serial2::SerialPort;
 
@@ -55,14 +56,17 @@ fn read_stdin_loop(port: Arc<SerialPort>, port_name: &str) -> Result<(), ()> {
 }
 
 fn read_serial_loop(port: Arc<SerialPort>, port_name: &str) -> Result<(), ()> {
-	let mut buffer = [0; 512];
+	let mut buffer: [u8; 512] = [0x00; 512];
 	loop {
+        //thread::sleep(time::Duration::from_millis(1000));
+        //println!("reading...");
 		match port.read(&mut buffer) {
 			Ok(0) => return Ok(()),
-			Ok(n) => {
-				std::io::stdout()
-					.write_all(&buffer[..n])
-					.map_err(|e| eprintln!("Error: Failed to write to stdout: {}", e))?;
+			Ok(mut n) => {
+				// std::io::stdout()
+				// 	.write_all(&buffer[..n])
+				// 	.map_err(|e| eprintln!("Error: Failed to write to stdout: {}", e))?;
+                //print!("{:?}", &buffer[..n]);
 			},
 			Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => continue,
 			Err(e) => {
