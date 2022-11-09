@@ -42,6 +42,19 @@ fn read_stdin_loop(port: Arc<SerialPort>, port_name: &str) -> Result<(), ()> {
 	let stdin = std::io::stdin();
 	let mut stdin = stdin.lock();
 	let mut buffer = [0; 512];
+	let mut test_buffer = [120; 512];
+	test_buffer[0] = 69;
+	for i in 1..512 {
+		if i % 3 == 0 {
+			test_buffer[i] = 200;
+		}
+		if i % 3 == 1 {
+			test_buffer[i] = 100;
+		}
+		if i % 3 == 2 {
+			test_buffer[i] = 10;
+		}
+	}
 	loop {
 		let read = stdin
 			.read(&mut buffer)
@@ -49,8 +62,9 @@ fn read_stdin_loop(port: Arc<SerialPort>, port_name: &str) -> Result<(), ()> {
 		if read == 0 {
 			return Ok(());
 		} else {
-			port.write(&buffer[..read])
-				.map_err(|e| eprintln!("Error: Failed to write to {}: {}", port_name, e))?;
+			port.write(&test_buffer);
+			// port.write(&buffer[..read])
+			// 	.map_err(|e| eprintln!("Error: Failed to write to {}: {}", port_name, e))?;
 		}
 	}
 }
@@ -63,10 +77,10 @@ fn read_serial_loop(port: Arc<SerialPort>, port_name: &str) -> Result<(), ()> {
 		match port.read(&mut buffer) {
 			Ok(0) => return Ok(()),
 			Ok(mut n) => {
-				// std::io::stdout()
-				// 	.write_all(&buffer[..n])
-				// 	.map_err(|e| eprintln!("Error: Failed to write to stdout: {}", e))?;
-                //print!("{:?}", &buffer[..n]);
+				std::io::stdout()
+					.write_all(&buffer[..n])
+					.map_err(|e| eprintln!("Error: Failed to write to stdout: {}", e))?;
+                print!("{:?}", &buffer[..n]);
 			},
 			Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => continue,
 			Err(e) => {
