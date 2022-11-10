@@ -90,18 +90,23 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
   // scanner
   // map rgb to single digit number
   if ( save[1][0] == save[1][1] && save[1][0] == save[1][2] ) {
-    DmxSimple.write( SCANNER_CHANNEL + 2, MV_WHITE );
+    // DmxSimple.write( SCANNER_CHANNEL + 2, MV_WHITE );
+    DmxSimple.write( SCANNER_CHANNEL + 2, MV_MSL_YELLOW );
   } else if ( save[1][0] > save[1][1] ) {
     if ( save[1][0] > save[1][2] ) {
-      DmxSimple.write( SCANNER_CHANNEL + 2, MV_RED );
+      // DmxSimple.write( SCANNER_CHANNEL + 2, MV_RED );
+      DmxSimple.write( SCANNER_CHANNEL + 2, MV_MSL_RED );
     } else {
-      DmxSimple.write( SCANNER_CHANNEL + 2, MV_GREEN );
+      // DmxSimple.write( SCANNER_CHANNEL + 2, MV_GREEN );
+      DmxSimple.write( SCANNER_CHANNEL + 2, MV_MSL_GREEN );
     }
   } else {
     if ( save[1][1] > save[1][2] ) {
-      DmxSimple.write( SCANNER_CHANNEL + 2, MV_GREEN  );
+      // DmxSimple.write( SCANNER_CHANNEL + 2, MV_GREEN  );
+      DmxSimple.write( SCANNER_CHANNEL + 2, MV_MSL_GREEN  );
     } else {
-      DmxSimple.write( SCANNER_CHANNEL + 2, MV_DARK_BLUE );
+      // DmxSimple.write( SCANNER_CHANNEL + 2, MV_DARK_BLUE );
+      DmxSimple.write( SCANNER_CHANNEL + 2, MV_MSL_DARK_BLUE );
     }
   }
 

@@ -35,6 +35,16 @@ void set_strobe_frequency(int);
 #define  MV_DARK_BLUE   85
 #define  MV_ORANGE      99
 #define  MV_PINK       113
+
+//msl mode
+#define MV_MSL_YELLOW      8
+#define MV_MSL_BLUE       38
+#define MV_MSL_GREEN      68
+#define MV_MSL_RED        98
+#define MV_MSL_PURPLE    128
+#define MV_MSL_DARK_BLUE 158
+#define MV_MSL_ORANGE    188
+#define MV_MSL_PINK      218
 // moving heads
 
 // laser
