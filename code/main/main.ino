@@ -27,7 +27,7 @@ unsigned long beat_timestamp, debug_mode_timestamp, last_beat_timestamp, last_an
 
 void change_values_in_write_to_save_for_each_active_light(int r, int g, int b, int animation) {
   for (int i = 0; i < NUM_LIGHTS - 1; i++ ) {
-    if ( active_lights[i] ) {
+    if ( active_lights[i] && write_to_save > -1 && write_to_save < 11 ) {
       if ( r != 256 )         saves[write_to_save][i][0] = r;
       if ( g != 256 )         saves[write_to_save][i][1] = b;
       if ( b != 256 )         saves[write_to_save][i][2] = g;
@@ -38,7 +38,7 @@ void change_values_in_write_to_save_for_each_active_light(int r, int g, int b, i
 
 void setup() {
 
-  Serial.begin(2000000);
+  Serial.begin(9600);
 
   Serial.print("booting...");
 
