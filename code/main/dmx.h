@@ -5,7 +5,7 @@
 #define DMX_DATA_PIN 3
 
 #define STAGE_LIGHTS_CHANNEL        1
-#define MOVING_HEADS_RIGHT_CHANNEL  4
+#define SCANNER_CHANNEL             4
 #define LASER_CHANNEL              30
 #define STROBE_CHANNEL            100
 
@@ -27,14 +27,14 @@ void set_strobe_frequency(int);
 
 // colors
 #define  MV_WHITE        0
-#define  MV_RED         20
-#define  MV_BLUE        40
-#define  MV_ORANGE      50
-#define  MV_DARK_BLUE   70
-#define  MV_YELLOW      90
-#define  MV_GREEN      100
-#define  MV_PURPLE     120
-
+#define  MV_YELLOW      15
+#define  MV_BLUE        30
+#define  MV_GREEN       45
+#define  MV_RED         57
+#define  MV_PURPLE      71
+#define  MV_DARK_BLUE   85
+#define  MV_ORANGE      99
+#define  MV_PINK       113
 // moving heads
 
 // laser
@@ -44,5 +44,4 @@ void set_strobe_frequency(int);
 #define  LS_YELLOW      24
 #define  LS_GREEN       16
 #define  LS_PURPLE      40
-
 // laser

@@ -11,7 +11,7 @@ int strobe_frequency;
 int circle_position = 0;
 bool increase_circle_position = true;
 
-int moving_heads_position = 0;
+int scanner_position = 0;
 bool rising = false;
 int light = 0;
 int dimmer = 255;
@@ -38,6 +38,9 @@ void dmx_channels_init() {
 
   DmxSimple.write(STROBE_CHANNEL + 21, 255);
 
+  DmxSimple.write(SCANNER_CHANNEL + 2,   8);
+  DmxSimple.write(SCANNER_CHANNEL + 5, 255);
+
   dmx_timestamp = millis();
 }
 
@@ -60,6 +63,20 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     DmxSimple.write( LASER_CHANNEL + 11, 0 );
     return;
   } else {
+    
+    DmxSimple.write( LASER_CHANNEL     , 255 );
+    DmxSimple.write( LASER_CHANNEL + 5,  128 );
+    DmxSimple.write( LASER_CHANNEL + 6,   30 );
+    DmxSimple.write( LASER_CHANNEL + 7,  128 );
+    DmxSimple.write( LASER_CHANNEL + 8,  100 );
+    DmxSimple.write( LASER_CHANNEL + 1 ,  60 );
+    DmxSimple.write( LASER_CHANNEL + 2 ,  80 );
+  
+    DmxSimple.write(STROBE_CHANNEL + 21, 255);
+  
+    DmxSimple.write(SCANNER_CHANNEL + 2,   8);
+    DmxSimple.write(SCANNER_CHANNEL + 5, 255);
+  
     DmxSimple.write( LASER_CHANNEL     , 255 );
     DmxSimple.write( LASER_CHANNEL + 11, 128 );
 
@@ -67,27 +84,24 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     DmxSimple.write( STROBE_CHANNEL    ,  0);
     DmxSimple.write( STROBE_CHANNEL + 1, 0 );
     DmxSimple.write( STROBE_CHANNEL + 2, 0 );
-    return;
   }
 
 
-  DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 7, dimmer );
-
-  // moving heads
+  // scanner
   // map rgb to single digit number
   if ( save[1][0] == save[1][1] && save[1][0] == save[1][2] ) {
-    DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 4, MV_WHITE );
+    DmxSimple.write( SCANNER_CHANNEL + 4, MV_WHITE );
   } else if ( save[1][0] > save[1][1] ) {
     if ( save[1][0] > save[1][2] ) {
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 4, MV_RED );
+      DmxSimple.write( SCANNER_CHANNEL + 4, MV_RED );
     } else {
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 4, MV_GREEN );
+      DmxSimple.write( SCANNER_CHANNEL + 4, MV_GREEN );
     }
   } else {
     if ( save[1][1] > save[1][2] ) {
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 4, MV_GREEN  );
+      DmxSimple.write( SCANNER_CHANNEL + 4, MV_GREEN  );
     } else {
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 4, MV_DARK_BLUE );
+      DmxSimple.write( SCANNER_CHANNEL + 4, MV_DARK_BLUE );
     }
   }
 
@@ -112,35 +126,35 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
   if ( save[1][3] == DROP_1) {
     dimmer = 255;
     if ( rising ) {
-      moving_heads_position = 180;
-      light = 8;
+      scanner_position = 230;
+      light = 255;
     } else {
-      moving_heads_position = 30;
+      scanner_position = 25;
       light = 0;
     }
     if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
       rising = !rising;
       dmx_timestamp = millis();
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , 0 );
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, moving_heads_position );
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
+      DmxSimple.write( SCANNER_CHANNEL    , 0 );
+      DmxSimple.write( SCANNER_CHANNEL + 1 , scanner_position );
+      DmxSimple.write( SCANNER_CHANNEL + 5, light );
     }
   }
   if ( save[1][3] == HYBRID_3) {
     dimmer = 255;
     if ( rising ) {
-      moving_heads_position = 115;
-      light = 8;
+      scanner_position = 230;
+      light = 255;
     } else {
-      moving_heads_position = 60;
+      scanner_position = 30;
       light = 0;
     }
     if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
       rising = !rising;
       dmx_timestamp = millis();
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , moving_heads_position );
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, 180 );
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
+      DmxSimple.write( SCANNER_CHANNEL    , scanner_position );
+      DmxSimple.write( SCANNER_CHANNEL + 1, 180 );
+      DmxSimple.write( SCANNER_CHANNEL + 6, light );
     }
   }
   if ( save[1][3] == HYBRID_1 ) {
@@ -148,13 +162,12 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     if ( millis() - dmx_timestamp > analogRead( POTENTIOMETER ) ) {
       light = 0;
       dmx_timestamp = millis();
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , random(50, 150) );
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, random(50, 150) );
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 5, random(0, 63) );
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
+      DmxSimple.write( SCANNER_CHANNEL    , random(30, 230) );
+      DmxSimple.write( SCANNER_CHANNEL + 1, random(30, 230) );
+      DmxSimple.write( SCANNER_CHANNEL + 5, light );
     } else if ( millis() - dmx_timestamp > 150 ) {
-      light = 8;
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
+      light = 255;
+      DmxSimple.write( SCANNER_CHANNEL + 5, light );
     }
   }
   if ( save[1][3] == DROP_2 ) {
@@ -162,17 +175,16 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
       light = 0;
       dmx_timestamp = millis();
       dimmer = 255;
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL    , random(50, 150) );
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 2, random(50, 150) );
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 5, random( 0,  63) );
-      DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, light );
+      DmxSimple.write( SCANNER_CHANNEL    , random(30, 230) );
+      DmxSimple.write( SCANNER_CHANNEL + 1, random(30, 230) );
+      DmxSimple.write( SCANNER_CHANNEL + 5, light );
     } else if ( millis() - dmx_timestamp > 150 ) {
-      light = 8;
+      light = 255;
   }
-    DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL, (circle_position * circle_position) / 300 - 100);
-    DmxSimple.write(MOVING_HEADS_RIGHT_CHANNEL + 2, circle_position);
-    DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 255 );
-    light = 8;
+    DmxSimple.write(SCANNER_CHANNEL, (circle_position * circle_position) / 300 - 100);
+    DmxSimple.write(SCANNER_CHANNEL + 1, circle_position);
+    DmxSimple.write( SCANNER_CHANNEL + 5, 255 );
+    light = 255;
     if ( circle_position > 100 ) {
       increase_circle_position = false;
     }
@@ -207,21 +219,21 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
   }
   
   if ( save[1][3] == ALL_ON ) {
-    DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 255 );
+    DmxSimple.write( SCANNER_CHANNEL + 5, 255 );
   }
 
   // flash every light
   if ( save[1][3] == FLASH ) {
-    DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 8 );
+    DmxSimple.write( SCANNER_CHANNEL + 5, 255 );
   }
 
   // turn every light off
   if ( save[1][3] == BRIZZLE || save[1][3] == OFF ) { // brizzle /off
-    DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 6, 0 );
+    DmxSimple.write( SCANNER_CHANNEL + 5, 0 );
   }
 
   // write to moving heads
-  DmxSimple.write( MOVING_HEADS_RIGHT_CHANNEL + 7, dimmer );
+  //DmxSimple.write( SCANNER_CHANNEL + 5, dimmer );
 
   DmxSimple.write( LASER_CHANNEL + 12, map( analogRead( POTENTIOMETER ), 0, 1024, 0, 35 )  );
 

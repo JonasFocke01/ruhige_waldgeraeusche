@@ -48,9 +48,9 @@ void led_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     }
     pixels.show();
     return;
-    Serial.println("test");
+    // Serial.println("test");
   }
-  Serial.println("IMPOSTER");
+  // Serial.println("IMPOSTER");
   if ( save[1][3] == ALL_ON ) {
     for ( int i = PIXEL_OFFSET; i < PIXEL_COUNT - 1; i++ ) {
       pixels.setPixelColor(i, pixels.Color(save[0][0], save[0][1], save[0][2]));

@@ -2,7 +2,7 @@
 #include "controller.h"
 
 //setup
-#define PIXEL_OFFSET         80
+#define PIXEL_OFFSET         0
 #define PIXEL_COUNT         150
 
 #define LED_STRIP_PIN   7
