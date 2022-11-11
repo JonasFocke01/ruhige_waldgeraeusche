@@ -24,4 +24,14 @@ impl<'a> DmxRenderer<'a> {
         println!("Rendering Dmx for {} channel...", self.dmx_config_store.get_channel_count());
         false
     }
+    pub fn get_channel_values(&self) -> &Vec<u8> {
+        &self.channels
+    }
+}
+
+#[test]
+fn channel_size() {
+    let dmx_config_store = DmxConfigStore::new();
+    let dmx_renderer = DmxRenderer::new(&dmx_config_store);
+    assert!(dmx_renderer.get_channel_values().len() == dmx_config_store.get_channel_count() as usize);
 }

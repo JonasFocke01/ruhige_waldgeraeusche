@@ -140,3 +140,27 @@ impl GeneralConfigStore {
         self.frame_timing
     }
 }
+
+#[test]
+fn test_general_config_store() {
+    let general_config_store = GeneralConfigStore::new();
+    assert!(general_config_store.get_frame_timing() > 0 as u64);
+}
+
+#[test]
+fn test_dmx_config_store() {
+    let dmx_config_store = DmxConfigStore::new();
+    assert!(dmx_config_store.get_channel_count() > 0 as u64);
+}
+
+#[test]
+fn test_led_config_store() {
+    let led_config_store = LedConfigStore::new();
+    assert!(led_config_store.get_parameter_count() > 0 as u64);
+}
+
+#[test]
+fn test_input_config_store() {
+    let input_config_store = InputConfigStore::new();
+    assert!(input_config_store.get_button_count() > 0 as u64);
+}

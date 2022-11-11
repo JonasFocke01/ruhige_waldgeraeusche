@@ -37,4 +37,14 @@ impl<'a> InputParser<'a> {
             println!("Gathering from Serial");
         }
     }
+    pub fn get_button_states(&self) -> &Vec<u8> {
+        &self.button_states
+    }
+}
+
+#[test]
+fn button_states_size() {
+    let input_config_store = InputConfigStore::new();
+    let input_parser = InputParser::new(&input_config_store);
+    assert!(input_parser.get_button_states().len() == input_config_store.get_button_count() as usize);
 }

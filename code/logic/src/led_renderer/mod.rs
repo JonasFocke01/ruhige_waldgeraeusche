@@ -47,4 +47,16 @@ impl<'a> LedRenderer<'a> {
         println!("Rendering Leds...");
         false
     }
+    pub fn get_pixels(&self) -> &Vec<Vec<Vec<u8>>>{
+        &self.pixels
+    }
+}
+
+#[test]
+fn pixels_vec_size() {
+    let led_config_store = LedConfigStore::new();
+    let led_renderer = LedRenderer::new(&led_config_store);
+    assert!(led_renderer.get_pixels().len() == led_config_store.get_strip_count() as usize);
+    assert!(led_renderer.get_pixels()[0].len() == led_config_store.get_led_count_per_strip() as usize);
+    assert!(led_renderer.get_pixels()[0][0].len() == led_config_store.get_parameter_count() as usize);
 }
