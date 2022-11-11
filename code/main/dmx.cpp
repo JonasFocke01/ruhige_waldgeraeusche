@@ -15,6 +15,7 @@ int scanner_position = 0;
 bool rising = false;
 int light = 0;
 int dimmer = 255;
+bool change_gobo = false;
 
 void dmx_channels_init() {
 
@@ -91,7 +92,7 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
   // map rgb to single digit number
   if ( save[1][0] == save[1][1] && save[1][0] == save[1][2] ) {
     // DmxSimple.write( SCANNER_CHANNEL + 2, MV_WHITE );
-    DmxSimple.write( SCANNER_CHANNEL + 2, MV_MSL_YELLOW );
+    DmxSimple.write( SCANNER_CHANNEL + 2, MV_MSL_WHITE );
   } else if ( save[1][0] > save[1][1] ) {
     if ( save[1][0] > save[1][2] ) {
       // DmxSimple.write( SCANNER_CHANNEL + 2, MV_RED );
@@ -232,11 +233,27 @@ void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]) {
     // DmxSimple.write( SCANNER_CHANNEL + 5, 255 );
   }
 
+  // brizzle
+  if ( save[1][3] == BRIZZLE ) { // brizzle /off
+    DmxSimple.write( SCANNER_CHANNEL + 1, 230 );
+  } else {
+    DmxSimple.write( SCANNER_CHANNEL + 1,   0 );
+  }
+
   // turn every light off
-  if ( save[1][3] == BRIZZLE || save[1][3] == OFF ) { // brizzle /off
+  if ( save[1][3] == OFF ) { // brizzle /off
     DmxSimple.write( SCANNER_CHANNEL, 0 );
   } else {
     DmxSimple.write( SCANNER_CHANNEL, 255 );
+  }
+
+  Serial.println(change_gobo);
+  if ( change_gobo == true ) {
+    Serial.println("chaning gobo");
+    DmxSimple.write(SCANNER_CHANNEL + 3, 255);
+  } else {
+    Serial.println("NOT CHANGING");
+    DmxSimple.write(SCANNER_CHANNEL + 3,   0);
   }
 
   // write to moving heads
@@ -253,4 +270,13 @@ void set_strobe_mode ( bool set_to ) {
 
 void set_strobe_frequency ( int set_to) {
   strobe_frequency = set_to;
+}
+
+void toggle_gobo() {
+  Serial.println(change_gobo);
+  if ( change_gobo == true ) {
+    change_gobo = false;
+  } else {
+    change_gobo = true;
+  }
 }

@@ -21,6 +21,7 @@ void dmx_channels_init();
 void dmx_loop(uint16_t save[NUM_LIGHTS][LIGHT_SAVE_SPACE]);
 void set_strobe_mode(bool);
 void set_strobe_frequency(int);
+void toggle_gobo();
 // functions
 
 // moving heads
@@ -37,6 +38,7 @@ void set_strobe_frequency(int);
 #define  MV_PINK       113
 
 //msl mode
+#define MV_MSL_WHITE       0
 #define MV_MSL_YELLOW      8
 #define MV_MSL_BLUE       38
 #define MV_MSL_GREEN      68

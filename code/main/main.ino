@@ -388,7 +388,8 @@ void handle_inputs() {
 
   // turn laser off
   if (button_click_states[2][0] && button_click_prevent_ghosting[2][0] == false) {
-    saves[write_to_save][2][3] = 255;
+    // saves[write_to_save][2][3] = 255;
+    toggle_gobo();
     button_click_prevent_ghosting[2][0] = true;
   } else if ( !button_click_states[2][0] ) {
     button_click_prevent_ghosting[2][0] = false;
