@@ -1,3 +1,5 @@
-/code/logic/target
+/code
 /testing/rust_testing/rust_to_python_communication/target
 /testing/rust_testing/rust_to_python/target
+code/logic/target/
+code/logic/target/debug/.cargo-lock
