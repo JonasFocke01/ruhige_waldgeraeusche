@@ -1,15 +1,23 @@
 {
-    "input": {},
+    "input": {
+        "button_count": 5
+    },
     "leds": {
-        "led_count_per_strip": 1,
+        "led_count_per_strip": 2,
         "strip_count": 1,
         "led_pin": 21,
         "led_freq_hz": 800000,
         "led_dma": 10,
         "led_brightness": 255,
-        "led_invert": false,
+        "led_invert": 0,
         "led_channel": 0,
         "pixel_offset": 0,
+        "parameter_count": 5
+    },
+    "dmx": {
+        "channel_count": 512
+    },
+    "general": {
         "frame_timing": 33
     }
 }
