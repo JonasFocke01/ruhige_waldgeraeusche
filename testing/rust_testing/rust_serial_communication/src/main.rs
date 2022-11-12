@@ -77,10 +77,17 @@ fn read_serial_loop(port: Arc<SerialPort>, port_name: &str) -> Result<(), ()> {
 		match port.read(&mut buffer) {
 			Ok(0) => return Ok(()),
 			Ok(mut n) => {
-				std::io::stdout()
-					.write_all(&buffer[..n])
-					.map_err(|e| eprintln!("Error: Failed to write to stdout: {}", e))?;
-                print!("{:?}", &buffer[..n]);
+				// std::io::stdout()
+				// 	.write_all(&buffer[..n])
+				// 	.map_err(|e| eprintln!("Error: Failed to write to stdout: {}", e))?;
+				//println!("{}", n);
+				if buffer[0] == 96 && buffer[1] == 1 && buffer[2] == 2 && buffer[3] == 3 && buffer[4] == 5 && buffer[5] == 4 {
+					println!("TREFFER");
+				} 
+				for i in 0..n {
+					print!("{:?}", &buffer[i]);
+				}
+                //print!("{:?}", &buffer);
 			},
 			Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => continue,
 			Err(e) => {

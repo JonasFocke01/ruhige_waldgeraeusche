@@ -1,50 +1,69 @@
 use crate::led_renderer::LedRenderer;
 use crate::dmx_renderer::DmxRenderer;
 
+use std::sync::Arc;
+use serial2::SerialPort;
+
 use crate::config_store::InputConfigStore;
 
 pub struct InputParser<'a> {
-    button_states: Vec<u8>,
-    input_config_store: &'a InputConfigStore
+    input_config_store: &'a InputConfigStore,
+    serial_port: Arc<SerialPort>
 }
 
 impl<'a> InputParser<'a> {
     pub fn new(input_config_store: &InputConfigStore) -> InputParser {
-        let mut actual_buttons = vec!();
-        for _ in 0..input_config_store.get_button_count() {
-            actual_buttons.push(0);
-        }
+        let port = SerialPort::open("/dev/ttyUSB0", 2000000).unwrap();
+	    let port = Arc::new(port);
+        
         InputParser {
-            button_states: actual_buttons,
-            input_config_store: input_config_store
+            input_config_store: input_config_store,
+            serial_port: port
         }
     }
     pub fn process_input(&self, led_renderer: &LedRenderer, dmx_renderer: &DmxRenderer, input_type: &str) -> bool {
-        // do render stuff
         println!("Parsing Input for {} buttons", self.input_config_store.get_button_count());
-        led_renderer.spawn_snake();
-        dmx_renderer.all_up();
-        Self::gather_input(input_type);
 
-        if self.button_states.len() > 0 {
+        let input: Vec<u8> = InputParser::gather_input(&self, input_type);
+        if input.len() > 0 && input[0] == 96 && input[1] == 1 && input[2] == 2 && input[3] == 3 && input[4] == 5 && input[5] == 4 {
+            led_renderer.spawn_snake();
+            dmx_renderer.all_up();
+        } 
+        
+        if input.len() > 0 {
             false
         } else {
             true
         }
     }
-    fn gather_input(input_type: &str) {
+    pub fn gather_input(&self, input_type: &str) -> Vec<u8> {
+        let mut return_vec: Vec<u8> = vec!();
         if input_type == "Serial" {
             println!("Gathering from Serial");
+
+            let mut buffer: [u8; 512] = [0x00; 512];
+
+            match &self.serial_port.read(&mut buffer) {
+                Ok(0) => {},
+                Ok(n) => {
+                    for i in 0..*n {
+                        return_vec.push(buffer[i]);
+                    }
+                }
+                Err(_) => {}
+            }
         }
+        return_vec
+        
     }
-    pub fn get_button_states(&self) -> &Vec<u8> {
-        &self.button_states
+    pub fn get_serial_connection(&self) -> &Arc<SerialPort> {
+        &self.serial_port
     }
 }
 
 #[test]
-fn button_states_size() {
+fn serial_port_valid() {
     let input_config_store = InputConfigStore::new();
     let input_parser = InputParser::new(&input_config_store);
-    assert!(input_parser.get_button_states().len() == input_config_store.get_button_count() as usize);
+    assert!(input_parser.get_serial_connection().is_write_vectored());
 }
