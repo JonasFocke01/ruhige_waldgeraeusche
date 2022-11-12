@@ -18,6 +18,6 @@
         "channel_count": 512
     },
     "general": {
-        "frame_timing": 33
+        "frame_timing": 5
     }
 }

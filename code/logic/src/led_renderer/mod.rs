@@ -11,10 +11,13 @@ use std::process::{Command, Stdio, Child};
 
 use crate::config_store::LedConfigStore;
 
+use std::time::Instant;
+
 pub struct LedRenderer<'a> {
     pixels: Vec<Vec<Vec<u8>>>,
     python_instance: Child,
-    led_config_store: &'a LedConfigStore
+    led_config_store: &'a LedConfigStore,
+    render_timestamp: Instant
 }
 
 impl<'a> LedRenderer<'a> {
@@ -29,23 +32,25 @@ impl<'a> LedRenderer<'a> {
                 }
             }
         }
-        LedRenderer {
-            pixels: actual_pixels,
-            python_instance: Command::new("python3")
+        let render_timestamp = Instant::now();
+        let python_instance = Command::new("python3")
                                 .arg("python/main.py")
                                 .stdin(Stdio::piped())
                                 .spawn()
-                                .unwrap(),
-            led_config_store: led_config_store
+                                .unwrap();
+        LedRenderer {
+            pixels: actual_pixels,
+            python_instance: python_instance,
+            led_config_store: led_config_store,
+            render_timestamp: render_timestamp
         }
     }
     pub fn spawn_snake(&self) {
         println!("spawning {} snake...", self.led_config_store.get_led_brightness());
     }
-    pub fn render(&self) -> bool {
-        // do render stuff
-        println!("Rendering Leds...");
-        false
+    pub fn render(&mut self) {
+        println!("Rendering Leds {} times.", self.render_timestamp.elapsed().as_millis());
+        self.render_timestamp = Instant::now();
     }
     pub fn get_pixels(&self) -> &Vec<Vec<Vec<u8>>>{
         &self.pixels

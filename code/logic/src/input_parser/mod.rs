@@ -4,6 +4,8 @@ use crate::dmx_renderer::DmxRenderer;
 use std::sync::Arc;
 use serial2::SerialPort;
 
+use std::time::Duration;
+
 use crate::config_store::InputConfigStore;
 
 pub struct InputParser<'a> {
@@ -13,8 +15,10 @@ pub struct InputParser<'a> {
 
 impl<'a> InputParser<'a> {
     pub fn new(input_config_store: &InputConfigStore) -> InputParser {
-        let port = SerialPort::open("/dev/ttyUSB0", 2000000).unwrap();
+        let mut port = SerialPort::open("/dev/ttyUSB0", 2000000).unwrap();
+        port.set_read_timeout(Duration::from_millis(1));
 	    let port = Arc::new(port);
+
         
         InputParser {
             input_config_store: input_config_store,

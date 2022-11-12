@@ -1,8 +1,11 @@
 use crate::config_store::DmxConfigStore;
 
+use std::time::Instant;
+
 pub struct DmxRenderer<'a> {
     channels: Vec<u8>,
-    dmx_config_store: &'a DmxConfigStore
+    dmx_config_store: &'a DmxConfigStore,
+    render_timestamp: Instant
 }
 
 impl<'a> DmxRenderer<'a> {
@@ -11,18 +14,20 @@ impl<'a> DmxRenderer<'a> {
         for _ in 0..dmx_config_store.get_channel_count() {
             actual_channels.push(0);
         }
+        let render_timestamp = Instant::now();
+
         DmxRenderer {
             channels: actual_channels,
-            dmx_config_store: dmx_config_store
+            dmx_config_store: dmx_config_store,
+            render_timestamp: render_timestamp
         }
     }
     pub fn all_up(&self) {
         println!("all upping...");
     }
-    pub fn render(&self) -> bool {
-        // do render stuff
-        println!("Rendering Dmx for {} channel...", self.dmx_config_store.get_channel_count());
-        false
+    pub fn render(&mut self) {
+        println!("Rendering Dmx {} times.", self.render_timestamp.elapsed().as_millis());
+        self.render_timestamp = Instant::now();
     }
     pub fn get_channel_values(&self) -> &Vec<u8> {
         &self.channels

@@ -21,17 +21,17 @@ fn main() {
     let dmx_config_store = DmxConfigStore::new();
     let input_config_store = InputConfigStore::new();
     let input_parser = InputParser::new(&input_config_store);
-    let led_renderer = LedRenderer::new(&led_config_store);
-    let dmx_renderer = DmxRenderer::new(&dmx_config_store);
+    let mut led_renderer = LedRenderer::new(&led_config_store);
+    let mut dmx_renderer = DmxRenderer::new(&dmx_config_store);
 
     //? infinite programmloop whose speed is capped by the FRAME_TIMING attribute
 
     loop {
         let fps_limit_timestamp = Instant::now();
         
-        input_parser.process_input(&led_renderer, &dmx_renderer, "Serial");
         led_renderer.render();
         dmx_renderer.render();
+        input_parser.process_input(&led_renderer, &dmx_renderer, "Serial");
 
         print!("Elapsed: {} | Frame timing: {}\n", fps_limit_timestamp.elapsed().as_millis(), general_config_store.get_frame_timing());
         while fps_limit_timestamp.elapsed().as_millis() < general_config_store.get_frame_timing() as u128 {}
