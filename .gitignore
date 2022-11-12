@@ -3,3 +3,4 @@
 /testing/rust_testing/rust_serial_communication/target
 code/logic/target/
 code/logic/target/debug/.cargo-lock
+/testing/rust_testing/audio_analysis/target
