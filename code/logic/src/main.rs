@@ -20,7 +20,7 @@ fn main() {
     let led_config_store = LedConfigStore::new();
     let dmx_config_store = DmxConfigStore::new();
     let input_config_store = InputConfigStore::new();
-    let input_parser = InputParser::new(&input_config_store);
+    let mut input_parser = InputParser::new(&input_config_store);
     let mut led_renderer = LedRenderer::new(&led_config_store);
     let mut dmx_renderer = DmxRenderer::new(&dmx_config_store);
 
