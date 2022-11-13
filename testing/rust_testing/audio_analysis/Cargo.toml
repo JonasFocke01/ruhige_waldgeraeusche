@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cpal = "0.14.0"
-anyhow = "1.0"
+portaudio = "0.7.0"
+three = "0.4.0"

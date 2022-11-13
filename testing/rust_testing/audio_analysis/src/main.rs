@@ -1,74 +1,49 @@
-extern crate anyhow;
-extern crate cpal;
+use portaudio;
+use std::sync::mpsc::*;
 
-use cpal::traits::{DeviceTrait, HostTrait};
+fn main() {
 
-fn main() -> Result<(), anyhow::Error> {
-    println!("Supported hosts:\n  {:?}", cpal::ALL_HOSTS);
-    let available_hosts = cpal::available_hosts();
-    println!("Available hosts:\n  {:?}", available_hosts);
+    // Construct a portaudio instance that will connect to a native audio API
+    let pa = portaudio::PortAudio::new().expect("Unable to init PortAudio"); 
+    print!("PortAudio initialized\n");
+    // Collect information about the default microphone
+    let mic_index = pa.default_input_device().expect("Unable to get default device");
+    let mic = pa.device_info(mic_index).expect("unable to get mic info");
 
-    for host_id in available_hosts {
-        println!("{}", host_id.name());
-        let host = cpal::host_from_id(host_id)?;
+    print!("mic started\n");
 
-        let default_in = host.default_input_device().map(|e| e.name().unwrap());
-        let default_out = host.default_output_device().map(|e| e.name().unwrap());
-        println!("  Default Input Device:\n    {:?}", default_in);
-        println!("  Default Output Device:\n    {:?}", default_out);
+    // Set parameters for the stream settings.
+    // We pass which mic should be used, how many channels are used,
+    // whether all the values of all the channels should be passed in a 
+    // single audiobuffer and the latency that should be considered 
+    let input_params = portaudio::StreamParameters::<f32>::new( mic_index, 1, true, mic.default_low_input_latency);
 
-        let devices = host.devices()?;
-        println!("  Devices: ");
-        for (device_index, device) in devices.enumerate() {
-            println!("  {}. \"{}\"", device_index + 1, device.name()?);
+    // Settings for an inputstream.
+    // Here we pass the stream parameters we set before,
+    // the sample rate of the mic and the amount values we want to receive
+    let input_settings = portaudio::InputStreamSettings::new(input_params, mic.default_sample_rate, 256);
 
-            // Input configs
-            if let Ok(conf) = device.default_input_config() {
-                println!("    Default input stream config:\n      {:?}", conf);
-            }
-            let input_configs = match device.supported_input_configs() {
-                Ok(f) => f.collect(),
-                Err(e) => {
-                    println!("    Error getting supported input configs: {:?}", e);
-                    Vec::new()
-                }
-            };
-            if !input_configs.is_empty() {
-                println!("    All supported input stream configs:");
-                for (config_index, config) in input_configs.into_iter().enumerate() {
-                    println!(
-                        "      {}.{}. {:?}",
-                        device_index + 1,
-                        config_index + 1,
-                        config
-                    );
-                }
-            }
+    print!("inputs set\n");
 
-            // Output configs
-            if let Ok(conf) = device.default_output_config() {
-                println!("    Default output stream config:\n      {:?}", conf);
-            }
-            let output_configs = match device.supported_output_configs() {
-                Ok(f) => f.collect(),
-                Err(e) => {
-                    println!("    Error getting supported output configs: {:?}", e);
-                    Vec::new()
-                }
-            };
-            if !output_configs.is_empty() {
-                println!("    All supported output stream configs:");
-                for (config_index, config) in output_configs.into_iter().enumerate() {
-                    println!(
-                        "      {}.{}. {:?}",
-                        device_index + 1,
-                        config_index + 1,
-                        config
-                    );
-                }
-            }
+    // Creating a channel so we can receive audio values asynchronously
+    let (sender, receiver) = channel(); 
+
+    // A callback function that should be as short as possible so we send all the info to a different thread
+    let callback = move |portaudio::InputStreamCallbackArgs {buffer, .. }| {
+        match sender.send(buffer) {
+            Ok(_) => portaudio::Continue, 
+            Err(_) => portaudio::Complete
         }
-    }
+    };
 
-    Ok(())
+    // Creating & starting the input stream with our settings & callback
+    let mut stream = pa.open_non_blocking_stream(input_settings, callback).expect("Unable to create stream"); 
+    stream.start().expect("Unable to start stream");
+
+    //Printing values every time we receive new ones while the stream is active
+    while stream.is_active().unwrap() {
+       while let Ok(buffer) = receiver.try_recv() {
+            print!("{:?}\r", buffer[0]); 
+       }
+    }
 }
