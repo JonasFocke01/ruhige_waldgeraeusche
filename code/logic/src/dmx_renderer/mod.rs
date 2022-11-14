@@ -23,10 +23,10 @@ impl<'a> DmxRenderer<'a> {
         }
     }
     pub fn all_up(&self) {
-        println!("all upping...");
+        // println!("all upping...");
     }
     pub fn render(&mut self) {
-        println!("Rendering Dmx {} times.", self.render_timestamp.elapsed().as_millis());
+        // println!("Rendering Dmx {} times.", self.render_timestamp.elapsed().as_millis());
         self.render_timestamp = Instant::now();
     }
     pub fn get_channel_values(&self) -> &Vec<u8> {

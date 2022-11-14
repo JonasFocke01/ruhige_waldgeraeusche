@@ -31,10 +31,10 @@ fn main() {
         
         led_renderer.render();
         dmx_renderer.render();
-        input_parser.process_input(&led_renderer, &dmx_renderer, "Serial");
+        input_parser.process_input(&mut led_renderer, &mut dmx_renderer, "Serial");
 
-        print!("Elapsed: {} | Frame timing: {}\n", fps_limit_timestamp.elapsed().as_millis(), general_config_store.get_frame_timing());
+        // print!("Elapsed: {} | Frame timing: {}\n", fps_limit_timestamp.elapsed().as_millis(), general_config_store.get_frame_timing());
         while fps_limit_timestamp.elapsed().as_millis() < general_config_store.get_frame_timing() as u128 {}
-        println!("--------------------------------------------------");
+        // println!("--------------------------------------------------");
     }
 }

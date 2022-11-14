@@ -19,7 +19,10 @@ pub struct InputParser<'a> {
 impl<'a> InputParser<'a> {
     pub fn new(input_config_store: &InputConfigStore) -> InputParser {
         let mut port = SerialPort::open("/dev/ttyUSB0", 2000000).unwrap();
-        port.set_read_timeout(Duration::from_millis(1));
+        match port.set_read_timeout(Duration::from_millis(1)) {
+            Ok(()) => Some(0),
+            Err(error) => panic!("set_read_timeout returned an error: {}\n", error)
+        };
 	    let port = Arc::new(port);
 
         let last_beat_timestamp = Instant::now();
@@ -34,8 +37,8 @@ impl<'a> InputParser<'a> {
             bpm: bpm
         }
     }
-    pub fn process_input(&mut self, led_renderer: &LedRenderer, dmx_renderer: &DmxRenderer, input_type: &str) -> bool {
-        println!("Parsing Input for {} buttons", self.input_config_store.get_button_count());
+    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, dmx_renderer: &mut DmxRenderer, input_type: &str) -> bool {
+        // println!("Parsing Input for {} buttons", self.input_config_store.get_button_count());
 
         let input: Vec<u8> = InputParser::gather_input(self, input_type);
         if input.len() > 0 && input[0] == 96 && input[1] == 1 && input[2] == 2 && input[3] == 3 && input[4] == 5 && input[5] == 4 {
@@ -54,12 +57,12 @@ impl<'a> InputParser<'a> {
 
         // ?process inputs
         if input_type == "Serial" {
-            println!("Gathering from Serial");
+            // println!("Gathering from Serial");
 
             let mut buffer: [u8; 512] = [0x00; 512];
 
             match &self.serial_port.read(&mut buffer) {
-                Ok(0) => {},
+                Ok(0) => unreachable!(),
                 Ok(n) => {
                     for i in 0..*n {
                         return_vec.push(buffer[i]);
