@@ -1,7 +1,8 @@
 use std::fs::File;
 
 pub struct InputConfigStore {
-    button_count: u64
+    button_count: u64,
+    input_type: u64
 }
 
 pub struct LedConfigStore {
@@ -93,11 +94,15 @@ impl InputConfigStore {
                     .unwrap();
 
         InputConfigStore {
-            button_count: input["button_count"].as_u64().unwrap()
+            button_count: input["button_count"].as_u64().unwrap(),
+            input_type: input["input_type"].as_u64().unwrap()
         }
     }
     pub fn get_button_count(&self) -> u64 {
         self.button_count
+    }
+    pub fn get_input_type(&self) -> u64 {
+        self.input_type
     }
 }
 

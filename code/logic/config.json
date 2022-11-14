@@ -1,6 +1,7 @@
 {
     "input": {
-        "button_count": 5
+        "button_count": 5,
+        "input_type": 1
     },
     "leds": {
         "led_count_per_strip": 2,

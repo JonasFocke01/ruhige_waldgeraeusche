@@ -37,10 +37,10 @@ impl<'a> InputParser<'a> {
             bpm: bpm
         }
     }
-    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, dmx_renderer: &mut DmxRenderer, input_type: &str) -> bool {
+    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, dmx_renderer: &mut DmxRenderer) -> bool {
         // println!("Parsing Input for {} buttons", self.input_config_store.get_button_count());
 
-        let input: Vec<u8> = InputParser::gather_input(self, input_type);
+        let input: Vec<u8> = InputParser::gather_input(self);
         if input.len() > 0 && input[0] == 96 && input[1] == 1 && input[2] == 2 && input[3] == 3 && input[4] == 5 && input[5] == 4 {
             led_renderer.spawn_snake();
             dmx_renderer.all_up();
@@ -52,11 +52,11 @@ impl<'a> InputParser<'a> {
             true
         }
     }
-    pub fn gather_input(&mut self, input_type: &str) -> Vec<u8> {
+    pub fn gather_input(&mut self) -> Vec<u8> {
         let mut return_vec: Vec<u8> = vec!();
 
         // ?process inputs
-        if input_type == "Serial" {
+        if self.input_config_store.get_input_type() == 1 {
             // println!("Gathering from Serial");
 
             let mut buffer: [u8; 512] = [0x00; 512];
