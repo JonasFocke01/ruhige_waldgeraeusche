@@ -16,7 +16,8 @@
         "parameter_count": 5
     },
     "dmx": {
-        "channel_count": 512
+        "channel_count": 512,
+        "scanner_count": 4
     },
     "general": {
         "frame_timing": 5

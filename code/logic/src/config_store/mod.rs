@@ -19,7 +19,8 @@ pub struct LedConfigStore {
 }
 
 pub struct DmxConfigStore {
-    channel_count: u64
+    channel_count: u64,
+    scanner_count: u64
 }
 
 pub struct GeneralConfigStore {
@@ -118,11 +119,15 @@ impl DmxConfigStore {
                     .unwrap();
 
         DmxConfigStore {
-            channel_count: input["channel_count"].as_u64().unwrap()
+            channel_count: input["channel_count"].as_u64().unwrap(),
+            scanner_count: input["scanner_count"].as_u64().unwrap()
         }
     }
     pub fn get_channel_count(&self) -> u64 {
         self.channel_count
+    }
+    pub fn get_scanner_count(&self) -> u64 {
+        self.scanner_count
     }
 }
 
