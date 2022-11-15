@@ -6,7 +6,6 @@ use dmx_serial::posix::TTYPort;
 use rand::Rng;
 
 use std::time::Instant;
-use std::{thread, time};
 
 pub struct DmxRenderer<'a> {
     scanner: Vec<Vec<u8>>,
@@ -44,43 +43,44 @@ impl<'a> DmxRenderer<'a> {
             self.scanner[scanner_i as usize][0] = rng.gen_range(0..256) as u8;
             self.scanner[scanner_i as usize][1] = rng.gen_range(0..256) as u8;
             self.scanner[scanner_i as usize][2] = rng.gen_range(0..256) as u8;
-            print!("Random number: {}\n", rng.gen_range(0..256));
+            //print!("Random number: {}\n", rng.gen_range(0..256));
         }
     }
     pub fn render(&mut self) {
-        // println!("Rendering Dmx {} times.", self.render_timestamp.elapsed().as_millis());
 
-        // ? move scanner
-        //TODO
-
-        // ? dmx value array construction
-        let mut channel_vec: Vec<u8> = vec!();
-
-        // ? stage lights
-        channel_vec.push(0);
-        channel_vec.push(0);
-        channel_vec.push(0);
-
-        // ? scanner
-        for scanner_i in 0..self.dmx_config_store.get_scanner_count() {
-            channel_vec.push(self.scanner[scanner_i as usize][0]);
-            channel_vec.push(self.scanner[scanner_i as usize][1]);
+        if self.render_timestamp.elapsed().as_millis() >= 50 {
+            print!("Rendering Dmx --------------------------------------------------");
+            
+            // ? move scanner
+            //TODO
+            
+            // ? dmx value array construction
+            let mut channel_vec: Vec<u8> = vec!();
+            
+            // ? stage lights
             channel_vec.push(0);
             channel_vec.push(0);
-            channel_vec.push(self.scanner[scanner_i as usize][2]);
-            channel_vec.push(255);
             channel_vec.push(0);
+            
+            // ? scanner
+            for scanner_i in 0..self.dmx_config_store.get_scanner_count() {
+                channel_vec.push(self.scanner[scanner_i as usize][0]);
+                channel_vec.push(self.scanner[scanner_i as usize][1]);
+                channel_vec.push(0);
+                channel_vec.push(0);
+                channel_vec.push(self.scanner[scanner_i as usize][2]);
+                channel_vec.push(255);
+                channel_vec.push(0);
+            }
+            
+            // ? strobe
+            //TODO
+
+            match self.dmx_port.send_dmx_packet(&channel_vec) {
+                Ok(_) => self.render_timestamp = Instant::now(),
+                Err(error) => print!("Error writing to dmx: {}\n", error)
+            }
         }
-
-        // ? strobe
-        //TODO
-
-        print!("{:?}\n", &channel_vec);
-        match self.dmx_port.send_dmx_packet(&channel_vec) {
-            Ok(_) => self.render_timestamp = Instant::now(),
-            Err(error) => print!("Error writing to dmx: {}\n", error)
-        }
-        thread::sleep(time::Duration::from_millis(100));
     }
     pub fn get_scanner_values(&self) -> &Vec<Vec<u8>> {
         &self.scanner
