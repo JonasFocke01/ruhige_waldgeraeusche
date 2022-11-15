@@ -6,8 +6,6 @@ use std::time::Instant;
 
 use std::io::Write;
 
-// use std::{thread, time};
-
 pub struct LedRenderer<'a> {
     pixels: Vec<Vec<Vec<u8>>>,
     python_instance_stdin: ChildStdin,
@@ -55,61 +53,58 @@ impl<'a> LedRenderer<'a> {
     pub fn spawn_snake(&mut self) {
         println!("spawning {} snake...", self.led_config_store.get_led_brightness());
         if self.test {
-            self.pixels[0][1] = vec![150, 11, 11, 0, 0, 1];
+            self.pixels[0][1] = vec![150, 10, 10, 0, 0, 1];
             self.test = false;
         } else {
-            self.pixels[0][1] = vec![0, 11, 11, 0, 0, 1];
+            self.pixels[0][1] = vec![0, 10, 12, 0, 0, 1];
             self.test = true;
         }
     }
     pub fn render(&mut self) -> Vec<Vec<Vec<u8>>> {
-        // println!("Rendering Leds {} times.", self.render_timestamp.elapsed().as_millis());
-        println!("Rendering Leds 1 time.");
+        println!("Leds not rendered for {} millis.", self.render_timestamp.elapsed().as_millis());
 
         let mut result_pixels: Vec<Vec<Vec<u8>>> = vec!();
-        
-        // for _ in 0..self.render_timestamp.elapsed().as_millis() {
 
-            // fade
-            // for strip_i in 0..self.led_config_store.get_strip_count() {
-            //     for pixel_i in 0..self.led_config_store.get_led_count_per_strip() { 
-            //         self.pixels[strip_i as usize][pixel_i as usize][0] = self.pixels[strip_i as usize][pixel_i as usize][0] * self.pixels[strip_i as usize][pixel_i as usize][4];
-            //         self.pixels[strip_i as usize][pixel_i as usize][1] = self.pixels[strip_i as usize][pixel_i as usize][1] * self.pixels[strip_i as usize][pixel_i as usize][4];
-            //         self.pixels[strip_i as usize][pixel_i as usize][2] = self.pixels[strip_i as usize][pixel_i as usize][2] * self.pixels[strip_i as usize][pixel_i as usize][4];
-            //     }
-            // }
-            
-            // ? move
-
-            for i in 0..self.led_config_store.get_strip_count() {
-                result_pixels.push(vec!());
-                for j in 0..self.led_config_store.get_led_count_per_strip() {
-                    result_pixels[i as usize].push(vec!());
-                    for _ in 0..self.led_config_store.get_parameter_count() {
-                        result_pixels[i as usize][j as usize].push(0);
-                    }
-                }
-            }
-            
-            for strip_i in 0..self.led_config_store.get_strip_count() {
-                for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
-                    if  self.pixels[strip_i as usize][pixel_i as usize][0] > 0 || 
-                        self.pixels[strip_i as usize][pixel_i as usize][1] > 0 || 
-                        self.pixels[strip_i as usize][pixel_i as usize][2] > 0 {
-                            if  pixel_i + self.pixels[strip_i as usize][pixel_i as usize][5] as u64 > 0 &&
-                                pixel_i + (self.pixels[strip_i as usize][pixel_i as usize][5] as u64) < self.led_config_store.get_led_count_per_strip() - 1 as u64 {
-                                    result_pixels[strip_i as usize][(pixel_i + (self.pixels[strip_i as usize][pixel_i as usize][5] as u64)) as usize] = self.pixels[strip_i as usize][pixel_i as usize].to_vec();
-                            }
-                    }
-                }
-            }
-            assert!(result_pixels.len() == self.led_config_store.get_strip_count() as usize);
-            assert!(result_pixels[0].len() == self.led_config_store.get_led_count_per_strip() as usize);
-            assert!(result_pixels[0][0].len() == self.led_config_store.get_parameter_count() as usize);
+        // ? fade
+        // for strip_i in 0..self.led_config_store.get_strip_count() {
+        //     for pixel_i in 0..self.led_config_store.get_led_count_per_strip() { 
+        //         self.pixels[strip_i as usize][pixel_i as usize][0] = self.pixels[strip_i as usize][pixel_i as usize][0] * self.pixels[strip_i as usize][pixel_i as usize][4];
+        //         self.pixels[strip_i as usize][pixel_i as usize][1] = self.pixels[strip_i as usize][pixel_i as usize][1] * self.pixels[strip_i as usize][pixel_i as usize][4];
+        //         self.pixels[strip_i as usize][pixel_i as usize][2] = self.pixels[strip_i as usize][pixel_i as usize][2] * self.pixels[strip_i as usize][pixel_i as usize][4];
+        //     }
         // }
+        
+        // ? move
+
+        for i in 0..self.led_config_store.get_strip_count() {
+            result_pixels.push(vec!());
+            for j in 0..self.led_config_store.get_led_count_per_strip() {
+                result_pixels[i as usize].push(vec!());
+                for _ in 0..self.led_config_store.get_parameter_count() {
+                    result_pixels[i as usize][j as usize].push(0);
+                }
+            }
+        }
+        
+        for strip_i in 0..self.led_config_store.get_strip_count() {
+            for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
+                if  self.pixels[strip_i as usize][pixel_i as usize][0] > 0 || 
+                    self.pixels[strip_i as usize][pixel_i as usize][1] > 0 || 
+                    self.pixels[strip_i as usize][pixel_i as usize][2] > 0 {
+                        if  pixel_i + self.pixels[strip_i as usize][pixel_i as usize][5] as u64 > 0 &&
+                            pixel_i + (self.pixels[strip_i as usize][pixel_i as usize][5] as u64) < self.led_config_store.get_led_count_per_strip() - 1 as u64 {
+                                result_pixels[strip_i as usize][(pixel_i + (self.pixels[strip_i as usize][pixel_i as usize][5] as u64)) as usize] = self.pixels[strip_i as usize][pixel_i as usize].to_vec();
+                        }
+                }
+            }
+        }
+        assert!(result_pixels.len() == self.led_config_store.get_strip_count() as usize);
+        assert!(result_pixels[0].len() == self.led_config_store.get_led_count_per_strip() as usize);
+        assert!(result_pixels[0][0].len() == self.led_config_store.get_parameter_count() as usize);
         self.pixels = result_pixels.to_vec();
         
-        // draw
+        // ? draw
+
         let mut writable_pixels = vec!();
         for strip_i in 0..self.led_config_store.get_strip_count() {
             for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
@@ -142,7 +137,6 @@ impl<'a> LedRenderer<'a> {
         }
 
         self.render_timestamp = Instant::now();
-        // thread::sleep( time::Duration::from_millis(200) );
 
         result_pixels
     }
