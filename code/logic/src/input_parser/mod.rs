@@ -6,7 +6,7 @@ use serial2::SerialPort;
 
 use std::time::{Duration, Instant};
 
-use crate::config_store::InputConfigStore;
+use crate::config_store::{InputConfigStore, InputType};
 
 pub struct InputParser<'a> {
     input_config_store: &'a InputConfigStore,
@@ -18,7 +18,8 @@ pub struct InputParser<'a> {
 
 impl<'a> InputParser<'a> {
     pub fn new(input_config_store: &InputConfigStore) -> InputParser {
-        let mut port = SerialPort::open("/dev/ttyUSB0", 2000000).unwrap();
+        let mut port = SerialPort::open("/dev/ttyUSB0", 2000000)
+                                    .expect("Could not open Serial input port!");
         match port.set_read_timeout(Duration::from_millis(1)) {
             Ok(()) => Some(0),
             Err(error) => panic!("set_read_timeout returned an error: {}\n", error)
@@ -56,25 +57,29 @@ impl<'a> InputParser<'a> {
         let mut return_vec: Vec<u8> = vec!();
 
         // ?process inputs
-        if self.input_config_store.get_input_type() == 1 {
-            // println!("Gathering from Serial");
+        match self.input_config_store.get_input_type() {
+            InputType::Serial => {
 
-            let mut buffer: [u8; 512] = [0x00; 512];
-
-            match &self.serial_port.read(&mut buffer) {
-                Ok(0) => unreachable!(),
-                Ok(n) => {
-                    for i in 0..*n {
-                        return_vec.push(buffer[i]);
+                // println!("Gathering from Serial");
+                
+                let mut buffer: [u8; 512] = [0x00; 512];
+                
+                match &self.serial_port.read(&mut buffer) {
+                    Ok(0) => unreachable!(),
+                    Ok(n) => {
+                        for i in 0..*n {
+                            return_vec.push(buffer[i]);
+                        }
                     }
+                    Err(_) => {}
                 }
-                Err(_) => {}
-            }
-        }
-
-        // ?beat detection
-        if self.last_beat_timestamp.elapsed().as_millis() > self.beat_duration.as_millis() {
-            self.beat_duration = Duration::from_millis(self.last_beat_timestamp.elapsed().as_millis() as u64);
+            },
+            InputType::RestApi => unimplemented!()
+        };
+            
+            // ?beat detection
+            if self.last_beat_timestamp.elapsed().as_millis() > self.beat_duration.as_millis() {
+                self.beat_duration = Duration::from_millis(self.last_beat_timestamp.elapsed().as_millis() as u64);
             self.last_beat_timestamp = Instant::now();
             self.bpm = (60000 / self.beat_duration.as_millis()) as u8;
         }
