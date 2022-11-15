@@ -79,7 +79,8 @@ impl<'a> LedRenderer<'a> {
             //     }
             // }
             
-            // move
+            // ? move
+
             for i in 0..self.led_config_store.get_strip_count() {
                 result_pixels.push(vec!());
                 for j in 0..self.led_config_store.get_led_count_per_strip() {
@@ -89,18 +90,22 @@ impl<'a> LedRenderer<'a> {
                     }
                 }
             }
-            assert!(result_pixels.len() == self.led_config_store.get_strip_count() as usize);
-            assert!(result_pixels[0].len() == self.led_config_store.get_led_count_per_strip() as usize);
-            assert!(result_pixels[0][0].len() == self.led_config_store.get_parameter_count() as usize);
-
+            
             for strip_i in 0..self.led_config_store.get_strip_count() {
                 for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
-                    //Todo: respect boundries of strips
-                    if self.pixels[strip_i as usize][pixel_i as usize][0] > 0 || self.pixels[strip_i as usize][pixel_i as usize][1] > 0 || self.pixels[strip_i as usize][pixel_i as usize][2] > 0 {
-                        result_pixels[strip_i as usize][pixel_i as usize] = self.pixels[strip_i as usize][pixel_i as usize].to_vec();
+                    if  self.pixels[strip_i as usize][pixel_i as usize][0] > 0 || 
+                        self.pixels[strip_i as usize][pixel_i as usize][1] > 0 || 
+                        self.pixels[strip_i as usize][pixel_i as usize][2] > 0 {
+                            if  pixel_i + self.pixels[strip_i as usize][pixel_i as usize][5] as u64 > 0 &&
+                                pixel_i + (self.pixels[strip_i as usize][pixel_i as usize][5] as u64) < self.led_config_store.get_led_count_per_strip() - 1 as u64 {
+                                    result_pixels[strip_i as usize][(pixel_i + (self.pixels[strip_i as usize][pixel_i as usize][5] as u64)) as usize] = self.pixels[strip_i as usize][pixel_i as usize].to_vec();
+                            }
                     }
                 }
             }
+            assert!(result_pixels.len() == self.led_config_store.get_strip_count() as usize);
+            assert!(result_pixels[0].len() == self.led_config_store.get_led_count_per_strip() as usize);
+            assert!(result_pixels[0][0].len() == self.led_config_store.get_parameter_count() as usize);
         // }
         self.pixels = result_pixels.to_vec();
         

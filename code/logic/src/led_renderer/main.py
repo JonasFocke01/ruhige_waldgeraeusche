@@ -34,13 +34,22 @@ strips = []
 physical_strip.begin()
 
 while 1:
-    std_input = input()
-    std_input = std_input.split(" ")
-    index = 0
-    if len(std_input) >= LED_COUNT:
+    try:
+        std_input = input()
+        std_input = std_input.split(" ")
+        index = 0
+        if len(std_input) >= LED_COUNT:
+            for strip_i in range(STRIP_COUNT):
+                for pixel_i in range(LED_COUNT_PER_STRIP):
+                    physical_strip.setPixelColor(pixel_i + (LED_COUNT_PER_STRIP * strip_i), Color(int(std_input[index]), int(std_input[index + 1]), int(std_input[index + 2])))
+                    index = index + 3
+        physical_strip.show()
+    except KeyboardInterrupt:
         for strip_i in range(STRIP_COUNT):
             for pixel_i in range(LED_COUNT_PER_STRIP):
-                physical_strip.setPixelColor(pixel_i + (LED_COUNT_PER_STRIP * strip_i), Color(int(std_input[index]), int(std_input[index + 1]), int(std_input[index + 2])))
-                index = index + 3
-    physical_strip.show()
+                physical_strip.setPixelColor(pixel_i + (LED_COUNT_PER_STRIP * strip_i), Color(0, 0, 0))
+        physical_strip.show()
+        exit(0)
+    except:
+        exit(1)
     

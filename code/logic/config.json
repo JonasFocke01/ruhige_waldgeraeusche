@@ -4,7 +4,7 @@
         "input_type": 1
     },
     "leds": {
-        "led_count_per_strip": 2,
+        "led_count_per_strip": 150,
         "strip_count": 1,
         "led_pin": 21,
         "led_freq_hz": 800000,
