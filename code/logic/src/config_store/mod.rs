@@ -191,7 +191,6 @@ fn test_input_config_store_input_type() {
     let input_config_store = InputConfigStore::new();
     match input_config_store.get_input_type() {
         InputType::Serial => (),
-        InputType::RestApi => (),
-        _ => panic!("InputConfigStore contains wrong value for InputType")
+        InputType::RestApi => ()
     }
 }
