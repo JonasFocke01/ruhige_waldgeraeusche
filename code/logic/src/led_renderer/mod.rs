@@ -108,6 +108,7 @@ impl<'a> LedRenderer<'a> {
         
         // ? draw
 
+        // Todo: drawing should invert for odd number of strips 
         let mut writable_pixels = vec!();
         for strip_i in 0..self.led_config_store.get_strip_count() {
             for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
