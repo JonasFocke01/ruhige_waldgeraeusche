@@ -1,5 +1,7 @@
 use crate::led_renderer::LedRenderer;
 use crate::dmx_renderer::DmxRenderer;
+use crate::config_store::GlobalVarsStore;
+use crate::config_store::ColorMode;
 
 use std::sync::Arc;
 use serial2::SerialPort;
@@ -38,12 +40,15 @@ impl<'a> InputParser<'a> {
             bpm: bpm
         }
     }
-    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, dmx_renderer: &mut DmxRenderer) -> bool {
+    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, dmx_renderer: &mut DmxRenderer, global_vars_store: &mut GlobalVarsStore) -> bool {
         // println!("Parsing Input for {} buttons", self.input_config_store.get_button_count());
 
         let input: Vec<u8> = InputParser::gather_input(self);
         if input.len() > 0 && input[0] == 96 && input[1] == 1 && input[2] == 2 && input[3] == 3 && input[4] == 5 && input[5] == 4 {
-            led_renderer.spawn_snake();
+            match global_vars_store.get_color_mode() {
+                ColorMode::Primary => led_renderer.spawn_snake(&global_vars_store.get_primary_color()),
+                ColorMode::Complementary => led_renderer.spawn_snake(&global_vars_store.get_secondary_color())
+            }
             dmx_renderer.all_up();
         }
         

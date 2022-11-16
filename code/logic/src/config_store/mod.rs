@@ -5,6 +5,11 @@ pub enum InputType {
     RestApi
 }
 
+pub enum ColorMode {
+    Primary,
+    Complementary
+}
+
 pub struct InputConfigStore {
     button_count: u64,
     input_type: InputType
@@ -30,6 +35,13 @@ pub struct DmxConfigStore {
 
 pub struct GeneralConfigStore {
     frame_timing: u64
+}
+
+
+pub struct GlobalVarsStore {
+    primary_color: (f32, f32, f32),
+    secondary_color: (f32, f32, f32),
+    color_mode: ColorMode
 }
 
 impl LedConfigStore {
@@ -159,6 +171,39 @@ impl GeneralConfigStore {
     }
     pub fn get_frame_timing(&self) -> u64 {
         self.frame_timing
+    }
+}
+
+impl GlobalVarsStore {
+    pub fn new() -> GlobalVarsStore {
+        let primary_color = (239.0, 2.0, 235.0);
+        let secondary_color = (255.0, 0.0, 0.0);
+
+        let color_mode = ColorMode::Primary;
+
+        GlobalVarsStore {
+            primary_color: primary_color,
+            secondary_color: secondary_color,
+            color_mode: color_mode
+        }
+    }
+    pub fn get_primary_color(&self) -> &(f32, f32, f32){
+        &self.primary_color
+    }
+    pub fn set_primary_color(&mut self, new_primary_color: (f32, f32, f32)) {
+        self.primary_color = new_primary_color;
+    }
+    pub fn get_secondary_color(&self) -> &(f32, f32, f32){
+        &self.secondary_color
+    }
+    pub fn set_secondary_color(&mut self, new_secondary_color: (f32, f32, f32)) {
+        self.secondary_color = new_secondary_color;
+    }
+    pub fn get_color_mode(&self) -> &ColorMode {
+        &self.color_mode
+    }
+    pub fn set_color_mode(&mut self, new_color_mode: ColorMode) {
+        self.color_mode = new_color_mode;
     }
 }
 
