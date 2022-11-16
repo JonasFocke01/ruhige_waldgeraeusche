@@ -59,13 +59,11 @@ impl<'a> InputParser<'a> {
         // ?process inputs
         match self.input_config_store.get_input_type() {
             InputType::Serial => {
-
-                // println!("Gathering from Serial");
                 
                 let mut buffer: [u8; 512] = [0x00; 512];
                 
                 match &self.serial_port.read(&mut buffer) {
-                    Ok(0) => unreachable!(),
+                    Ok(0) => panic!("Input source may be unplugged!"),
                     Ok(n) => {
                         for i in 0..*n {
                             return_vec.push(buffer[i]);
