@@ -1,7 +1,6 @@
 use std::process::{Command, Stdio, ChildStdin};
 
 use crate::config_store::LedConfigStore;
-use crate::config_store::GlobalVarsStore;
 
 use std::time::Instant;
 
@@ -51,8 +50,8 @@ impl<'a> LedRenderer<'a> {
     }
     pub fn spawn_snake(&mut self, color: &(f32, f32, f32)) {
         println!("spawning {} snake...", self.led_config_store.get_led_brightness());
-        for index in 0..140 {
-            self.pixels[0][index] = vec![color.0, color.1, color.2, 0.0, 1.0, 0.1];
+        for index in 0..12 {
+            self.pixels[0][index] = vec![color.0 * index as f32 / 12.0, color.1 * index as f32 / 12.0, color.2 * index as f32 / 12.0, 0.0, 3.0, 0.0];
         }
     }
     pub fn render(&mut self) -> Vec<Vec<Vec<f32>>> {

@@ -11,6 +11,7 @@ use config_store::GeneralConfigStore;
 use config_store::DmxConfigStore;
 use config_store::LedConfigStore;
 use config_store::InputConfigStore;
+use config_store::GlobalVarsStore;
 pub mod config_store;
 
 fn main() {
@@ -20,6 +21,7 @@ fn main() {
     let led_config_store = LedConfigStore::new();
     let dmx_config_store = DmxConfigStore::new();
     let input_config_store = InputConfigStore::new();
+    let mut global_vars_store = GlobalVarsStore::new();
     let mut input_parser = InputParser::new(&input_config_store);
     let mut led_renderer = LedRenderer::new(&led_config_store);
     let mut dmx_renderer = DmxRenderer::new(&dmx_config_store);
@@ -31,7 +33,7 @@ fn main() {
         
         led_renderer.render();
         dmx_renderer.render();
-        input_parser.process_input(&mut led_renderer, &mut dmx_renderer);
+        input_parser.process_input(&mut led_renderer, &mut dmx_renderer, &mut global_vars_store);
 
         print!("Elapsed: {} | Frame timing: {}\n", fps_limit_timestamp.elapsed().as_millis(), general_config_store.get_frame_timing());
         while fps_limit_timestamp.elapsed().as_millis() < general_config_store.get_frame_timing() as u128 {}

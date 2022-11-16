@@ -5,7 +5,7 @@
     },
     "leds": {
         "led_count_per_strip": 150,
-        "strip_count": 8,
+        "strip_count": 4,
         "led_pin": 21,
         "led_freq_hz": 800000,
         "led_dma": 10,
@@ -20,6 +20,6 @@
         "scanner_count": 4
     },
     "general": {
-        "frame_timing": 12
+        "frame_timing": 34
     }
 }
