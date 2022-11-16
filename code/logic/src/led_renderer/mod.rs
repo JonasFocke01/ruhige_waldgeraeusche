@@ -68,6 +68,17 @@ impl<'a> LedRenderer<'a> {
             }
         }
     }
+    pub fn flash_fade_whole_strip(&mut self, color: &(f32, f32, f32)) {
+        for strip_i in 0..self.led_config_store.get_strip_count() {
+            for pixel_i in self.led_config_store.get_pixel_offset()..self.led_config_store.get_led_count_per_strip() {
+                if  self.pixels[strip_i as usize][pixel_i as usize][0] < 10.0 || 
+                    self.pixels[strip_i as usize][pixel_i as usize][1] < 10.0 || 
+                    self.pixels[strip_i as usize][pixel_i as usize][2] < 10.0 {
+                        self.pixels[strip_i as usize][pixel_i as usize] = vec![color.0, color.1, color.2, 0.0, 0.0, 0.1];
+                    }
+            }
+        }
+    }
     pub fn render(&mut self) -> Vec<Vec<Vec<f32>>> {
         // println!("Leds not rendered for {} ms.", self.render_timestamp.elapsed().as_millis());
 
