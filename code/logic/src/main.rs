@@ -33,7 +33,7 @@ fn main() {
         dmx_renderer.render();
         input_parser.process_input(&mut led_renderer, &mut dmx_renderer);
 
-        // print!("Elapsed: {} | Frame timing: {}\n", fps_limit_timestamp.elapsed().as_millis(), general_config_store.get_frame_timing());
+        print!("Elapsed: {} | Frame timing: {}\n", fps_limit_timestamp.elapsed().as_millis(), general_config_store.get_frame_timing());
         while fps_limit_timestamp.elapsed().as_millis() < general_config_store.get_frame_timing() as u128 {}
         // println!("--------------------------------------------------");
     }

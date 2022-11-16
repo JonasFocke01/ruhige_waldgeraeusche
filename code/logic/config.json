@@ -5,7 +5,7 @@
     },
     "leds": {
         "led_count_per_strip": 150,
-        "strip_count": 1,
+        "strip_count": 8,
         "led_pin": 21,
         "led_freq_hz": 800000,
         "led_dma": 10,
@@ -13,13 +13,13 @@
         "led_invert": 0,
         "led_channel": 0,
         "pixel_offset": 0,
-        "parameter_count": 5
+        "parameter_count": 6
     },
     "dmx": {
         "channel_count": 512,
         "scanner_count": 4
     },
     "general": {
-        "frame_timing": 5
+        "frame_timing": 12
     }
 }
