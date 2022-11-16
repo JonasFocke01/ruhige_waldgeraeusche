@@ -141,6 +141,20 @@ impl<'a> LedRenderer<'a> {
 
         result_pixels
     }
+    pub fn clear_strips(&mut self) -> bool {
+        let mut actual_pixels = vec!();
+        for i in 0..self.led_config_store.get_strip_count() {
+            actual_pixels.push(vec!());
+            for j in 0..self.led_config_store.get_led_count_per_strip() {
+                actual_pixels[i as usize].push(vec!());
+                for _ in 0..self.led_config_store.get_parameter_count() {
+                    actual_pixels[i as usize][j as usize].push(0.0);
+                }
+            }
+        }
+        self.pixels = actual_pixels;
+        true
+    }
     pub fn get_pixels(&self) -> &Vec<Vec<Vec<f32>>>{
         &self.pixels
     }
