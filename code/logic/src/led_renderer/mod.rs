@@ -50,8 +50,10 @@ impl<'a> LedRenderer<'a> {
     }
     pub fn spawn_snake(&mut self, color: &(f32, f32, f32)) {
         println!("spawning {} snake...", self.led_config_store.get_led_brightness());
-        for index in 0..12 {
-            self.pixels[0][index] = vec![color.0 * index as f32 / 12.0, color.1 * index as f32 / 12.0, color.2 * index as f32 / 12.0, 0.0, 3.0, 0.0];
+        for strip_i in 0..self.led_config_store.get_strip_count() {   
+            for index in 0..12 {
+                self.pixels[strip_i as usize][index] = vec![color.0 * index as f32 / 12.0, color.1 * index as f32 / 12.0, color.2 * index as f32 / 12.0, 0.0, 3.0, 0.0];
+            }
         }
     }
     pub fn render(&mut self) -> Vec<Vec<Vec<f32>>> {
