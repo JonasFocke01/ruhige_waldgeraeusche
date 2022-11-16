@@ -6,6 +6,8 @@ use std::time::Instant;
 
 use std::io::Write;
 
+use rand::Rng;
+
 pub struct LedRenderer<'a> {
     pixels: Vec<Vec<Vec<f32>>>,
     python_instance_stdin: ChildStdin,
@@ -51,8 +53,18 @@ impl<'a> LedRenderer<'a> {
     pub fn spawn_snake(&mut self, color: &(f32, f32, f32)) {
         println!("spawning {} snake...", self.led_config_store.get_led_brightness());
         for strip_i in 0..self.led_config_store.get_strip_count() {   
-            for index in 0..12 {
-                self.pixels[strip_i as usize][index] = vec![color.0 * index as f32 / 12.0, color.1 * index as f32 / 12.0, color.2 * index as f32 / 12.0, 0.0, 3.0, 0.0];
+            for index in self.led_config_store.get_pixel_offset()..12 {
+                self.pixels[strip_i as usize][index as usize] = vec![color.0 * index as f32 / 12.0, color.1 * index as f32 / 12.0, color.2 * index as f32 / 12.0, 0.0, 3.0, 0.0];
+            }
+        }
+    }
+    pub fn spawn_fading_blocks(&mut self, color: &(f32, f32, f32)) {
+        let mut rng = rand::thread_rng();
+        for strip_i in 0..self.led_config_store.get_strip_count() { 
+            // Todo: the start should not be random but represent the current pitch of some sort
+            let random_start = rng.gen_range(self.led_config_store.get_pixel_offset()..(self.led_config_store.get_led_count_per_strip() - 16));
+            for index in random_start..(random_start + 15) {
+                self.pixels[strip_i as usize][index as usize] = vec![color.0, color.1, color.2, 0.0, 0.0, 0.1];
             }
         }
     }
