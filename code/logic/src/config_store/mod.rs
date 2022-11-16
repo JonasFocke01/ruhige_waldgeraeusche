@@ -205,6 +205,12 @@ impl GlobalVarsStore {
     pub fn set_color_mode(&mut self, new_color_mode: ColorMode) {
         self.color_mode = new_color_mode;
     }
+    pub fn toggle_color_mode(&mut self) {
+        self.color_mode = match self.color_mode {
+                                                    ColorMode::Primary => ColorMode::Complementary,
+                                                    ColorMode::Complementary => ColorMode::Primary
+                                                };
+    }
 }
 
 #[test]
