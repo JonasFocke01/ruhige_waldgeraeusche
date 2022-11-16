@@ -15,7 +15,7 @@ pub struct InputParser<'a> {
     serial_port: Arc<SerialPort>,
     last_beat_timestamp: Instant,
     beat_duration: Duration,
-    bpm: u8
+    bpm: u16
 }
 
 impl<'a> InputParser<'a> {
@@ -29,8 +29,8 @@ impl<'a> InputParser<'a> {
 	    let port = Arc::new(port);
 
         let last_beat_timestamp = Instant::now();
-        let beat_duration = Duration::from_millis(500);
-        let bpm = 120;
+        let bpm = 120 as u16;
+        let beat_duration = Duration::from_millis( (60_000 / bpm) as u64 );
         
         InputParser {
             input_config_store: input_config_store,
@@ -84,7 +84,7 @@ impl<'a> InputParser<'a> {
             if self.last_beat_timestamp.elapsed().as_millis() > self.beat_duration.as_millis() {
                 self.beat_duration = Duration::from_millis(self.last_beat_timestamp.elapsed().as_millis() as u64);
             self.last_beat_timestamp = Instant::now();
-            self.bpm = (60000 / self.beat_duration.as_millis()) as u8;
+            self.bpm = (60000 / self.beat_duration.as_millis()) as u16;
         }
         return_vec
         
