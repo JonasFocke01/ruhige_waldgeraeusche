@@ -10,6 +10,11 @@ pub enum ColorMode {
     Complementary
 }
 
+pub enum MovementMode {
+    Synchronized,
+    Asynchronized
+}
+
 pub struct InputConfigStore {
     button_count: u64,
     input_type: InputType
@@ -41,7 +46,8 @@ pub struct GeneralConfigStore {
 pub struct GlobalVarsStore {
     primary_color: (f32, f32, f32),
     secondary_color: (f32, f32, f32),
-    color_mode: ColorMode
+    color_mode: ColorMode,
+    movement_mode: MovementMode
 }
 
 impl LedConfigStore {
@@ -181,10 +187,13 @@ impl GlobalVarsStore {
 
         let color_mode = ColorMode::Primary;
 
+        let movement_mode = MovementMode::Synchronized;
+
         GlobalVarsStore {
             primary_color: primary_color,
             secondary_color: secondary_color,
-            color_mode: color_mode
+            color_mode: color_mode,
+            movement_mode: movement_mode
         }
     }
     pub fn get_primary_color(&self) -> &(f32, f32, f32){
@@ -207,9 +216,21 @@ impl GlobalVarsStore {
     }
     pub fn toggle_color_mode(&mut self) {
         self.color_mode = match self.color_mode {
-                                                    ColorMode::Primary => ColorMode::Complementary,
-                                                    ColorMode::Complementary => ColorMode::Primary
-                                                };
+                                ColorMode::Primary => ColorMode::Complementary,
+                                ColorMode::Complementary => ColorMode::Primary
+                            };
+    }
+    pub fn get_movement_mode(&self) -> &MovementMode {
+        &self.movement_mode
+    }
+    pub fn set_movement_mode(&mut self, new_movement_mode: MovementMode) {
+        self.movement_mode = new_movement_mode;
+    }
+    pub fn toggle_movement_mode(&mut self) {
+        self.movement_mode = match self.movement_mode {
+                                MovementMode::Asynchronized => MovementMode::Synchronized,
+                                MovementMode::Synchronized => MovementMode::Asynchronized
+                            };
     }
 }
 
