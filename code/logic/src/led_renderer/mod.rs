@@ -79,7 +79,7 @@ impl<'a> LedRenderer<'a> {
             }
         }
     }
-    pub fn render(&mut self) -> Vec<Vec<Vec<f32>>> {
+    pub fn render(&mut self) -> Result<Vec<Vec<Vec<f32>>>, String> {
         // println!("Leds not rendered for {} ms.", self.render_timestamp.elapsed().as_millis());
 
         let mut result_pixels: Vec<Vec<Vec<f32>>> = vec!();
@@ -150,22 +150,20 @@ impl<'a> LedRenderer<'a> {
             match self.python_instance_stdin.write_all(format!("{} ", &writable_pixels[i]).as_bytes()) {
                 Ok(()) => (),
                 Err(error) => {
-                    println!("Error while writing to python stdin: {}", error);
-                    return vec!();
+                    return Err(String::from("Error while writing to python stdin"));
                 }
             }
         }
         match self.python_instance_stdin.write_all("\n".as_bytes()) {
             Ok(()) => (),
             Err(error) => {
-                println!("Error while writing to python stdin: {}", error);
-                return vec!();
+                return Err(String::from("Error while writing to python stdin"));
             }
         }
 
         self.render_timestamp = Instant::now();
 
-        result_pixels
+        Ok(result_pixels)
     }
     pub fn clear_strips(&mut self) -> bool {
         let mut actual_pixels = vec!();
@@ -193,4 +191,31 @@ fn pixels_vec_size() {
     assert!(led_renderer.get_pixels().len() == led_config_store.get_strip_count() as usize);
     assert!(led_renderer.get_pixels()[0].len() == led_config_store.get_led_count_per_strip() as usize);
     assert!(led_renderer.get_pixels()[0][0].len() == led_config_store.get_parameter_count() as usize);
+}
+
+//Todo: this needs review
+#[test]
+fn led_render_function() {
+    let led_config_store = LedConfigStore::new();
+    let mut led_renderer = LedRenderer::new(&led_config_store);
+    let mut filled_pixels = 0.0;
+    for strips in led_renderer.get_pixels().iter() {
+        for pixels in strips.iter() {
+            for param in pixels.iter() {
+                filled_pixels += param;
+            }
+        }
+    }
+    led_renderer.spawn_snake(&(12.0, 12.0, 12.0));
+    for _ in 0..50 {
+        led_renderer.render();
+    }
+    for strips in led_renderer.get_pixels().iter() {
+        for pixels in strips.iter() {
+            for param in pixels.iter() {
+                filled_pixels += param;
+            }
+        }
+    }
+    panic!("result: {}", filled_pixels);
 }
