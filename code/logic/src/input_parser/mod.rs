@@ -95,7 +95,7 @@ impl<'a> InputParser<'a> {
 }
 
 #[test]
-fn serial_port_valid() {
+fn serial_port_is_valid() {
     let input_config_store = InputConfigStore::new();
     let input_parser = InputParser::new(&input_config_store);
     assert!(input_parser.get_serial_connection().is_write_vectored());

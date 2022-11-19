@@ -185,7 +185,7 @@ impl<'a> LedRenderer<'a> {
 }
 
 #[test]
-fn pixels_vec_size() {
+fn pixels_vec_has_expected_dimensions() {
     let led_config_store = LedConfigStore::new();
     let led_renderer = LedRenderer::new(&led_config_store);
     assert!(led_renderer.get_pixels().len() == led_config_store.get_strip_count() as usize);
@@ -195,7 +195,7 @@ fn pixels_vec_size() {
 
 //Todo: this needs review
 #[test]
-fn led_render_function() {
+fn led_render_function_works_as_expected() {
     let led_config_store = LedConfigStore::new();
     let mut led_renderer = LedRenderer::new(&led_config_store);
     let mut filled_pixels = 0.0;

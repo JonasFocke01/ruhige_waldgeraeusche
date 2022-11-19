@@ -88,7 +88,7 @@ impl<'a> DmxRenderer<'a> {
 }
 
 #[test]
-fn channel_size() {
+fn scanner_vec_has_expected_size() {
     let dmx_config_store = DmxConfigStore::new();
     let dmx_renderer = DmxRenderer::new(&dmx_config_store);
     assert!(dmx_renderer.get_scanner_values().len() == dmx_config_store.get_scanner_count() as usize);
