@@ -149,14 +149,14 @@ impl<'a> LedRenderer<'a> {
         for i in 0..writable_pixels.len() {
             match self.python_instance_stdin.write_all(format!("{} ", &writable_pixels[i]).as_bytes()) {
                 Ok(()) => (),
-                Err(error) => {
+                Err(_) => {
                     return Err(String::from("Error while writing to python stdin"));
                 }
             }
         }
         match self.python_instance_stdin.write_all("\n".as_bytes()) {
             Ok(()) => (),
-            Err(error) => {
+            Err(_) => {
                 return Err(String::from("Error while writing to python stdin"));
             }
         }
@@ -208,7 +208,10 @@ fn led_render_function_works_as_expected() {
     }
     led_renderer.spawn_snake(&(12.0, 12.0, 12.0));
     for _ in 0..50 {
-        led_renderer.render();
+        match led_renderer.render() {
+            Ok(_) => 0,
+            Err(error) => panic!("{}", error)
+        };
     }
     for strips in led_renderer.get_pixels().iter() {
         for pixels in strips.iter() {

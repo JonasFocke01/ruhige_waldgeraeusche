@@ -40,10 +40,13 @@ impl<'a> InputParser<'a> {
             bpm: bpm
         }
     }
-    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, dmx_renderer: &mut DmxRenderer, global_vars_store: &mut GlobalVarsStore) -> bool {
+    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, dmx_renderer: &mut DmxRenderer, global_vars_store: &mut GlobalVarsStore) -> Result<Vec<u8>, String> {
         // println!("Parsing Input for {} buttons", self.input_config_store.get_button_count());
 
-        let input: Vec<u8> = InputParser::gather_input(self);
+        let input: Vec<u8> = match InputParser::gather_input(self) {
+            Ok(e) => e,
+            Err(error) => return Err(error)
+        };
         if input.len() > 0 && input[0] == 96 && input[1] == 1 && input[2] == 2 && input[3] == 3 && input[4] == 5 && input[5] == 4 {
             match global_vars_store.get_color_mode() {
                 ColorMode::Primary => led_renderer.spawn_fading_blocks(&global_vars_store.get_primary_color()),
@@ -53,12 +56,12 @@ impl<'a> InputParser<'a> {
         }
         
         if input.len() > 0 {
-            false
+            return Ok(input)
         } else {
-            true
+            return Err(String::from("Input is empty"))
         }
     }
-    pub fn gather_input(&mut self) -> Vec<u8> {
+    pub fn gather_input(&mut self) -> Result<Vec<u8>, String> {
         let mut return_vec: Vec<u8> = vec!();
 
         // ?process inputs
@@ -68,25 +71,25 @@ impl<'a> InputParser<'a> {
                 let mut buffer: [u8; 512] = [0x00; 512];
                 
                 match &self.serial_port.read(&mut buffer) {
-                    Ok(0) => panic!("Input source may be unplugged!"),
+                    Ok(0) => return Err(String::from("Input source may be unplugged!")),
                     Ok(n) => {
                         for i in 0..*n {
                             return_vec.push(buffer[i]);
                         }
-                    }
-                    Err(_) => {}
+                    },
+                    Err(_) => return Err(String::from("Unknown error while gathering reading serial port!"))
                 }
             },
             InputType::RestApi => unimplemented!()
         };
             
-            // ?beat detection
-            if self.last_beat_timestamp.elapsed().as_millis() > self.beat_duration.as_millis() {
-                self.beat_duration = Duration::from_millis(self.last_beat_timestamp.elapsed().as_millis() as u64);
+        // ? beat detection
+        if self.last_beat_timestamp.elapsed().as_millis() > self.beat_duration.as_millis() {
+            self.beat_duration = Duration::from_millis(self.last_beat_timestamp.elapsed().as_millis() as u64);
             self.last_beat_timestamp = Instant::now();
             self.bpm = (60000 / self.beat_duration.as_millis()) as u16;
         }
-        return_vec
+        Ok(return_vec)
         
     }
     pub fn get_serial_connection(&self) -> &Arc<SerialPort> {
@@ -96,6 +99,14 @@ impl<'a> InputParser<'a> {
 
 #[test]
 fn serial_port_is_valid() {
+    let input_config_store = InputConfigStore::new();
+    let input_parser = InputParser::new(&input_config_store);
+    assert!(input_parser.get_serial_connection().is_write_vectored());
+}
+
+//Todo: this needs review
+#[test]
+fn input_function_gathers_something() {
     let input_config_store = InputConfigStore::new();
     let input_parser = InputParser::new(&input_config_store);
     assert!(input_parser.get_serial_connection().is_write_vectored());

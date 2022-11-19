@@ -31,9 +31,15 @@ fn main() {
     loop {
         let fps_limit_timestamp = Instant::now();
         
-        led_renderer.render();
+        match led_renderer.render() {
+            Ok(_) => 0,
+            Err(error) => panic!("{}", error)
+        };
         dmx_renderer.render();
-        input_parser.process_input(&mut led_renderer, &mut dmx_renderer, &mut global_vars_store);
+        match input_parser.process_input(&mut led_renderer, &mut dmx_renderer, &mut global_vars_store) {
+            Ok(_) => 0,
+            Err(error) => panic!("{}", error)
+        };
 
         print!("Elapsed: {} | Frame timing: {}\n", fps_limit_timestamp.elapsed().as_millis(), general_config_store.get_frame_timing());
         while fps_limit_timestamp.elapsed().as_millis() < general_config_store.get_frame_timing() as u128 {}
