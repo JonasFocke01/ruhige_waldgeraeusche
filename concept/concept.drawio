@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-11-20T12:48:00.901Z" agent="5.0 (X11)" etag="jLYgdhdawikD2CCgvA-Z" version="20.5.3" type="github">
+<mxfile host="app.diagrams.net" modified="2022-11-20T12:52:32.001Z" agent="5.0 (X11)" etag="J7h75Oy49qVMOv1nM1lo" version="20.5.3" type="github">
   <diagram id="EBs3eoclZNxCUd93gEGw" name="Page-1">
     <mxGraphModel dx="3334" dy="2960" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -554,6 +554,9 @@
         </mxCell>
         <mxCell id="DIamjsAeuccOloleiY1Q-31" value="ACCESS KEY" style="points=[[0,0.5,0],[0.24,0,0],[0.5,0.28,0],[0.995,0.475,0],[0.5,0.72,0],[0.24,1,0]];verticalLabelPosition=bottom;sketch=0;html=1;verticalAlign=top;aspect=fixed;align=center;pointerEvents=1;shape=mxgraph.cisco19.key;fillColor=#005073;strokeColor=none;fontSize=12;" vertex="1" parent="DIamjsAeuccOloleiY1Q-16">
           <mxGeometry x="370" y="120" width="311.11" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="DIamjsAeuccOloleiY1Q-35" value="&lt;div&gt;(Toggle)&lt;/div&gt;&lt;div&gt;Glove mode&lt;/div&gt;&lt;div&gt;(Sensors are more sensitive&lt;/div&gt;&lt;div&gt;to be able to operate keyboard&lt;/div&gt;&lt;div&gt;outside in the cold)&lt;br&gt;&lt;/div&gt;" style="labelPosition=center;verticalLabelPosition=middle;align=center;html=1;shape=mxgraph.basic.shaded_button;dx=10;fillColor=#E6E6E6;strokeColor=none;" vertex="1" parent="DIamjsAeuccOloleiY1Q-16">
+          <mxGeometry x="910" y="320" width="170" height="120" as="geometry" />
         </mxCell>
         <mxCell id="DIamjsAeuccOloleiY1Q-32" value="" style="endArrow=none;html=1;rounded=0;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;shape=link;" edge="1" parent="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
