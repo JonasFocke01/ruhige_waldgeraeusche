@@ -2,6 +2,8 @@ use std::io::{Read, Write};
 use std::sync::Arc;
 use std::{thread, time};
 
+use std::time::Duration;
+
 use serial2::SerialPort;
 
 fn do_main() -> Result<(), ()> {
@@ -17,8 +19,12 @@ fn do_main() -> Result<(), ()> {
 		.parse()
 		.map_err(|_| eprintln!("Error: invalid baud rate: {}", args[2]))?;
 
-	let port = SerialPort::open(&port_name, baud_rate)
+	let mut port = SerialPort::open(&port_name, baud_rate)
 		.map_err(|e| eprintln!("Error: Failed to open {}: {}", port_name, e))?;
+	match port.set_read_timeout(Duration::from_millis(1)) {
+		Ok(()) => Some(0),
+		Err(error) => panic!("set_read_timeout returned an error: {}\n", error)
+	};
 	let port = Arc::new(port);
 
 	// Spawn a thread to read from stdin and write to the serial port.
@@ -31,6 +37,7 @@ fn do_main() -> Result<(), ()> {
 			}
 		}
 	});
+
 
 	// Read from serial port and write to stdout in main thread.
 	read_serial_loop(port, port_name)?;
