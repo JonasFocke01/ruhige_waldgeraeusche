@@ -3,8 +3,6 @@ from rpi_ws281x import *
 import json
 import sys
 
-print(sys.argv)
-
 config_file_path = ""
 
 if (len(sys.argv) > 1):
