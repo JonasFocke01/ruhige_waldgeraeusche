@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
 use std::sync::Arc;
 use std::{thread, time};
+use rand::{thread_rng, Rng};
 
 use std::time::Duration;
 
@@ -49,26 +50,33 @@ fn read_stdin_loop(port: Arc<SerialPort>, port_name: &str) -> Result<(), ()> {
 	let stdin = std::io::stdin();
 	let mut stdin = stdin.lock();
 	let mut buffer = [0; 512];
-	let mut test_buffer = [120; 512];
+	let mut test_buffer = [0; 10];
 	test_buffer[0] = 69;
-	for i in 1..512 {
-		if i % 3 == 0 {
-			test_buffer[i] = 200;
-		}
-		if i % 3 == 1 {
-			test_buffer[i] = 100;
-		}
-		if i % 3 == 2 {
-			test_buffer[i] = 10;
-		}
-	}
+	// for i in 1..512 {
+	// 	if i % 3 == 0 {
+	// 		test_buffer[i] = 200;
+	// 	}
+	// 	if i % 3 == 1 {
+	// 		test_buffer[i] = 100;
+	// 	}
+	// 	if i % 3 == 2 {
+	// 		test_buffer[i] = 10;
+	// 	}
+	// }
+	let mut rng = thread_rng();
+	test_buffer[3] = 0;
+	test_buffer[4] = 0;
+	test_buffer[5] = 0;
 	loop {
+		test_buffer[1] = rng.gen_range(0..255);
+		test_buffer[2] = rng.gen_range(0..255);
 		let read = stdin
 			.read(&mut buffer)
 			.map_err(|e| eprintln!("Error: Failed to read from stdin: {}", e))?;
-		if read == 0 {
-			return Ok(());
-		} else {
+			// println!("{:?}", test_buffer);
+			if read == 0 {
+				return Ok(());
+			} else {
 			port.write(&test_buffer);
 			// port.write(&buffer[..read])
 			// 	.map_err(|e| eprintln!("Error: Failed to write to {}: {}", port_name, e))?;
@@ -84,16 +92,16 @@ fn read_serial_loop(port: Arc<SerialPort>, port_name: &str) -> Result<(), ()> {
 		match port.read(&mut buffer) {
 			Ok(0) => return Ok(()),
 			Ok(mut n) => {
-				// std::io::stdout()
-				// 	.write_all(&buffer[..n])
-				// 	.map_err(|e| eprintln!("Error: Failed to write to stdout: {}", e))?;
-				//println!("{}", n);
-				if buffer[0] == 96 && buffer[1] == 1 && buffer[2] == 2 && buffer[3] == 3 && buffer[4] == 5 && buffer[5] == 4 {
-					println!("TREFFER");
-				} 
-				for i in 0..n {
-					print!("{:?}", &buffer[i]);
-				}
+				std::io::stdout()
+					.write_all(&buffer[..n])
+					.map_err(|e| eprintln!("Error: Failed to write to stdout: {}", e))?;
+				// println!("{}", n);
+				// if buffer[0] == 96 && buffer[1] == 1 && buffer[2] == 2 && buffer[3] == 3 && buffer[4] == 5 && buffer[5] == 4 {
+				// 	println!("TREFFER");
+				// } 
+				// for i in 0..n {
+				// 	print!("{:?}", &buffer[i]);
+				// }
                 //print!("{:?}", &buffer);
 			},
 			Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => continue,

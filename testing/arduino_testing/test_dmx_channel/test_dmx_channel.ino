@@ -21,7 +21,7 @@
 
 #include <DmxSimple.h>
 
-#define CHANNEL_OFFSET 99
+#define CHANNEL_OFFSET 3
 
 void setup() {
   Serial.begin(9600);
@@ -32,7 +32,7 @@ void setup() {
   ** do this, DmxSimple will set the maximum channel number to the
   ** highest channel you DmxSimple.write() to. */
   //DmxSimple.maxChannel(10);
-  DmxSimple.usePin(3);   // digital output for DMX serial data
+  DmxSimple.usePin(6);   // digital output for DMX serial data
 
   Serial.println("DMX Manual Control");
   Serial.println();
@@ -45,7 +45,7 @@ void setup() {
   //DmxSimple.write(8 + CHANNEL_OFFSET, 255);
 
 // strobe
-  DmxSimple.write(22 + CHANNEL_OFFSET, 255);
+  // DmxSimple.write(22 + CHANNEL_OFFSET, 255);
 
   // laser
   // DmxSimple.write( CHANNEL_OFFSET + 1, 255 );

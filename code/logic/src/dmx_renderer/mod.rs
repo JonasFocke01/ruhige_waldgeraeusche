@@ -52,6 +52,9 @@ impl<'a> DmxRenderer<'a> {
             // ? dmx value array construction
             let mut channel_vec: Vec<u8> = vec!();
             
+            // ? start byte
+            channel_vec.push(69);
+
             // ? stage lights
             channel_vec.push(0);
             channel_vec.push(0);
