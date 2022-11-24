@@ -20,7 +20,7 @@ pub struct InputParser<'a> {
 
 impl<'a> InputParser<'a> {
     pub fn new(input_config_store: &InputConfigStore) -> InputParser {
-        let mut port = SerialPort::open("/dev/ttyUSB0", 2000000)
+        let mut port = SerialPort::open("/dev/ttyACM0", 2000000)
                                     .expect("Could not open Serial input port!");
         match port.set_read_timeout(Duration::from_millis(1)) {
             Ok(()) => Some(0),
@@ -47,10 +47,11 @@ impl<'a> InputParser<'a> {
             Ok(e) => e,
             Err(error) => return Err(error)
         };
-        if input.len() > 0 && input[0] == 96 && input[1] == 1 && input[2] == 2 && input[3] == 3 && input[4] == 5 && input[5] == 4 {
+        if input.len() > 5 && input[0] == 96 && input[1] == 1 && input[2] == 2 && input[3] == 3 && input[4] == 5 && input[5] == 4 {
+            print!("====================================================================================================\n");
             match global_vars_store.get_color_mode() {
-                ColorMode::Primary => led_renderer.spawn_fading_blocks(&global_vars_store.get_primary_color()),
-                ColorMode::Complementary => led_renderer.spawn_fading_blocks(&global_vars_store.get_secondary_color())
+                ColorMode::Primary => led_renderer.spawn_snake(&global_vars_store.get_primary_color()),
+                ColorMode::Complementary => led_renderer.spawn_snake(&global_vars_store.get_secondary_color())
             }
             dmx_renderer.all_up();
         }
@@ -58,7 +59,7 @@ impl<'a> InputParser<'a> {
         if input.len() > 0 {
             return Ok(input)
         } else {
-            return Err(String::from("Input is empty"))
+            return Ok(input)
         }
     }
     pub fn gather_input(&mut self) -> Result<Vec<u8>, String> {
@@ -77,7 +78,7 @@ impl<'a> InputParser<'a> {
                             return_vec.push(buffer[i]);
                         }
                     },
-                    Err(_) => return Err(String::from("Unknown error while gathering reading serial port!"))
+                    Err(_) => return Ok(return_vec)
                 }
             },
             InputType::RestApi => unimplemented!()

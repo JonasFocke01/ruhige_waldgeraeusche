@@ -5,20 +5,20 @@ use rand::Rng;
 use std::fs;
 
 fn main() {
+    print!("ENTERING!\n");
     let stdin = io::stdin();
-
+    
     let file = fs::File::open("config.json")
-                .expect("file should open read only");
+    .expect("file should open read only");
     
     let json: serde_json::Value = serde_json::from_reader(file)
                 .expect("file should be proper JSON");
-
-    let leds = json.get("leds")
+                
+                let leds = json.get("leds")
                 .expect("file should have leds key");
-
-    let led_pin = &leds["led_pin"];
-
-    print!("{:?}", led_pin);
+                
+                let led_pin = &leds["led_pin"];
+    print!("LED_PIN: {:?}", led_pin);
 
     let mut child = Command::new("python3")
         .arg("python/main.py")

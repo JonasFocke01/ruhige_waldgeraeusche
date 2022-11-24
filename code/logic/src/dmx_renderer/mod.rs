@@ -1,49 +1,44 @@
 use crate::config_store::DmxConfigStore;
 
-use dmx::{self, DmxTransmitter};
-use dmx_serial::posix::TTYPort;
+use serial2::SerialPort;
 
 use rand::Rng;
 
 use std::time::Instant;
 
+
 pub struct DmxRenderer<'a> {
     scanner: Vec<Vec<u8>>,
     dmx_config_store: &'a DmxConfigStore,
     render_timestamp: Instant,
-    dmx_port: TTYPort
+    dmx_port: SerialPort
 }
 
 impl<'a> DmxRenderer<'a> {
     pub fn new(dmx_config_store: &DmxConfigStore) -> DmxRenderer {
         let mut scanner = vec!();
         for _ in 0..dmx_config_store.get_scanner_count() {
-            // [x_position, y_position, color]
             scanner.push(vec![0, 0, 0]);
         }
 
         let render_timestamp = Instant::now();
 
-        let dmx_port = match dmx::open_serial("/dev/ttyS0") {
-            Ok(n) => n,
-            Err(error) => panic!("Could not open dmx port: {}\n", error)
-        };
+        let port = SerialPort::open("/dev/ttyUSB0", 2_000_000)
+		    .map_err(|e| eprintln!("Error: Failed to open {}: {}", "/dev/ttyUSB0", e)).unwrap();
 
         DmxRenderer {
             scanner: scanner,
             dmx_config_store: dmx_config_store,
             render_timestamp: render_timestamp,
-            dmx_port: dmx_port
+            dmx_port: port
         }
     }
     pub fn all_up(&mut self) {
-        // println!("all upping...");
         let mut rng = rand::thread_rng();
         for scanner_i in 0..self.dmx_config_store.get_scanner_count() {
             self.scanner[scanner_i as usize][0] = rng.gen_range(0..256) as u8;
             self.scanner[scanner_i as usize][1] = rng.gen_range(0..256) as u8;
             self.scanner[scanner_i as usize][2] = rng.gen_range(0..256) as u8;
-            //print!("Random number: {}\n", rng.gen_range(0..256));
         }
     }
     pub fn render(&mut self) {
@@ -76,10 +71,13 @@ impl<'a> DmxRenderer<'a> {
             // ? strobe
             //TODO
 
-            match self.dmx_port.send_dmx_packet(&channel_vec) {
-                Ok(_) => self.render_timestamp = Instant::now(),
-                Err(error) => print!("Error writing to dmx: {}\n", error)
-            }
+            print!("{:?}", channel_vec);
+
+            //TODO: improve error handling
+            match self.dmx_port.write(&channel_vec) {
+                Ok(_) => print!("Wrote successfull to dmx"),
+                Err(_) => print!("Cannot write to dmx")
+            };
         }
     }
     pub fn get_scanner_values(&self) -> &Vec<Vec<u8>> {

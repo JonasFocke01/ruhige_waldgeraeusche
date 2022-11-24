@@ -10,10 +10,11 @@ fn main() {
     let data = &[0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0xff];
     
     loop {
+        print!("printing...");
         dmx_port.send_dmx_packet(data).unwrap();
         
         // repeat about every 51 ms. for more accurate frame timings,
         // consider using the ticktock crate.
-        thread::sleep(time::Duration::new(0, 20_000_000));
+        thread::sleep(time::Duration::new(0, 50_000_000));
     }
 }
