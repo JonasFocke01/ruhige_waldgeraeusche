@@ -23,7 +23,7 @@ impl<'a> DmxRenderer<'a> {
 
         let render_timestamp = Instant::now();
 
-        let port = SerialPort::open("/dev/ttyUSB0", 2_000_000)
+        let port = SerialPort::open("/dev/ttyUSB0", 115_200)
 		    .map_err(|e| eprintln!("Error: Failed to open {}: {}", "/dev/ttyUSB0", e)).unwrap();
 
         DmxRenderer {
@@ -44,7 +44,6 @@ impl<'a> DmxRenderer<'a> {
     pub fn render(&mut self) {
 
         if self.render_timestamp.elapsed().as_millis() >= 50 {
-            print!("Rendering Dmx --------------------------------------------------");
             
             // ? move scanner
             //TODO
@@ -74,13 +73,17 @@ impl<'a> DmxRenderer<'a> {
             // ? strobe
             //TODO
 
-            print!("{:?}", channel_vec);
+            while channel_vec.len() < 514 {
+                channel_vec.push(0);
+            }
 
             //TODO: improve error handling
             match self.dmx_port.write(&channel_vec) {
-                Ok(_) => print!("Wrote successfull to dmx"),
-                Err(_) => print!("Cannot write to dmx")
+                Ok(_) => (),
+                Err(_) => print!("Error while writing to DMX")
             };
+
+            self.render_timestamp = Instant::now();
         }
     }
     pub fn get_scanner_values(&self) -> &Vec<Vec<u8>> {
