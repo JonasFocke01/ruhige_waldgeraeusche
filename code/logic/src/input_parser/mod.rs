@@ -41,8 +41,6 @@ impl<'a> InputParser<'a> {
         }
     }
     pub fn process_input(&mut self, led_renderer: &mut LedRenderer, dmx_renderer: &mut DmxRenderer, global_vars_store: &mut GlobalVarsStore) -> Result<Vec<u8>, String> {
-        // println!("Parsing Input for {} buttons", self.input_config_store.get_button_count());
-
         let input: Vec<u8> = match InputParser::gather_input(self) {
             Ok(e) => e,
             Err(error) => return Err(error)
@@ -53,14 +51,10 @@ impl<'a> InputParser<'a> {
                 ColorMode::Primary => led_renderer.spawn_snake(&global_vars_store.get_primary_color()),
                 ColorMode::Complementary => led_renderer.spawn_snake(&global_vars_store.get_secondary_color())
             }
-            dmx_renderer.all_up();
+            dmx_renderer.scanner_test_function();
         }
         
-        if input.len() > 0 {
-            return Ok(input)
-        } else {
-            return Ok(input)
-        }
+        Ok(input)
     }
     pub fn gather_input(&mut self) -> Result<Vec<u8>, String> {
         let mut return_vec: Vec<u8> = vec!();
@@ -111,4 +105,22 @@ fn input_function_gathers_something() {
     let input_config_store = InputConfigStore::new();
     let input_parser = InputParser::new(&input_config_store);
     assert!(input_parser.get_serial_connection().is_write_vectored());
+}
+
+#[test]
+fn process_input_throws_no_errors() {
+    use crate::config_store::DmxConfigStore;
+    use crate::config_store::LedConfigStore;
+
+    let led_config_store = LedConfigStore::new();
+    let dmx_config_store = DmxConfigStore::new();
+    let input_config_store = InputConfigStore::new();
+    let mut global_vars_store = GlobalVarsStore::new();
+    let mut input_parser = InputParser::new(&input_config_store);
+    let mut led_renderer = LedRenderer::new(&led_config_store);
+    let mut dmx_renderer = DmxRenderer::new(&dmx_config_store);
+    match input_parser.process_input(&mut led_renderer, &mut dmx_renderer, &mut global_vars_store) {
+            Ok(_) => 0,
+            Err(error) => panic!("{}", error)
+        };
 }

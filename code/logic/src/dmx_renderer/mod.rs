@@ -33,7 +33,7 @@ impl<'a> DmxRenderer<'a> {
             dmx_port: port
         }
     }
-    pub fn all_up(&mut self) {
+    pub fn scanner_test_function(&mut self) {// ! This is not test covered
         let mut rng = rand::thread_rng();
         for scanner_i in 0..self.dmx_config_store.get_scanner_count() {
             self.scanner[scanner_i as usize][0] = rng.gen_range(0..256) as u8;
@@ -41,13 +41,10 @@ impl<'a> DmxRenderer<'a> {
             self.scanner[scanner_i as usize][2] = rng.gen_range(0..256) as u8;
         }
     }
-    pub fn render(&mut self) {
+    pub fn render(&mut self) -> Result<Vec<u8>, String> {
 
         if self.render_timestamp.elapsed().as_millis() >= 50 {
-            
-            // ? move scanner
-            //TODO
-            
+                        
             // ? dmx value array construction
             let mut channel_vec: Vec<u8> = vec!();
             
@@ -71,20 +68,21 @@ impl<'a> DmxRenderer<'a> {
             }
             
             // ? strobe
-            //TODO
+            //Todo: write strobe
 
-            while channel_vec.len() < 514 {
+            while channel_vec.len() < 513 {
                 channel_vec.push(0);
             }
 
-            //TODO: improve error handling
             match self.dmx_port.write(&channel_vec) {
                 Ok(_) => (),
-                Err(_) => print!("Error while writing to DMX")
+                Err(_) => return Err("Error while writing to Serial DMX port".to_string())
             };
 
             self.render_timestamp = Instant::now();
+            return Ok(channel_vec)
         }
+        Ok(vec!())
     }
     pub fn get_scanner_values(&self) -> &Vec<Vec<u8>> {
         &self.scanner
@@ -96,4 +94,14 @@ fn scanner_vec_has_expected_size() {
     let dmx_config_store = DmxConfigStore::new();
     let dmx_renderer = DmxRenderer::new(&dmx_config_store);
     assert!(dmx_renderer.get_scanner_values().len() == dmx_config_store.get_scanner_count() as usize);
+}
+
+#[test]
+fn dmx_rendering_works_as_expected() {
+    use std::{thread, time};
+
+    let dmx_config_store = DmxConfigStore::new();
+    let mut dmx_renderer = DmxRenderer::new(&dmx_config_store);
+    thread::sleep(time::Duration::from_millis(100));
+    assert_eq!(dmx_renderer.render().unwrap().len(), 513);
 }

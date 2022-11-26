@@ -57,7 +57,7 @@ impl<'a> LedRenderer<'a> {
             }
         }
     }
-    pub fn spawn_fading_blocks(&mut self, color: &(f32, f32, f32)) {
+    pub fn spawn_fading_blocks(&mut self, color: &(f32, f32, f32)) { // !Untested because this is highly suspect to change
         let mut rng = rand::thread_rng();
         for strip_i in 0..self.led_config_store.get_strip_count() { 
             // Todo: the start should not be random but represent the current pitch of some sort
@@ -79,8 +79,6 @@ impl<'a> LedRenderer<'a> {
         }
     }
     pub fn render(&mut self) -> Result<Vec<Vec<Vec<f32>>>, String> {
-        // println!("Leds not rendered for {} ms.", self.render_timestamp.elapsed().as_millis());
-
         let mut result_pixels: Vec<Vec<Vec<f32>>> = vec!();
 
         if self.render_timestamp.elapsed().as_millis() >= 5 {
@@ -205,6 +203,7 @@ fn led_render_function_works_as_expected() {
             }
         }
     }
+    assert!(filled_pixels == 0.0);
     led_renderer.spawn_snake(&(12.0, 12.0, 12.0));
     for _ in 0..50 {
         match led_renderer.render() {
@@ -219,5 +218,60 @@ fn led_render_function_works_as_expected() {
             }
         }
     }
-    assert!(filled_pixels == 936.0)
+    assert!(filled_pixels > 800.0)
+}
+
+#[test]
+fn clear_strips_clears_the_strips() {
+    let led_config_store = LedConfigStore::new();
+    let mut led_renderer = LedRenderer::new(&led_config_store);
+    let mut filled_pixels = 0.0;
+    for strips in led_renderer.get_pixels().iter() {
+        for pixels in strips.iter() {
+            for param in pixels.iter() {
+                filled_pixels += param;
+            }
+        }
+    }
+    assert!(filled_pixels == 0.0);
+    led_renderer.spawn_snake(&(12.0, 12.0, 12.0));
+    for _ in 0..50 {
+        match led_renderer.render() {
+            Ok(_) => 0,
+            Err(error) => panic!("{}\n", error)
+        };
+    }
+    led_renderer.clear_strips();
+    for strips in led_renderer.get_pixels().iter() {
+        for pixels in strips.iter() {
+            for param in pixels.iter() {
+                filled_pixels += param;
+            }
+        }
+    }
+    assert!(filled_pixels == 0.0)
+}
+
+#[test]
+fn flash_fade_flashes_the_strip() {
+    let led_config_store = LedConfigStore::new();
+    let mut led_renderer = LedRenderer::new(&led_config_store);
+    let mut filled_pixels = 0.0;
+    for strips in led_renderer.get_pixels().iter() {
+        for pixels in strips.iter() {
+            for param in pixels.iter() {
+                filled_pixels += param;
+            }
+        }
+    }
+    assert!(filled_pixels == 0.0);
+    led_renderer.flash_fade_whole_strip(&(12.0, 12.0, 12.0));
+    for strips in led_renderer.get_pixels().iter() {
+        for pixels in strips.iter() {
+            for param in pixels.iter() {
+                filled_pixels += param;
+            }
+        }
+    }
+    assert!(filled_pixels > 21_000.0)
 }
