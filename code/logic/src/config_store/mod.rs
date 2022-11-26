@@ -34,7 +34,6 @@ pub struct LedConfigStore {
 }
 
 pub struct DmxConfigStore {
-    channel_count: u64,
     scanner_count: u64
 }
 
@@ -148,12 +147,8 @@ impl DmxConfigStore {
                     .expect("config file does not contain 'dmx' key");
 
         DmxConfigStore {
-            channel_count: input["channel_count"].as_u64().expect("config file does not contain expected sub key dmx/channel_count"),
             scanner_count: input["scanner_count"].as_u64().expect("config file does not contain expected sub key dmx/scanner_count")
         }
-    }
-    pub fn get_channel_count(&self) -> u64 {
-        self.channel_count
     }
     pub fn get_scanner_count(&self) -> u64 {
         self.scanner_count
@@ -243,7 +238,7 @@ fn general_config_store_loaded_its_attributes_correctly() {
 #[test]
 fn dmx_config_store_loaded_its_attributes_correctly() {
     let dmx_config_store = DmxConfigStore::new();
-    assert!(dmx_config_store.get_channel_count() > 0 as u64);
+    assert!(dmx_config_store.get_scanner_count() > 0 as u64);
 }
 
 #[test]

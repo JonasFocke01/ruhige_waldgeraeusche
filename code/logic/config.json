@@ -16,7 +16,6 @@
         "parameter_count": 6
     },
     "dmx": {
-        "channel_count": 512,
         "scanner_count": 4
     },
     "general": {
