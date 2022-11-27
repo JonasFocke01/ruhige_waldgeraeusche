@@ -11,7 +11,8 @@ pub struct DmxRenderer<'a> {
     scanner: Vec<Vec<u8>>,
     dmx_config_store: &'a DmxConfigStore,
     render_timestamp: Instant,
-    dmx_port: SerialPort
+    dmx_port: SerialPort,
+    updateable: bool
 }
 
 impl<'a> DmxRenderer<'a> {
@@ -26,11 +27,13 @@ impl<'a> DmxRenderer<'a> {
         let port = SerialPort::open("/dev/ttyUSB0", 115_200)
 		    .map_err(|e| eprintln!("Error: Failed to open {}: {}", "/dev/ttyUSB0", e)).unwrap();
 
+
         DmxRenderer {
             scanner: scanner,
             dmx_config_store: dmx_config_store,
             render_timestamp: render_timestamp,
-            dmx_port: port
+            dmx_port: port,
+            updateable: false
         }
     }
     pub fn scanner_test_function(&mut self) {// ! This is not test covered
@@ -40,10 +43,11 @@ impl<'a> DmxRenderer<'a> {
             self.scanner[scanner_i as usize][1] = rng.gen_range(0..256) as u8;
             self.scanner[scanner_i as usize][2] = rng.gen_range(0..256) as u8;
         }
+        self.updateable = true;
     }
     pub fn render(&mut self) -> Result<Vec<u8>, String> {
 
-        if self.render_timestamp.elapsed().as_millis() >= 50 {
+        if self.updateable && self.render_timestamp.elapsed().as_millis() >= 50 {
                         
             // ? dmx value array construction
             let mut channel_vec: Vec<u8> = vec!();
@@ -80,12 +84,17 @@ impl<'a> DmxRenderer<'a> {
             };
 
             self.render_timestamp = Instant::now();
+            self.updateable = false;
             return Ok(channel_vec)
         }
         Ok(vec!())
     }
     pub fn get_scanner_values(&self) -> &Vec<Vec<u8>> {
         &self.scanner
+    }
+    pub fn set_updateable(&mut self, updateable: Option<bool>) -> bool {
+        self.updateable = updateable.unwrap_or(!self.updateable);
+        self.updateable
     }
 }
 
@@ -102,6 +111,10 @@ fn dmx_rendering_works_as_expected() {
 
     let dmx_config_store = DmxConfigStore::new();
     let mut dmx_renderer = DmxRenderer::new(&dmx_config_store);
+    dmx_renderer.set_updateable(None);
     thread::sleep(time::Duration::from_millis(100));
     assert_eq!(dmx_renderer.render().unwrap().len(), 513);
+    dmx_renderer.set_updateable(Some(false));
+    thread::sleep(time::Duration::from_millis(100));
+    assert_eq!(dmx_renderer.render().unwrap().len(), 0);
 }
