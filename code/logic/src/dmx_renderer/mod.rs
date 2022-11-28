@@ -36,11 +36,12 @@ impl<'a> DmxRenderer<'a> {
             updateable: false
         }
     }
-    pub fn scanner_test_function(&mut self) {// ! This is not test covered
+    pub fn scanner_test_function(&mut self, _color: &(f32, f32, f32)) {// ! This is not test covered
         let mut rng = rand::thread_rng();
         for scanner_i in 0..self.dmx_config_store.get_scanner_count() {
             self.scanner[scanner_i as usize][0] = rng.gen_range(0..256) as u8;
             self.scanner[scanner_i as usize][1] = rng.gen_range(0..256) as u8;
+            // Todo: construct scanner one byte color from input three byte rgb color tuple
             self.scanner[scanner_i as usize][2] = rng.gen_range(0..256) as u8;
         }
         self.updateable = true;

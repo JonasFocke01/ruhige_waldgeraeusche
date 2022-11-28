@@ -8,11 +8,32 @@ use std::io::Write;
 
 use rand::Rng;
 
+pub enum Animation {
+    Snake,
+    FadingBlocks,
+    FlashFadeWholeStrip,
+    Blackout
+}
+
+pub enum Direction {
+    Up,
+    Down,
+    Out
+}
+
+pub enum Combination {
+    Parallel,
+    Async
+}
+
 pub struct LedRenderer<'a> {
     pixels: Vec<Vec<Vec<f32>>>,
     python_instance_stdin: ChildStdin,
     led_config_store: &'a LedConfigStore,
-    render_timestamp: Instant
+    render_timestamp: Instant,
+    current_animation: Animation,
+    current_direction: Direction,
+    current_combination: Combination
 }
 
 impl<'a> LedRenderer<'a> {
@@ -47,10 +68,13 @@ impl<'a> LedRenderer<'a> {
             pixels: actual_pixels,
             python_instance_stdin: python_instance_stdin,
             led_config_store: led_config_store,
-            render_timestamp: render_timestamp
+            render_timestamp: render_timestamp,
+            current_animation: Animation::Snake,
+            current_direction: Direction::Up,
+            current_combination: Combination::Parallel
         }
     }
-    pub fn spawn_snake(&mut self, color: &(f32, f32, f32)) {
+    pub fn spawn_snake(&mut self, color: &(f32, f32, f32)) { // Todo: this should resprect Direction and Combination
         for strip_i in 0..self.led_config_store.get_strip_count() {   
             for index in self.led_config_store.get_pixel_offset()..12 {
                 self.pixels[strip_i as usize][index as usize] = vec![color.0 * index as f32 / 12.0, color.1 * index as f32 / 12.0, color.2 * index as f32 / 12.0, 0.0, 3.0, 0.0];
@@ -67,7 +91,7 @@ impl<'a> LedRenderer<'a> {
             }
         }
     }
-    pub fn flash_fade_whole_strip(&mut self, color: &(f32, f32, f32)) {
+    pub fn flash_fade_whole_strip(&mut self, color: &(f32, f32, f32)) { // Todo: this should respect Combination
         for strip_i in 0..self.led_config_store.get_strip_count() {
             for pixel_i in self.led_config_store.get_pixel_offset()..self.led_config_store.get_led_count_per_strip() {
                 if  self.pixels[strip_i as usize][pixel_i as usize][0] < 10.0 || 
@@ -177,8 +201,37 @@ impl<'a> LedRenderer<'a> {
         self.pixels = actual_pixels;
         true
     }
-    pub fn get_pixels(&self) -> &Vec<Vec<Vec<f32>>>{
+    pub fn trigger_current_animation(&mut self, color: &(f32, f32, f32)) {
+        match self.current_animation {
+            Animation::Snake => self.spawn_snake(color),
+            Animation::FadingBlocks => self.spawn_fading_blocks(color),
+            Animation::FlashFadeWholeStrip => self.spawn_fading_blocks(color),
+            Animation::Blackout => {
+                self.clear_strips();
+                return ()
+            }
+        }
+    }
+    pub fn get_pixels(&self) -> &Vec<Vec<Vec<f32>>> {
         &self.pixels
+    }
+    pub fn get_current_animation(&self) -> &Animation {
+        &self.current_animation
+    }
+    pub fn set_current_animation(&mut self, animation: Animation) {
+        self.current_animation = animation
+    }
+    pub fn get_current_direction(&self) -> &Direction {
+        &self.current_direction
+    }
+    pub fn set_current_direction(&mut self, direction: Direction) {
+        self.current_direction = direction
+    }
+    pub fn get_current_combination(&self) -> &Combination {
+        &self.current_combination
+    }
+    pub fn set_current_combination(&mut self, combination: Combination) {
+        self.current_combination = combination
     }
 }
 

@@ -48,10 +48,15 @@ impl<'a> InputParser<'a> {
         if input.len() > 5 && input[0] == 96 && input[1] == 1 && input[2] == 2 && input[3] == 3 && input[4] == 5 && input[5] == 4 {
             print!("====================================================================================================\n");
             match global_vars_store.get_color_mode() {
-                ColorMode::Primary => led_renderer.spawn_snake(&global_vars_store.get_primary_color()),
-                ColorMode::Complementary => led_renderer.spawn_snake(&global_vars_store.get_secondary_color())
+                ColorMode::Primary => {
+                    led_renderer.trigger_current_animation(&global_vars_store.get_primary_color());
+                    dmx_renderer.scanner_test_function(&global_vars_store.get_primary_color());
+                },
+                ColorMode::Complementary => {
+                    led_renderer.trigger_current_animation(&global_vars_store.get_secondary_color());
+                    dmx_renderer.scanner_test_function(&global_vars_store.get_secondary_color());
+                }
             }
-            dmx_renderer.scanner_test_function();
         }
         
         Ok(input)
