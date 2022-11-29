@@ -1,11 +1,8 @@
 use crate::config_store::DmxConfigStore;
 
-use serial2::SerialPort;
-
-use rand::Rng;
-
 use std::time::Instant;
-
+use rand::Rng;
+use serial2::SerialPort;
 
 pub struct DmxRenderer<'a> {
     scanner: Vec<Vec<u8>>,

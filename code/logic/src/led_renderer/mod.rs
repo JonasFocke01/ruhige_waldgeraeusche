@@ -1,12 +1,10 @@
-use std::process::{Command, Stdio, ChildStdin};
-
 use crate::config_store::LedConfigStore;
 
 use std::time::Instant;
-
 use std::io::Write;
-
+use std::process::{Command, Stdio, ChildStdin};
 use rand::Rng;
+
 
 pub enum Animation {
     Snake,

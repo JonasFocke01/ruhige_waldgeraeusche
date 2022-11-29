@@ -3,10 +3,9 @@ use crate::dmx_renderer::DmxRenderer;
 use crate::config_store::GlobalVarsStore;
 use crate::config_store::ColorMode;
 
+use std::time::{Duration, Instant};
 use std::sync::Arc;
 use serial2::SerialPort;
-
-use std::time::{Duration, Instant};
 
 use crate::config_store::{InputConfigStore, InputType};
 
