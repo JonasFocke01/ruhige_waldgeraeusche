@@ -6,6 +6,8 @@ use led_renderer::LedRenderer;
 pub mod led_renderer;
 use dmx_renderer::DmxRenderer;
 pub mod dmx_renderer;
+use scanner::Scanner;
+pub mod scanner;
 
 use config_store::GeneralConfigStore;
 use config_store::DmxConfigStore;
@@ -24,7 +26,8 @@ fn main() {
     let mut global_vars_store = GlobalVarsStore::new();
     let mut input_parser = InputParser::new(&input_config_store);
     let mut led_renderer = LedRenderer::new(&led_config_store);
-    let mut dmx_renderer = DmxRenderer::new(&dmx_config_store);
+    let mut scanner = Scanner::new(&dmx_config_store);
+    let mut dmx_renderer = DmxRenderer::new();
 
     //? infinite programmloop whose speed is capped by the FRAME_TIMING attribute
 
@@ -35,11 +38,11 @@ fn main() {
             Ok(_) => (),
             Err(error) => panic!("{}", error)
         };
-        match dmx_renderer.render() {
+        match dmx_renderer.render(&scanner) {
             Ok(_) => (),
             Err(error) => panic!("{}", error)
         }
-        match input_parser.process_input(&mut led_renderer, &mut dmx_renderer, &mut global_vars_store) {
+        match input_parser.process_input(&mut led_renderer, &mut scanner, &mut dmx_renderer, &mut global_vars_store) {
             Ok(_) => (),
             Err(error) => panic!("{}", error)
         };

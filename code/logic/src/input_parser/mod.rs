@@ -2,6 +2,7 @@ use crate::led_renderer::LedRenderer;
 use crate::dmx_renderer::DmxRenderer;
 use crate::config_store::GlobalVarsStore;
 use crate::config_store::ColorMode;
+use crate::scanner::Scanner;
 
 use std::time::{Duration, Instant};
 use std::sync::Arc;
@@ -39,7 +40,7 @@ impl<'a> InputParser<'a> {
             bpm: bpm
         }
     }
-    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, dmx_renderer: &mut DmxRenderer, global_vars_store: &mut GlobalVarsStore) -> Result<Vec<u8>, String> {
+    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, scanner: &mut Scanner, dmx_renderer: &mut DmxRenderer, global_vars_store: &mut GlobalVarsStore) -> Result<Vec<u8>, String> {
         let input: Vec<u8> = match InputParser::gather_input(self) {
             Ok(e) => e,
             Err(error) => return Err(error)
@@ -49,11 +50,11 @@ impl<'a> InputParser<'a> {
             match global_vars_store.get_color_mode() {
                 ColorMode::Primary => {
                     led_renderer.trigger_current_animation(&global_vars_store.get_primary_color());
-                    dmx_renderer.scanner_test_function(&global_vars_store.get_primary_color());
+                    scanner.trigger_next_step(dmx_renderer);
                 },
                 ColorMode::Complementary => {
                     led_renderer.trigger_current_animation(&global_vars_store.get_secondary_color());
-                    dmx_renderer.scanner_test_function(&global_vars_store.get_secondary_color());
+                    scanner.trigger_next_step(dmx_renderer);
                 }
             }
         }
@@ -118,12 +119,13 @@ fn process_input_throws_no_errors() {
 
     let led_config_store = LedConfigStore::new();
     let dmx_config_store = DmxConfigStore::new();
+    let mut scanner = Scanner::new(&dmx_config_store);
     let input_config_store = InputConfigStore::new();
     let mut global_vars_store = GlobalVarsStore::new();
     let mut input_parser = InputParser::new(&input_config_store);
     let mut led_renderer = LedRenderer::new(&led_config_store);
     let mut dmx_renderer = DmxRenderer::new(&dmx_config_store);
-    match input_parser.process_input(&mut led_renderer, &mut dmx_renderer, &mut global_vars_store) {
+    match input_parser.process_input(&mut led_renderer, &mut scanner, &mut dmx_renderer, &mut global_vars_store) {
             Ok(_) => 0,
             Err(error) => panic!("{}", error)
         };
