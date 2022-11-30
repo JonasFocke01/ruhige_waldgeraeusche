@@ -10,15 +10,24 @@ use serial2::SerialPort;
 
 use crate::config_store::{InputConfigStore, InputType};
 
+/// The struct to define how the InputParser should look like
 pub struct InputParser<'a> {
+    /// InputConfigStore contains usefull informations for the parser
     input_config_store: &'a InputConfigStore,
+    /// The input usb port
     serial_port: Arc<SerialPort>,
+    /// The timestamp to support the beat detection
     last_beat_timestamp: Instant,
+    /// Stores, how long is the interval between beats is
     beat_duration: Duration,
+    /// The current bpm is calculated from the beat_duration
     bpm: u16
 }
-
+/// Responsible for reading and parsing possible input sources
 impl<'a> InputParser<'a> {
+    /// This creates, fills and returns the InputParser object
+    /// - opens and configures the serial input port
+    /// - calculates bpm based on a hardcoded start beat_duration
     pub fn new(input_config_store: &InputConfigStore) -> InputParser {
         let mut port = SerialPort::open("/dev/ttyACM0", 2000000)
                                     .expect("Could not open Serial input port!");
@@ -40,6 +49,7 @@ impl<'a> InputParser<'a> {
             bpm: bpm
         }
     }
+    /// acts acordingly to the processed input gathered by gather_input()
     pub fn process_input(&mut self, led_renderer: &mut LedRenderer, scanner: &mut Scanner, dmx_renderer: &mut DmxRenderer, global_vars_store: &mut GlobalVarsStore) -> Result<Vec<u8>, String> {
         let input: Vec<u8> = match InputParser::gather_input(self) {
             Ok(e) => e,
@@ -61,6 +71,7 @@ impl<'a> InputParser<'a> {
         
         Ok(input)
     }
+    /// gathers input from the configured input source
     pub fn gather_input(&mut self) -> Result<Vec<u8>, String> {
         let mut return_vec: Vec<u8> = vec!();
 
@@ -92,6 +103,7 @@ impl<'a> InputParser<'a> {
         Ok(return_vec)
         
     }
+    /// returns a reference to the established serial connection
     pub fn get_serial_connection(&self) -> &Arc<SerialPort> {
         &self.serial_port
     }

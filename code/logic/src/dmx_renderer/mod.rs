@@ -3,13 +3,25 @@ use crate::scanner::Scanner;
 use std::time::Instant;
 use serial2::SerialPort;
 
+/// The struct to define how a DmxRenderer should look like (more than one is possible and intended)
 pub struct DmxRenderer {
+    /// limit writing to once every 50ms to not confuse the adapter
     render_timestamp: Instant,
-    dmx_port: SerialPort,
-    updateable: bool
+    /// writing speed is further limited by this variable, which should indicate if an actual update happened, to further reduce confusion to the adapter
+    updateable: bool,
+    /// The SerialPort object, the adapter is connected to
+    dmx_port: SerialPort
 }
 
+/// Responsible for
+/// - collecting the current state of
+///     - scanners
+///     - // todo
+/// - processing them by building a dmx ready vec of 512 bytes
+/// - writing the build vec to the usb connected dmx adapter
 impl DmxRenderer {
+    /// This creates, fills and returns the DmxRenderer object
+    /// - opens the serial port to the dmx adapter
     pub fn new() -> DmxRenderer {
         let render_timestamp = Instant::now();
 
@@ -22,6 +34,8 @@ impl DmxRenderer {
             updateable: false
         }
     }
+    /// Gathers all usefull infomations of scanners etc., builds a 512 size vec and writes it to the dmx adapter
+    /// only writes after 50 ms passed since last run AND an actual update can be written
     pub fn render(&mut self, scanner: &Scanner) -> Result<Vec<u8>, String> {
 
         if self.updateable && self.render_timestamp.elapsed().as_millis() >= 50 {
@@ -68,6 +82,7 @@ impl DmxRenderer {
         }
         Ok(vec!())
     }
+    /// sets the updateable field
     pub fn set_updateable(&mut self, updateable: Option<bool>) -> bool {
         self.updateable = updateable.unwrap_or(true);
         self.updateable

@@ -5,36 +5,57 @@ use std::io::Write;
 use std::process::{Command, Stdio, ChildStdin};
 use rand::Rng;
 
-
+/// Holds every possible animation
 pub enum Animation {
+    /// A ~12 pixel long snake that runns from one strip end to the other with a speed of ~3, where every pixel is not as bright as the pixel before it
     Snake,
+    /// A Block of ~12 pixels that flashes in, has no movement and fades out
     FadingBlocks,
+    /// Flash the whole strip and fade every pixel
     FlashFadeWholeStrip,
+    /// The brightness of every pixel is 0.0
     Blackout
 }
-
+/// All possible directions
 pub enum Direction {
+    /// Bottom to top
     Up,
+    /// Top to bottom
     Down,
+    /// Middle to edges
     Out
 }
-
+/// All possible combination of strips
 pub enum Combination {
+    /// All strips display the current animation simultaneusly
     Parallel,
+    /// Every strip displays the current animation independend of each other
     Async
 }
 
+/// The struct to define how the LedRenderer should look like
 pub struct LedRenderer<'a> {
+    /// The actual pixels stored like Strip< Pixels< Parameters >>>
     pixels: Vec<Vec<Vec<f32>>>,
+    /// The python script instance responsible for writing to the physical strip
     python_instance_stdin: ChildStdin,
+    /// LedConfigStore contains usefull informations for the renderer
     led_config_store: &'a LedConfigStore,
+    /// The last timestamp the leds where written. The leds framerate is capped to a hardcoded number of milliseconds
     render_timestamp: Instant,
+    /// The animation displayed on the strips
     current_animation: Animation,
+    /// The direction the animation goes
     current_direction: Direction,
+    /// The combination on where to show the current animation
     current_combination: Combination
 }
 
+/// Responsible for storing and rendering the current pixel state 
 impl<'a> LedRenderer<'a> {
+    /// This creates, fills and returns the LedRenderer object
+    /// - prefills the pixel array
+    /// - spawns the python instance
     pub fn new(led_config_store: &LedConfigStore) -> LedRenderer {
         let mut actual_pixels = vec!();
         for i in 0..led_config_store.get_strip_count() {
@@ -72,14 +93,18 @@ impl<'a> LedRenderer<'a> {
             current_combination: Combination::Parallel
         }
     }
-    pub fn spawn_snake(&mut self, color: &(f32, f32, f32)) { // Todo: this should resprect Direction and Combination
+    /// Spawns a snake <br>
+    /// Todo: this should resprect Direction and Combination
+    pub fn spawn_snake(&mut self, color: &(f32, f32, f32)) { 
         for strip_i in 0..self.led_config_store.get_strip_count() {   
             for index in self.led_config_store.get_pixel_offset()..12 {
                 self.pixels[strip_i as usize][index as usize] = vec![color.0 * index as f32 / 12.0, color.1 * index as f32 / 12.0, color.2 * index as f32 / 12.0, 0.0, 3.0, 0.0];
             }
         }
     }
-    pub fn spawn_fading_blocks(&mut self, color: &(f32, f32, f32)) { // !Untested because this is highly suspect to change
+    /// Spawns a fading block  <br>
+    /// Todo: is this usefull? Change if not
+    pub fn spawn_fading_blocks(&mut self, color: &(f32, f32, f32)) {
         let mut rng = rand::thread_rng();
         for strip_i in 0..self.led_config_store.get_strip_count() { 
             // Todo: the start should not be random but represent the current pitch of some sort
@@ -89,7 +114,9 @@ impl<'a> LedRenderer<'a> {
             }
         }
     }
-    pub fn flash_fade_whole_strip(&mut self, color: &(f32, f32, f32)) { // Todo: this should respect Combination
+    /// Flashes the whole strip and lets it fade out <br>
+    /// Todo: this should respect Direction and Combination
+    pub fn flash_fade_whole_strip(&mut self, color: &(f32, f32, f32)) {
         for strip_i in 0..self.led_config_store.get_strip_count() {
             for pixel_i in self.led_config_store.get_pixel_offset()..self.led_config_store.get_led_count_per_strip() {
                 if  self.pixels[strip_i as usize][pixel_i as usize][0] < 10.0 || 
@@ -100,6 +127,7 @@ impl<'a> LedRenderer<'a> {
             }
         }
     }
+    /// Renders the current state of the pixel vec to a format understandable by python and writes it to pythons stdin
     pub fn render(&mut self) -> Result<Vec<Vec<Vec<f32>>>, String> {
         let mut result_pixels: Vec<Vec<Vec<f32>>> = vec!();
 
@@ -185,6 +213,7 @@ impl<'a> LedRenderer<'a> {
         }
         Ok(result_pixels)
     }
+    /// Sets every pixel and its values to 0.0 to achieve a total blackout
     pub fn clear_strips(&mut self) -> bool {
         let mut actual_pixels = vec!();
         for i in 0..self.led_config_store.get_strip_count() {
@@ -199,6 +228,7 @@ impl<'a> LedRenderer<'a> {
         self.pixels = actual_pixels;
         true
     }
+    /// Triggers the function responsible for the current animation
     pub fn trigger_current_animation(&mut self, color: &(f32, f32, f32)) {
         match self.current_animation {
             Animation::Snake => self.spawn_snake(color),
@@ -210,24 +240,31 @@ impl<'a> LedRenderer<'a> {
             }
         }
     }
+    /// Returns the current pixel vec
     pub fn get_pixels(&self) -> &Vec<Vec<Vec<f32>>> {
         &self.pixels
     }
+    /// Returns the current animation
     pub fn get_current_animation(&self) -> &Animation {
         &self.current_animation
     }
+    /// Sets the current animation
     pub fn set_current_animation(&mut self, animation: Animation) {
         self.current_animation = animation
     }
+    /// Returns the current direction
     pub fn get_current_direction(&self) -> &Direction {
         &self.current_direction
     }
+    /// Sets the current direction
     pub fn set_current_direction(&mut self, direction: Direction) {
         self.current_direction = direction
     }
+    /// Returns the current combination
     pub fn get_current_combination(&self) -> &Combination {
         &self.current_combination
     }
+    /// Sets the current combination
     pub fn set_current_combination(&mut self, combination: Combination) {
         self.current_combination = combination
     }

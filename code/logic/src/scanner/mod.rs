@@ -1,21 +1,35 @@
 use crate::dmx_renderer::DmxRenderer;
 use crate::config_store::DmxConfigStore;
 
+/// The struct to determine how the Scanner store should look like
+/// Todo: rename to something that indecates, that this is not a scanner but a container for all scanners
 pub struct Scanner {
-    // * all vecs are left to right when looking towards the stage
-    // * Animation<Scanner<Position<x_position, y_position, direction_to_know_when_to_light_up_up, down, in, out
+    /// The animations for all scanners
+    /// all vecs are left to right when looking towards the stage
+    /// Animation< Scanner< Position< x_position, y_position, up, down, in, out >>>
+    /// the up, down, in, out bools indicate, if the scanner should blackout(false) or light(true) when moving to that coordinates
     animations: Vec<Vec<Vec<(u8, u8, bool, bool, bool, bool)>>>,
+    /// Stores the index of the current animation
     active_animation: u8,
+    /// stores a single byte representation of the current color of the scanners
     current_color: u8,
+    /// scanners should light up if this is true and the current animations direction is up
     light_mode_up: bool,
+    /// scanners should light up if this is true and the current animations direction is down
     light_mode_down: bool,
+    /// scanners should light up if this is true and the current animations direction is in
     light_mode_in: bool,
+    /// scanners should light up if this is true and the current animations direction is out
     light_mode_out: bool,
+    /// This vec contains a bool for every scanner. true = normal behavior, false = blackout
     enabled_scanner: Vec<bool>,
+    /// the animation index. This should count into oblivion on each render cyncle
     index: u64
 }
 
+/// This is responsible for storing the current scanner state and how they should react to certain situations
 impl Scanner {
+    /// This creates, fills and returns the Scanner object
     pub fn new(dmx_config_store: &DmxConfigStore) -> Scanner {
         let mut animations: Vec<Vec<Vec<(u8, u8, bool, bool, bool, bool)>>> = vec!();
         for _ in 0..1 {
@@ -78,10 +92,13 @@ impl Scanner {
             index: 0
         }
     }
+    /// increments the animation index
+    /// Todo: this should also return linke the function get_current_position
     pub fn trigger_next_step(&mut self, dmx_renderer: &mut DmxRenderer) {
         self.index += 1;
         dmx_renderer.set_updateable(None);
     }
+    /// returns the target coords and dimmer states for all scanners by filtering the active_animation variable with the current animation index
     pub fn get_current_position(&self) -> Vec<(u8, u8, bool)> {
         let mut result_vec: Vec<(u8, u8, bool)> = vec!();
         let scanner_count = self.animations[0].len();
@@ -103,9 +120,11 @@ impl Scanner {
         }
         result_vec
     }
+    /// Returns the current one byte representation of the current color of the scanners
     pub fn get_current_color(&self) -> &u8 {
         &self.current_color
     }
+    /// sets the current color by processing the given three bytes into one
     pub fn set_current_color(&mut self, color: &(f32, f32, f32)) {
         // Todo: construct color 
         self.current_color = if color.0 > color.1 {
@@ -114,30 +133,35 @@ impl Scanner {
             8
         }
     }
+    /// Sets the current light mode for up
     pub fn set_current_light_mode_up(&mut self, light_mode_up: Option<bool>) {
         match light_mode_up {
             Some(e) => self.light_mode_up = e,
             None => self.light_mode_up = !self.light_mode_up
         }
     }
+    /// Sets the current light mode for down
     pub fn set_current_light_mode_down(&mut self, light_mode_down: Option<bool>) {
         match light_mode_down {
             Some(e) => self.light_mode_down = e,
             None => self.light_mode_down = !self.light_mode_down
         }
     }
+    /// Sets the current light mode for in
     pub fn set_current_light_mode_in(&mut self, light_mode_in: Option<bool>) {
         match light_mode_in {
             Some(e) => self.light_mode_in = e,
             None => self.light_mode_in = !self.light_mode_in
         }
     }
+    /// Sets the current light mode for out
     pub fn set_current_light_mode_out(&mut self, light_mode_out: Option<bool>) {
         match light_mode_out {
             Some(e) => self.light_mode_out = e,
             None => self.light_mode_out = !self.light_mode_out
         }
     }
+    /// Returns the enabled_scanner variable
     pub fn get_enabled_scanner(&self) -> &Vec<bool> {
         &self.enabled_scanner
     }

@@ -1,3 +1,4 @@
+#![warn(missing_docs)]
 use std::time::Instant;
 
 use input_parser::InputParser;
