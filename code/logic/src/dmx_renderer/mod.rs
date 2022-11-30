@@ -45,8 +45,8 @@ impl DmxRenderer {
                 channel_vec.push(scanner_positions[scanner_i as usize].1);
                 channel_vec.push(8);
                 channel_vec.push(0);
-                channel_vec.push(0);
-                channel_vec.push(20);
+                channel_vec.push(*scanner_color);
+                channel_vec.push(if scanner_positions[scanner_i as usize].2 { 60 } else { 0 });
                 channel_vec.push(0);
             }
             
@@ -77,10 +77,11 @@ impl DmxRenderer {
 #[test]
 fn dmx_rendering_works_as_expected() {
     use std::{thread, time};
+    use crate::config_store::DmxConfigStore;
 
     let dmx_config_store = DmxConfigStore::new();
     let scanner = Scanner::new(&dmx_config_store);
-    let mut dmx_renderer = DmxRenderer::new(&dmx_config_store);
+    let mut dmx_renderer = DmxRenderer::new();
     dmx_renderer.set_updateable(None);
     thread::sleep(time::Duration::from_millis(100));
     assert_eq!(dmx_renderer.render(&scanner).unwrap().len(), 513);

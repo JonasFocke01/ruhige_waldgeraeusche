@@ -124,7 +124,7 @@ fn process_input_throws_no_errors() {
     let mut global_vars_store = GlobalVarsStore::new();
     let mut input_parser = InputParser::new(&input_config_store);
     let mut led_renderer = LedRenderer::new(&led_config_store);
-    let mut dmx_renderer = DmxRenderer::new(&dmx_config_store);
+    let mut dmx_renderer = DmxRenderer::new();
     match input_parser.process_input(&mut led_renderer, &mut scanner, &mut dmx_renderer, &mut global_vars_store) {
             Ok(_) => 0,
             Err(error) => panic!("{}", error)

@@ -70,6 +70,7 @@ impl LedConfigStore {
             led_invert: leds["led_invert"].as_u64().expect("config file does not contain expected sub key leds/led_invert"),
             led_channel: leds["led_channel"].as_u64().expect("config file does not contain expected sub key leds/led_channel"),
             pixel_offset: leds["pixel_offset"].as_u64().expect("config file does not contain expected sub key leds/pixel_offset"),
+            // Todo: parameter count should be a const
             parameter_count: leds["parameter_count"].as_u64().expect("config file does not contain expected sub key leds/parameter_count")
         }
     }
@@ -202,6 +203,7 @@ impl GlobalVarsStore {
     pub fn set_color_mode(&mut self, new_color_mode: ColorMode) {
         self.color_mode = new_color_mode;
     }
+    // Todo: this can be integratet into set_color_mode
     pub fn toggle_color_mode(&mut self) {
         self.color_mode = match self.color_mode {
                                 ColorMode::Primary => ColorMode::Complementary,
@@ -214,6 +216,7 @@ impl GlobalVarsStore {
     pub fn set_movement_mode(&mut self, new_movement_mode: MovementMode) {
         self.movement_mode = new_movement_mode;
     }
+    // Todo: this can be integratet into set_movement_mode
     pub fn toggle_movement_mode(&mut self) {
         self.movement_mode = match self.movement_mode {
                                 MovementMode::Asynchronized => MovementMode::Synchronized,
@@ -231,7 +234,7 @@ fn general_config_store_loaded_its_attributes_correctly() {
 #[test]
 fn dmx_config_store_loaded_its_attributes_correctly() {
     let dmx_config_store = DmxConfigStore::new();
-    assert!(dmx_config_store.get_scanner_count() > 0 as u64);
+    assert!(dmx_config_store.get_scanner_count() > 0);
 }
 
 #[test]
