@@ -1,21 +1,29 @@
 #![warn(missing_docs)]
+//! The entrypoint for ruhige_waldgeräusche.<br>
+//! Please consult the README for in depth documentation
+
 use std::time::Instant;
 
-use input_parser::InputParser;
+/// Responsible for reading and parsing possible input sources
 pub mod input_parser;
-use led_renderer::LedRenderer;
+use input_parser::InputParser;
+/// Responsible for storing and rendering the current pixel state 
 pub mod led_renderer;
-use dmx_renderer::DmxRenderer;
+use led_renderer::LedRenderer;
+/// Responsible for collecting and rendering all values from dmx devices
 pub mod dmx_renderer;
-use scanner::Scanner;
+use dmx_renderer::DmxRenderer;
+/// This is responsible for storing the current scanner state and how they should react to certain situations
 pub mod scanner;
+use scanner::Scanner;
 
+/// holding all stores that load and provide configurations or global variables
+pub mod config_store;
 use config_store::GeneralConfigStore;
 use config_store::DmxConfigStore;
 use config_store::LedConfigStore;
 use config_store::InputConfigStore;
 use config_store::GlobalVarsStore;
-pub mod config_store;
 
 fn main() {
     //? setup

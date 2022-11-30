@@ -16,7 +16,7 @@ pub struct DmxRenderer {
 /// Responsible for
 /// - collecting the current state of
 ///     - scanners
-///     - // todo
+///     - // todo: implement other fixtures
 /// - processing them by building a dmx ready vec of 512 bytes
 /// - writing the build vec to the usb connected dmx adapter
 impl DmxRenderer {
