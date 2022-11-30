@@ -34,7 +34,7 @@ impl DmxRenderer {
             updateable: false
         }
     }
-    /// Gathers all usefull infomations of scanners etc., builds a 512 size vec and writes it to the dmx adapter
+    /// Gathers all usefull infomations of scanners etc., builds a 513 size vec and writes it to the dmx adapter
     /// only writes after 50 ms passed since last run AND an actual update can be written
     pub fn render(&mut self, scanner: &Scanner) -> Result<Vec<u8>, String> {
 
