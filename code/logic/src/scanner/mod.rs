@@ -133,28 +133,32 @@ impl Scanner {
             8
         }
     }
-    /// Sets the current light mode for up
+    /// Sets the current light mode for up <br>
+    /// toggles if light_mode_up: None
     pub fn set_current_light_mode_up(&mut self, light_mode_up: Option<bool>) {
         match light_mode_up {
             Some(e) => self.light_mode_up = e,
             None => self.light_mode_up = !self.light_mode_up
         }
     }
-    /// Sets the current light mode for down
+    /// Sets the current light mode for down <br>
+    /// toggles if light_mode_down: None
     pub fn set_current_light_mode_down(&mut self, light_mode_down: Option<bool>) {
         match light_mode_down {
             Some(e) => self.light_mode_down = e,
             None => self.light_mode_down = !self.light_mode_down
         }
     }
-    /// Sets the current light mode for in
+    /// Sets the current light mode for in <br>
+    /// toggles if light_mode_in: None
     pub fn set_current_light_mode_in(&mut self, light_mode_in: Option<bool>) {
         match light_mode_in {
             Some(e) => self.light_mode_in = e,
             None => self.light_mode_in = !self.light_mode_in
         }
     }
-    /// Sets the current light mode for out
+    /// Sets the current light mode for out <br>
+    ///  toggles if light_mode_out: None
     pub fn set_current_light_mode_out(&mut self, light_mode_out: Option<bool>) {
         match light_mode_out {
             Some(e) => self.light_mode_out = e,

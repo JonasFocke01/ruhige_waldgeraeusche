@@ -235,33 +235,31 @@ impl GlobalVarsStore {
     pub fn get_color_mode(&self) -> &ColorMode {
         &self.color_mode
     }
-    /// Sets the color mode
-    pub fn set_color_mode(&mut self, new_color_mode: ColorMode) {
-        self.color_mode = new_color_mode;
-    }
-    /// Toggles the color_mode variable
-    /// Todo: this can be integratet into set_color_mode
-    pub fn toggle_color_mode(&mut self) {
-        self.color_mode = match self.color_mode {
-                                ColorMode::Primary => ColorMode::Complementary,
-                                ColorMode::Complementary => ColorMode::Primary
-                            };
+    /// Sets the color_mode variable <br>
+    /// toggles if new_color_mode: None
+    pub fn set_color_mode(&mut self, new_color_mode: Option<ColorMode>) {
+        match new_color_mode {
+            Some(e) => self.color_mode = e,
+            None => self.color_mode = match self.color_mode {
+                                        ColorMode::Primary => ColorMode::Complementary,
+                                        ColorMode::Complementary => ColorMode::Primary
+                                    }
+        }
     }
     /// Returns movement_mode
     pub fn get_movement_mode(&self) -> &MovementMode {
         &self.movement_mode
     }
-    /// Sets the movement_mode varibale
-    pub fn set_movement_mode(&mut self, new_movement_mode: MovementMode) {
-        self.movement_mode = new_movement_mode;
-    }
-    /// Toggles the movement_mode variable
-    /// Todo: this can be integratet into set_movement_mode
-    pub fn toggle_movement_mode(&mut self) {
-        self.movement_mode = match self.movement_mode {
-                                MovementMode::Asynchronized => MovementMode::Synchronized,
-                                MovementMode::Synchronized => MovementMode::Asynchronized
-                            };
+    /// Sets the movement_mode varibale <br>
+    /// toggles if movement_mode: None
+    pub fn set_movement_mode(&mut self, new_movement_mode: Option<MovementMode>) {
+        match new_movement_mode {
+            Some(e) => self.movement_mode = e,
+            None => self.movement_mode = match self.movement_mode {
+                                            MovementMode::Asynchronized => MovementMode::Synchronized,
+                                            MovementMode::Synchronized => MovementMode::Asynchronized
+                                        }
+        }
     }
 }
 
