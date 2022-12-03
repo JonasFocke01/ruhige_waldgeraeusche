@@ -103,11 +103,12 @@ impl Scanners {
         }
         scanner_return_vec
     }
-    /// increments the animation index <br>
-    /// Todo: this should also return linke the function get_current_position
-    pub fn trigger_next_step(&mut self, dmx_renderer: &mut DmxRenderer) {
+    /// Increments the animation index <br>
+    /// Returns the target coords and dimmer states for all scanners like get_current_position()
+    pub fn trigger_next_step(&mut self, dmx_renderer: &mut DmxRenderer) -> Vec<(u8, u8, bool)> {
         self.index += 1;
         dmx_renderer.set_updateable(None);
+        self.get_current_position()
     }
     /// returns the target coords and dimmer states for all scanners by filtering the active_animation variable with the current animation index
     pub fn get_current_position(&self) -> Vec<(u8, u8, bool)> {
