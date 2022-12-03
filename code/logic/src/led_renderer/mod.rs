@@ -4,6 +4,7 @@ use std::time::Instant;
 use std::io::Write;
 use std::process::{Command, Stdio, ChildStdin};
 use rand::Rng;
+use std::f64;
 
 /// Holds every possible animation
 pub enum Animation {
@@ -102,6 +103,11 @@ impl<'a> LedRenderer<'a> {
             }
         }
     }
+    /// maps a value from range to range <br>
+    /// Todo: move to config_store or own module
+    pub fn map_range(number: f64, from_range: (f64, f64), to_range: (f64, f64)) -> f64 {
+        to_range.0 + (number - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
+    }
     /// Spawns a fading block  <br>
     /// Todo: is this usefull? Change if not
     pub fn spawn_fading_blocks(&mut self, color: &(f32, f32, f32)) {
@@ -127,7 +133,8 @@ impl<'a> LedRenderer<'a> {
             }
         }
     }
-    /// Renders the current state of the pixel vec to a format understandable by python and writes it to pythons stdin
+    /// Renders the current state of the pixel vec to a format understandable by python and writes it to pythons stdin <br>
+    /// Three bytes for each pixel (RGB)
     pub fn render(&mut self) -> Result<Vec<Vec<Vec<f32>>>, String> {
         let mut result_pixels: Vec<Vec<Vec<f32>>> = vec!();
 
@@ -179,18 +186,12 @@ impl<'a> LedRenderer<'a> {
             self.pixels = result_pixels.to_vec();
             
             // ? draw
-
-            // Todo: drawing should invert for odd number of strips 
             let mut writable_pixels = vec!();
             for strip_i in 0..self.led_config_store.get_strip_count() {
-                for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
+                for mut pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
+                    if strip_i % 2 == 1 { pixel_i = LedRenderer::map_range(pixel_i as f64, (0.0, self.led_config_store.get_led_count_per_strip() as f64 - 1.0), (self.led_config_store.get_led_count_per_strip() as f64 - 1.0, 0.0)) as u64; }
                     for parameter_i in 0..3 {
-                        let parameter = self.pixels[strip_i as usize][pixel_i as usize][parameter_i as usize];
-                        if parameter == 10.0 {
-                            writable_pixels.push(11);
-                        } else {
-                            writable_pixels.push(self.pixels[strip_i as usize][pixel_i as usize][parameter_i as usize] as u8);
-                        }
+                        writable_pixels.push(self.pixels[strip_i as usize][pixel_i as usize][parameter_i as usize] as u8);
                     }
                 }
             }
