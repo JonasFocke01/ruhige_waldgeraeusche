@@ -36,6 +36,13 @@ impl DmxRenderer {
     }
     /// Gathers all usefull infomations of scanners etc., builds a 513 size vec and writes it to the dmx adapter
     /// only writes after 50 ms passed since last run AND an actual update can be written
+    /// The current DMX channel configuration:
+    /// channel_start-channel_fin(channel_footprint): fixture_type - fixture_name
+    ///   1-  7(  7):   scanner - JB Systems LED Victory Scan
+    ///   8- 14(  7):   scanner - JB Systems LED Victory Scan
+    ///  15- 21(  7):   scanner - JB Systems LED Victory Scan
+    ///  22- 28(  7):   scanner - JB Systems LED Victory Scan
+    ///  29- 35(  7):   scanner - JB Systems LED Victory Scan
     pub fn render(&mut self, scanner: &Scanner) -> Result<Vec<u8>, String> {
 
         if self.updateable && self.render_timestamp.elapsed().as_millis() >= 50 {
@@ -45,11 +52,6 @@ impl DmxRenderer {
             
             // ? start byte
             channel_vec.push(69);
-
-            // ? stage lights
-            channel_vec.push(0);
-            channel_vec.push(0);
-            channel_vec.push(0);
             
             // ? scanner
             let scanner_positions = scanner.get_current_position();
@@ -63,9 +65,6 @@ impl DmxRenderer {
                 channel_vec.push(if scanner_positions[scanner_i as usize].2 { 60 } else { 0 });
                 channel_vec.push(0);
             }
-            
-            // ? strobe
-            //Todo: write strobe
 
             while channel_vec.len() < 513 {
                 channel_vec.push(0);
