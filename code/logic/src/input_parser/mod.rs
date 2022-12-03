@@ -116,7 +116,6 @@ fn serial_port_is_valid() {
     assert!(input_parser.get_serial_connection().is_write_vectored());
 }
 
-//Todo: this needs review
 #[test]
 fn input_function_gathers_something() {
     let input_config_store = InputConfigStore::new();
