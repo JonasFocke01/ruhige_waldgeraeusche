@@ -136,7 +136,6 @@ impl<'a> LedRenderer<'a> {
         if self.render_timestamp.elapsed().as_millis() >= 5 {
 
             // ? fade
-
             for strip_i in 0..self.led_config_store.get_strip_count() {
                 for pixel_i in 0..self.led_config_store.get_led_count_per_strip() { 
                     if  self.pixels[strip_i as usize][pixel_i as usize][0] > 0.0 || 
@@ -150,9 +149,7 @@ impl<'a> LedRenderer<'a> {
             }
             
             // ? move
-
-            //Todo: the priority should be respected
-
+            // ! Sometimes in the future, the priority of the pixels should be respected
             for i in 0..self.led_config_store.get_strip_count() {
                 result_pixels.push(vec!());
                 for j in 0..self.led_config_store.get_led_count_per_strip() {
