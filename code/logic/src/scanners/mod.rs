@@ -4,8 +4,7 @@ use crate::config_store::DmxConfigStore;
 use std::path::Path;
 
 /// The struct to determine how the Scanner store should look like
-/// Todo: rename to something that indecates, that this is not a scanner but a container for all scanners
-pub struct Scanner {
+pub struct Scanners {
     /// The animations for all scanners
     /// all vecs are left to right when looking towards the stage
     /// Animation< Scanner< Position< x_position, y_position, up, down, in, out >>>
@@ -24,23 +23,23 @@ pub struct Scanner {
     /// scanners should light up if this is true and the current animations direction is out
     light_mode_out: bool,
     /// This vec contains a bool for every scanner. true = normal behavior, false = blackout
-    enabled_scanner: Vec<bool>,
+    enabled_scanners: Vec<bool>,
     /// the animation index. This should count into oblivion on each render cyncle
     index: u64
 }
 
 /// This is responsible for storing the current scanner state and how they should react to certain situations
-impl Scanner {
+impl Scanners {
     /// This creates, fills and returns the Scanner object
-    pub fn new(dmx_config_store: &DmxConfigStore) -> Scanner {
-        let animations = Scanner::read_scanner_animation_files(dmx_config_store);
+    pub fn new(dmx_config_store: &DmxConfigStore) -> Scanners {
+        let animations = Scanners::read_scanner_animation_files(dmx_config_store);
 
-        let mut enabled_scanner = vec!();
+        let mut enabled_scanners = vec!();
         for _ in 0..dmx_config_store.get_scanner_count() {
-            enabled_scanner.push(true);
+            enabled_scanners.push(true);
         }
 
-        Scanner {
+        Scanners {
             animations: animations,
             active_animation: 0,
             current_color: 0,
@@ -48,7 +47,7 @@ impl Scanner {
             light_mode_down: true,
             light_mode_in: false,
             light_mode_out: false,
-            enabled_scanner:  enabled_scanner,
+            enabled_scanners:  enabled_scanners,
             index: 0
         }
     }
@@ -63,7 +62,7 @@ impl Scanner {
             }
         }
 
-        animations[0] = Scanner::help_read_scanner_animation_files("snake.tpl", scanner_count);
+        animations[0] = Scanners::help_read_scanner_animation_files("snake.tpl", scanner_count);
 
         animations
     }
@@ -75,7 +74,7 @@ impl Scanner {
             scanner_return_vec.push(vec!());
         }
         let mut position_i: isize = -1;
-        let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/scanner/") + animation_file_name).as_str())) {
+        let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/scanners/") + animation_file_name).as_str())) {
             Ok(e) => e,
             Err(e) => panic!("Error occured while reading animation file {}\n", e)
         };
@@ -209,6 +208,6 @@ impl Scanner {
     }
     /// Returns the enabled_scanner variable
     pub fn get_enabled_scanner(&self) -> &Vec<bool> {
-        &self.enabled_scanner
+        &self.enabled_scanners
     }
 }

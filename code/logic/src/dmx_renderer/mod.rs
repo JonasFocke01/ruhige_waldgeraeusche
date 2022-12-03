@@ -1,4 +1,4 @@
-use crate::scanner::Scanner;
+use crate::scanners::Scanners;
 
 use std::time::Instant;
 use serial2::SerialPort;
@@ -16,7 +16,6 @@ pub struct DmxRenderer {
 /// Responsible for
 /// - collecting the current state of
 ///     - scanners
-///     - // todo: implement other fixtures
 /// - processing them by building a dmx ready vec of 512 bytes
 /// - writing the build vec to the usb connected dmx adapter
 impl DmxRenderer {
@@ -36,14 +35,15 @@ impl DmxRenderer {
     }
     /// Gathers all usefull infomations of scanners etc., builds a 513 size vec and writes it to the dmx adapter
     /// only writes after 50 ms passed since last run AND an actual update can be written
+    /// Todo: scanner_count should not be configurable in config.json
     /// The current DMX channel configuration:
-    /// channel_start-channel_fin(channel_footprint): fixture_type - fixture_name
+    /// channel_start-channel_end(channel_footprint): fixture_type - fixture_name
     ///   1-  7(  7):   scanner - JB Systems LED Victory Scan
     ///   8- 14(  7):   scanner - JB Systems LED Victory Scan
     ///  15- 21(  7):   scanner - JB Systems LED Victory Scan
     ///  22- 28(  7):   scanner - JB Systems LED Victory Scan
     ///  29- 35(  7):   scanner - JB Systems LED Victory Scan
-    pub fn render(&mut self, scanner: &Scanner) -> Result<Vec<u8>, String> {
+    pub fn render(&mut self, scanners: &Scanners) -> Result<Vec<u8>, String> {
 
         if self.updateable && self.render_timestamp.elapsed().as_millis() >= 50 {
                         
@@ -54,8 +54,8 @@ impl DmxRenderer {
             channel_vec.push(69);
             
             // ? scanner
-            let scanner_positions = scanner.get_current_position();
-            let scanner_color = scanner.get_current_color();
+            let scanner_positions = scanners.get_current_position();
+            let scanner_color = scanners.get_current_color();
             for scanner_i in 0..scanner_positions.len() {
                 channel_vec.push(scanner_positions[scanner_i as usize].0);
                 channel_vec.push(scanner_positions[scanner_i as usize].1);
@@ -95,12 +95,12 @@ fn dmx_rendering_works_as_expected() {
     use crate::config_store::DmxConfigStore;
 
     let dmx_config_store = DmxConfigStore::new();
-    let scanner = Scanner::new(&dmx_config_store);
+    let scanners = Scanners::new(&dmx_config_store);
     let mut dmx_renderer = DmxRenderer::new();
     dmx_renderer.set_updateable(None);
     thread::sleep(time::Duration::from_millis(100));
-    assert_eq!(dmx_renderer.render(&scanner).unwrap().len(), 513);
+    assert_eq!(dmx_renderer.render(&scanners).unwrap().len(), 513);
     dmx_renderer.set_updateable(Some(false));
     thread::sleep(time::Duration::from_millis(100));
-    assert_eq!(dmx_renderer.render(&scanner).unwrap().len(), 0);
+    assert_eq!(dmx_renderer.render(&scanners).unwrap().len(), 0);
 }

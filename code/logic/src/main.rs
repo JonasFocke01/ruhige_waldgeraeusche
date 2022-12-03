@@ -14,8 +14,8 @@ use led_renderer::LedRenderer;
 pub mod dmx_renderer;
 use dmx_renderer::DmxRenderer;
 /// This is responsible for storing the current scanner state and how they should react to certain situations
-pub mod scanner;
-use scanner::Scanner;
+pub mod scanners;
+use scanners::Scanners;
 
 /// holding all stores that load and provide configurations or global variables
 pub mod config_store;
@@ -35,7 +35,7 @@ fn main() {
     let mut global_vars_store = GlobalVarsStore::new();
     let mut input_parser = InputParser::new(&input_config_store);
     let mut led_renderer = LedRenderer::new(&led_config_store);
-    let mut scanner = Scanner::new(&dmx_config_store);
+    let mut scanners = Scanners::new(&dmx_config_store);
     let mut dmx_renderer = DmxRenderer::new();
 
     //? infinite programmloop whose speed is capped by the FRAME_TIMING attribute
@@ -47,11 +47,11 @@ fn main() {
             Ok(_) => (),
             Err(error) => panic!("{}", error)
         };
-        match dmx_renderer.render(&scanner) {
+        match dmx_renderer.render(&scanners) {
             Ok(_) => (),
             Err(error) => panic!("{}", error)
         }
-        match input_parser.process_input(&mut led_renderer, &mut scanner, &mut dmx_renderer, &mut global_vars_store) {
+        match input_parser.process_input(&mut led_renderer, &mut scanners, &mut dmx_renderer, &mut global_vars_store) {
             Ok(_) => (),
             Err(error) => panic!("{}", error)
         };
