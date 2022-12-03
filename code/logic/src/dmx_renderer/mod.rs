@@ -35,7 +35,6 @@ impl DmxRenderer {
     }
     /// Gathers all usefull infomations of scanners etc., builds a 513 size vec and writes it to the dmx adapter
     /// only writes after 50 ms passed since last run AND an actual update can be written
-    /// Todo: scanner_count should not be configurable in config.json
     /// The current DMX channel configuration:
     /// channel_start-channel_end(channel_footprint): fixture_type - fixture_name
     ///   1-  7(  7):   scanner - JB Systems LED Victory Scan

@@ -163,7 +163,7 @@ impl InputConfigStore {
 impl DmxConfigStore {
     /// This creates, fills and returns a DmxConfigStore object
     pub fn new() -> DmxConfigStore {
-        const SCANNER_COUNT: u8 = 5;
+        let scanner_count = 5;
 
         let file = File::open("config.json")
             .expect("config file should open read only");
@@ -175,7 +175,7 @@ impl DmxConfigStore {
                     .expect("config file does not contain 'dmx' key");
 
         DmxConfigStore {
-            scanner_count: SCANNER_COUNT,
+            scanner_count: scanner_count,
             scanner_animation_count: dmx["scanner_animation_count"].as_u64().expect("config file does not contain expected sub key dmx/scanner_animation_count")
         }
     }
