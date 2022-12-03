@@ -212,6 +212,7 @@ impl GeneralConfigStore {
 }
 
 /// Defines global variables
+/// This store can also hold utility functions
 impl GlobalVarsStore {
     /// This creates, fills and returns a GlobalVarsStore object
     pub fn new() -> GlobalVarsStore {
@@ -228,6 +229,10 @@ impl GlobalVarsStore {
             color_mode: color_mode,
             movement_mode: movement_mode
         }
+    }
+    /// maps a value from range to range <br>
+    pub fn map_range(number: f64, from_range: (f64, f64), to_range: (f64, f64)) -> f64 {
+        to_range.0 + (number - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
     }
     /// Returns primary_color
     pub fn get_primary_color(&self) -> &(f32, f32, f32){

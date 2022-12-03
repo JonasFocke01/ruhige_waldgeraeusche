@@ -1,4 +1,5 @@
 use crate::config_store::LedConfigStore;
+use crate::config_store::GlobalVarsStore;
 
 use std::time::Instant;
 use std::io::Write;
@@ -103,11 +104,6 @@ impl<'a> LedRenderer<'a> {
             }
         }
     }
-    /// maps a value from range to range <br>
-    /// Todo: move to config_store or own module
-    pub fn map_range(number: f64, from_range: (f64, f64), to_range: (f64, f64)) -> f64 {
-        to_range.0 + (number - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
-    }
     /// Spawns a fading block  <br>
     /// ! This is a test function !
     pub fn spawn_fading_blocks(&mut self, color: &(f32, f32, f32)) {
@@ -188,7 +184,7 @@ impl<'a> LedRenderer<'a> {
             let mut writable_pixels = vec!();
             for strip_i in 0..self.led_config_store.get_strip_count() {
                 for mut pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
-                    if strip_i % 2 == 1 { pixel_i = LedRenderer::map_range(pixel_i as f64, (0.0, self.led_config_store.get_led_count_per_strip() as f64 - 1.0), (self.led_config_store.get_led_count_per_strip() as f64 - 1.0, 0.0)) as u64; }
+                    if strip_i % 2 == 1 { pixel_i = GlobalVarsStore::map_range(pixel_i as f64, (0.0, self.led_config_store.get_led_count_per_strip() as f64 - 1.0), (self.led_config_store.get_led_count_per_strip() as f64 - 1.0, 0.0)) as u64; }
                     for parameter_i in 0..3 {
                         writable_pixels.push(self.pixels[strip_i as usize][pixel_i as usize][parameter_i as usize] as u8);
                     }
