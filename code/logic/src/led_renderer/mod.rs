@@ -95,7 +95,7 @@ impl<'a> LedRenderer<'a> {
         }
     }
     /// Spawns a snake <br>
-    /// Todo: this should resprect Direction and Combination
+    /// ! This is a test function !
     pub fn spawn_snake(&mut self, color: &(f32, f32, f32)) { 
         for strip_i in 0..self.led_config_store.get_strip_count() {   
             for index in self.led_config_store.get_pixel_offset()..12 {
@@ -109,11 +109,10 @@ impl<'a> LedRenderer<'a> {
         to_range.0 + (number - from_range.0) * (to_range.1 - to_range.0) / (from_range.1 - from_range.0)
     }
     /// Spawns a fading block  <br>
-    /// Todo: is this usefull? Change if not
+    /// ! This is a test function !
     pub fn spawn_fading_blocks(&mut self, color: &(f32, f32, f32)) {
         let mut rng = rand::thread_rng();
         for strip_i in 0..self.led_config_store.get_strip_count() { 
-            // Todo: the start should not be random but represent the current pitch of some sort
             let random_start = rng.gen_range(self.led_config_store.get_pixel_offset()..(self.led_config_store.get_led_count_per_strip() - 16));
             for index in random_start..(random_start + 15) {
                 self.pixels[strip_i as usize][index as usize] = vec![color.0, color.1, color.2, 0.0, 0.0, 0.1];
@@ -121,7 +120,7 @@ impl<'a> LedRenderer<'a> {
         }
     }
     /// Flashes the whole strip and lets it fade out <br>
-    /// Todo: this should respect Direction and Combination
+    /// ! This is a test function !
     pub fn flash_fade_whole_strip(&mut self, color: &(f32, f32, f32)) {
         for strip_i in 0..self.led_config_store.get_strip_count() {
             for pixel_i in self.led_config_store.get_pixel_offset()..self.led_config_store.get_led_count_per_strip() {
