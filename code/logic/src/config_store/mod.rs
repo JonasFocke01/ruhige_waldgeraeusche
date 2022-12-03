@@ -42,7 +42,8 @@ pub struct LedConfigStore {
 }
 /// The struct to define how the DmxConfigStore should look like
 pub struct DmxConfigStore {
-    scanner_count: u8
+    scanner_count: u8,
+    scanner_animation_count: u64
 }
 /// The struct to define how the GeneralConfigStore should look like
 pub struct GeneralConfigStore {
@@ -164,13 +165,27 @@ impl DmxConfigStore {
     pub fn new() -> DmxConfigStore {
         const SCANNER_COUNT: u8 = 5;
 
+        let file = File::open("config.json")
+            .expect("config file should open read only");
+
+        let json: serde_json::Value = serde_json::from_reader(file)
+                    .expect("config file should be proper JSON");
+
+        let dmx = json.get("dmx")
+                    .expect("config file does not contain 'dmx' key");
+
         DmxConfigStore {
-            scanner_count: SCANNER_COUNT
+            scanner_count: SCANNER_COUNT,
+            scanner_animation_count: dmx["scanner_animation_count"].as_u64().expect("config file does not contain expected sub key dmx/scanner_animation_count")
         }
     }
     /// Returns scanner_count
     pub fn get_scanner_count(&self) -> u8 {
         self.scanner_count
+    }
+    /// Returns the scanner_animation_count
+    pub fn get_scanner_animation_count(&self) -> u64 {
+        self.scanner_animation_count
     }
 }
 

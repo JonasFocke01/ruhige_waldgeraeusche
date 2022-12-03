@@ -1,6 +1,8 @@
 use crate::dmx_renderer::DmxRenderer;
 use crate::config_store::DmxConfigStore;
 
+use std::path::Path;
+
 /// The struct to determine how the Scanner store should look like
 /// Todo: rename to something that indecates, that this is not a scanner but a container for all scanners
 pub struct Scanner {
@@ -31,49 +33,7 @@ pub struct Scanner {
 impl Scanner {
     /// This creates, fills and returns the Scanner object
     pub fn new(dmx_config_store: &DmxConfigStore) -> Scanner {
-        let mut animations: Vec<Vec<Vec<(u8, u8, bool, bool, bool, bool)>>> = vec!();
-        for _ in 0..1 {
-            animations.push(vec!());
-        }
-        // Todo: develop custom file format for this to not clog up this file
-        // testanimation1 = snake | only two scanner are implemented for this.
-        for i in 0..dmx_config_store.get_scanner_count() {
-            animations[0].push(vec!());
-            for _ in 0..4 {
-                animations[0][i as usize].push((0,0,false,false,false,false));
-            }
-        }
-        // position1
-        animations[0][0][0].0 = 50;
-        animations[0][0][0].1 = 50;
-        animations[0][0][0].2 = false;
-        animations[0][0][0].3 = false;
-        animations[0][0][0].4 = true;
-        animations[0][0][0].5 = true;
-
-        // position2
-        animations[0][0][1].0 = 50;
-        animations[0][0][1].1 = 200;
-        animations[0][0][1].2 = true;
-        animations[0][0][1].3 = false;
-        animations[0][0][1].4 = false;
-        animations[0][0][1].5 = false;
-
-        // position3
-        animations[0][0][2].0 = 200;
-        animations[0][0][2].1 = 200;
-        animations[0][0][2].2 = false;
-        animations[0][0][2].3 = false;
-        animations[0][0][2].4 = true;
-        animations[0][0][2].5 = true;
-
-        // position4
-        animations[0][0][3].0 = 200;
-        animations[0][0][3].1 = 50;
-        animations[0][0][3].2 = false;
-        animations[0][0][3].3 = true;
-        animations[0][0][3].4 = false;
-        animations[0][0][3].5 = false;
+        let animations = Scanner::read_scanner_animation_files(dmx_config_store);
 
         let mut enabled_scanner = vec!();
         for _ in 0..dmx_config_store.get_scanner_count() {
@@ -92,7 +52,59 @@ impl Scanner {
             index: 0
         }
     }
-    /// increments the animation index
+    /// reads the scanner animation files and returns the constructed animation vec
+    fn read_scanner_animation_files(dmx_config_store: &DmxConfigStore) -> Vec<Vec<Vec<(u8, u8, bool, bool, bool, bool)>>> {
+        let mut animations: Vec<Vec<Vec<(u8, u8, bool, bool, bool, bool)>>> = vec!();
+        let scanner_count = dmx_config_store.get_scanner_count();
+        for animation_i in 0..dmx_config_store.get_scanner_animation_count() {
+            animations.push(vec!());
+            for _ in 0..scanner_count {
+                animations[animation_i as usize].push(vec!());
+            }
+        }
+
+        animations[0] = Scanner::help_read_scanner_animation_files("snake.tpl", scanner_count);
+
+        animations
+    }
+    /// helper function for read_scanner_animation_files <br>
+    /// returns the positions for each scanner from a given file for x (scanner_count) scanner
+    fn help_read_scanner_animation_files(animation_file_name: &str, scanner_count: u8) -> Vec<Vec<(u8, u8, bool, bool, bool, bool)>> {
+        let mut scanner_return_vec: Vec<Vec<(u8, u8, bool, bool, bool, bool)>> = vec!();
+        for _ in 0..scanner_count {
+            scanner_return_vec.push(vec!());
+        }
+        let mut position_i: isize = -1;
+        let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/scanner/") + animation_file_name).as_str())) {
+            Ok(e) => e,
+            Err(e) => panic!("Error occured while reading animation file {}\n", e)
+        };
+        plain_content = plain_content.replace(" ", "");
+        let vec_content = plain_content.split("\n");
+        for (line_i, line) in vec_content.clone().enumerate() {
+            if line_i == 0 || line_i % 6 == 0 { position_i += 1; continue; }
+
+            for scanner_i in 0..scanner_count {
+                scanner_return_vec[scanner_i as usize].push((0, 0, false, false, false, false));
+            }
+            let mut line_params = line.split(",");
+            let x: u8 = line_params.next().unwrap().parse().unwrap();
+            let y: u8 = line_params.next().unwrap().parse().unwrap();
+            let dir_up: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
+            let dir_down: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
+            let dir_in: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
+            let dir_out: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
+
+            scanner_return_vec[(line_i % 6) - 1 as usize][position_i as usize].0 = x;
+            scanner_return_vec[(line_i % 6) - 1 as usize][position_i as usize].1 = y;
+            scanner_return_vec[(line_i % 6) - 1 as usize][position_i as usize].2 = dir_up;
+            scanner_return_vec[(line_i % 6) - 1 as usize][position_i as usize].3 = dir_down;
+            scanner_return_vec[(line_i % 6) - 1 as usize][position_i as usize].4 = dir_in;
+            scanner_return_vec[(line_i % 6) - 1 as usize][position_i as usize].5 = dir_out;
+        }
+        scanner_return_vec
+    }
+    /// increments the animation index <br>
     /// Todo: this should also return linke the function get_current_position
     pub fn trigger_next_step(&mut self, dmx_renderer: &mut DmxRenderer) {
         self.index += 1;
@@ -104,17 +116,17 @@ impl Scanner {
         let scanner_count = self.animations[0].len();
         for i in 0..scanner_count {
             result_vec.push((0, 0, false));
-            result_vec[i].0 = self.animations[self.active_animation as usize][i as usize][self.index as usize % self.animations[self.active_animation as usize][i as usize].len()].0;
-            result_vec[i].1 = self.animations[self.active_animation as usize][i as usize][self.index as usize % self.animations[self.active_animation as usize][i as usize].len()].1;
+            result_vec[i].0 = self.animations[self.active_animation as usize][i as usize][self.index as usize % (self.animations[self.active_animation as usize][0].len() / scanner_count)].0;
+            result_vec[i].1 = self.animations[self.active_animation as usize][i as usize][self.index as usize % (self.animations[self.active_animation as usize][0].len() / scanner_count)].1;
 
             // calculate if lit
-            if self.animations[self.active_animation as usize][i as usize][self.index as usize % self.animations[self.active_animation as usize][i as usize].len()].2 && self.light_mode_up {
+            if self.animations[self.active_animation as usize][i as usize][self.index as usize % (self.animations[self.active_animation as usize][0].len() / scanner_count)].2 && !self.light_mode_up {
                 result_vec[i].2 = true;
-            } else if self.animations[self.active_animation as usize][i as usize][self.index as usize % self.animations[self.active_animation as usize][i as usize].len()].3 && self.light_mode_down {
+            } else if self.animations[self.active_animation as usize][i as usize][self.index as usize % (self.animations[self.active_animation as usize][0].len() / scanner_count)].3 && !self.light_mode_down {
                 result_vec[i].2 = true;
-            } else if self.animations[self.active_animation as usize][i as usize][self.index as usize % self.animations[self.active_animation as usize][i as usize].len()].4 && self.light_mode_in {
+            } else if self.animations[self.active_animation as usize][i as usize][self.index as usize % (self.animations[self.active_animation as usize][0].len() / scanner_count)].4 && !self.light_mode_in {
                 result_vec[i].2 = true;
-            } else if self.animations[self.active_animation as usize][i as usize][self.index as usize % self.animations[self.active_animation as usize][i as usize].len()].5 && self.light_mode_out {
+            } else if self.animations[self.active_animation as usize][i as usize][self.index as usize % (self.animations[self.active_animation as usize][0].len() / scanner_count)].5 && !self.light_mode_out {
                 result_vec[i].2 = true;
             }
         }

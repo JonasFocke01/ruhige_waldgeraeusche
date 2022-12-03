@@ -15,7 +15,9 @@
         "pixel_offset": 0,
         "parameter_count": 6
     },
-    "dmx": { },
+    "dmx": {
+        "scanner_animation_count": 1
+     },
     "general": {
         "frame_timing": 34
     }
