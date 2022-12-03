@@ -136,13 +136,43 @@ impl Scanner {
     pub fn get_current_color(&self) -> &u8 {
         &self.current_color
     }
-    /// sets the current color by processing the given three bytes into one
+    /// sets the current color by processing the given three bytes into one <br>
+    /// Available colors by the here used JB Systems LED Victory Scan are <br>
+    /// WHITE       0 <br>
+    /// YELLOW      8 <br>
+    /// BLUE       38 <br>
+    /// GREEN      68 <br>
+    /// RED        98 <br>
+    /// PURPLE    128 <br>
+    /// DARK_BLUE 158 <br>
+    /// ORANGE    188 <br>
+    /// PINK      218
     pub fn set_current_color(&mut self, color: &(f32, f32, f32)) {
-        // Todo: construct color 
-        self.current_color = if color.0 > color.1 {
-            98
+        if color.0 == color.1 && color.0 == color.2 {
+            self.current_color = 0;
+        } else
+        if color.0 > 200.0 && color.1 < 30.0 && color.2 < 30.0 {
+            self.current_color = 98;
+        } else
+        if color.0 < 30.0 && color.1 > 200.0 && color.2 < 30.0 {
+            self.current_color = 68;
+        } else
+        if color.0 < 30.0 && color.1 < 30.0 && color.2 > 200.0 {
+            self.current_color = 38;
+        } else
+        if color.0 > color.2 && color.1 > color.2 {
+            self.current_color = 8;
+        } else
+        if color.0 > color.1 && color.2 > color.1 {
+            self.current_color = 128;
+        } else
+        if color.0 > color.1 + 30.0 && color.1 > color.2 + 100.0 {
+            self.current_color = 188;
+        } else
+        if color.0 > color.2 + 30.0 && color.2 > color.1 + 100.0 {
+            self.current_color = 218;
         } else {
-            8
+            self.current_color = 0;
         }
     }
     /// Sets the current light mode for up <br>
