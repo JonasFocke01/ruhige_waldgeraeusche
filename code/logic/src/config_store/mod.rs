@@ -68,6 +68,8 @@ impl LedConfigStore {
         let leds = json.get("leds")
                     .expect("config file does not contain 'leds' key");
 
+        let parameter_count = 6;
+
         LedConfigStore {
             led_count_per_strip: leds["led_count_per_strip"].as_u64().expect("config file does not contain expected sub key leds/led_count_per_strip"),
             strip_count: leds["strip_count"].as_u64().expect("config file does not contain expected sub key leds/strip_count"),
@@ -78,8 +80,7 @@ impl LedConfigStore {
             led_invert: leds["led_invert"].as_u64().expect("config file does not contain expected sub key leds/led_invert"),
             led_channel: leds["led_channel"].as_u64().expect("config file does not contain expected sub key leds/led_channel"),
             pixel_offset: leds["pixel_offset"].as_u64().expect("config file does not contain expected sub key leds/pixel_offset"),
-            // Todo: parameter count should be a const
-            parameter_count: leds["parameter_count"].as_u64().expect("config file does not contain expected sub key leds/parameter_count")
+            parameter_count: parameter_count
         }
     }
     /// Returns led_count_per_strip

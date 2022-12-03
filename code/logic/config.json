@@ -12,8 +12,7 @@
         "led_brightness": 255,
         "led_invert": 0,
         "led_channel": 0,
-        "pixel_offset": 0,
-        "parameter_count": 6
+        "pixel_offset": 0
     },
     "dmx": {
         "scanner_animation_count": 1
