@@ -5,7 +5,6 @@ pub enum InputType {
     /// This gathers input from serial
     Serial,
     /// This gathers input from a rest api
-    /// Todo
     RestApi
 }
 /// Enums all possible color modes
@@ -140,7 +139,7 @@ impl InputConfigStore {
 
         let input_type = match input["input_type"].as_u64().expect("config file does not contain expected sub key input/input_type") {
                         1 => InputType::Serial,
-                        2 => InputType::RestApi,
+                        2 => todo!("RestApi is still not implemented"),
                         _ => panic!("Unexpected InputType in config.json!\nAvailable:\n    1: Serial\n    2:RestApi")
                     };
         
