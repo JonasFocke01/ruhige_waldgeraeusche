@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-12-04T16:03:42.978Z" agent="5.0 (X11)" etag="q53E0cECxTJBoSCprqGc" version="20.6.0" type="github">
+<mxfile host="app.diagrams.net" modified="2022-12-04T16:04:59.303Z" agent="5.0 (X11)" etag="Ja5tUbhYYexCyzaeWzd_" version="20.6.0" type="github">
   <diagram id="EBs3eoclZNxCUd93gEGw" name="Page-1">
     <mxGraphModel dx="778" dy="1235" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -797,7 +797,7 @@
           <mxGeometry x="390" y="190" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="gBRiGfkmkzS1eKWoziOa-52" value="Zeugs" style="swimlane;horizontal=0;" parent="TiyWxUWlf9TtwbMy1Xod-247" vertex="1">
-          <mxGeometry x="35" y="280" width="405" height="100" as="geometry" />
+          <mxGeometry x="40" y="280" width="535" height="100" as="geometry" />
         </mxCell>
         <mxCell id="gBRiGfkmkzS1eKWoziOa-59" value="Side" style="labelPosition=center;verticalLabelPosition=middle;align=center;html=1;shape=mxgraph.basic.shaded_button;dx=10;fillColor=#E6E6E6;strokeColor=none;" parent="gBRiGfkmkzS1eKWoziOa-52" vertex="1">
           <mxGeometry x="220" y="10" width="80" height="80" as="geometry" />
@@ -810,6 +810,9 @@
         </mxCell>
         <mxCell id="xdJi89OpjSas5999cNQN-2" value="Individel" style="labelPosition=center;verticalLabelPosition=middle;align=center;html=1;shape=mxgraph.basic.shaded_button;dx=10;fillColor=#E6E6E6;strokeColor=none;" parent="gBRiGfkmkzS1eKWoziOa-52" vertex="1">
           <mxGeometry x="130" y="10" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="zEtEnnna0CKq0i6cEH_B-3" value="&lt;div&gt;Switch&lt;/div&gt;" style="labelPosition=center;verticalLabelPosition=middle;align=center;html=1;shape=mxgraph.basic.shaded_button;dx=10;fillColor=#E6E6E6;strokeColor=none;" vertex="1" parent="gBRiGfkmkzS1eKWoziOa-52">
+          <mxGeometry x="450" y="10" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="xdJi89OpjSas5999cNQN-27" value="" style="dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;shape=mxgraph.gmdl.slider2;barPos=40;strokeColor=#3F51B5;opacity=100;strokeWidth=2;fillColor=#3F51B5;handleSize=10;shadow=0;rotation=-90;" parent="TiyWxUWlf9TtwbMy1Xod-247" vertex="1">
           <mxGeometry x="430" y="225" width="405" height="10" as="geometry" />
