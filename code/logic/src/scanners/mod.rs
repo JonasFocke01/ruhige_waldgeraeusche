@@ -1,5 +1,6 @@
 use crate::dmx_renderer::DmxRenderer;
 use crate::config_store::DmxConfigStore;
+use crate::logger;
 
 use std::path::Path;
 
@@ -76,7 +77,10 @@ impl Scanners {
         let mut position_i: isize = -1;
         let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/scanners/") + animation_file_name).as_str())) {
             Ok(e) => e,
-            Err(e) => panic!("Error occured while reading animation file {}\n", e)
+            Err(e) => {
+                logger::log("Error occured while reading animation file");
+                panic!("Error occured while reading animation file {}\n", e);
+            }
         };
         plain_content = plain_content.replace(" ", "");
         let vec_content = plain_content.split("\n");

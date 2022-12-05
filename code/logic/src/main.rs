@@ -25,6 +25,9 @@ use config_store::LedConfigStore;
 use config_store::InputConfigStore;
 use config_store::GlobalVarsStore;
 
+/// logs a message to the predefined file ".log"
+pub mod logger;
+
 fn main() {
     //? setup
 
@@ -42,18 +45,18 @@ fn main() {
 
     loop {
         let fps_limit_timestamp = Instant::now();
-        
+
         match led_renderer.render() {
             Ok(_) => (),
-            Err(error) => panic!("{}", error)
+            Err(error) => logger::log(error.as_str())
         };
         match dmx_renderer.render(&scanners) {
             Ok(_) => (),
-            Err(error) => panic!("{}", error)
+            Err(error) => logger::log(error.as_str())
         }
         match input_parser.process_input(&mut led_renderer, &mut scanners, &mut dmx_renderer, &mut global_vars_store) {
             Ok(_) => (),
-            Err(error) => panic!("{}", error)
+            Err(error) => logger::log(error.as_str())
         };
 
         print!("Elapsed: {} | Frame timing: {}\n", fps_limit_timestamp.elapsed().as_millis(), general_config_store.get_frame_timing());

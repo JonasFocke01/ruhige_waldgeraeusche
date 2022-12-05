@@ -1,3 +1,4 @@
+use crate::logger;
 use std::fs::File;
 
 /// Enums all possible input types
@@ -59,14 +60,29 @@ pub struct GlobalVarsStore {
 impl LedConfigStore {
     /// This creates, fills and returns a LedConfigStore object
     pub fn new() -> LedConfigStore {
-        let file = File::open("config.json")
-            .expect("config file should open read only");
+        let file = match File::open("config.json") {
+            Ok(e) => e,
+            Err(_) => {
+                logger::log("config file should open read only");
+                panic!("config file should open read only");
+            }
+        };
 
-        let json: serde_json::Value = serde_json::from_reader(file)
-                    .expect("config file should be proper JSON");
+        let json: serde_json::Value = match serde_json::from_reader(file) {
+            Ok(e) => e,
+            Err(_) => {
+                logger::log("config file should be proper JSON");
+                panic!("config file should be proper JSON");
+            }
+        };
 
-        let leds = json.get("leds")
-                    .expect("config file does not contain 'leds' key");
+        let leds = match json.get("leds") {
+            Some(e) => e,
+            None => {
+                logger::log("config file does not contain 'leds' key");
+                panic!("config file does not contain 'leds' key");
+            }
+        };
 
         let parameter_count = 6;
 
@@ -129,19 +145,37 @@ impl LedConfigStore {
 impl InputConfigStore {
     /// This creates, fills and returns an InputConfigStore object
     pub fn new() -> InputConfigStore {
-        let file = File::open("config.json")
-            .expect("config file should open read only");
+        let file = match File::open("config.json") {
+            Ok(e) => e,
+            Err(_) => {
+                logger::log("config file should open read only");
+                panic!("config file should open read only");
+            }
+        };
 
-        let json: serde_json::Value = serde_json::from_reader(file)
-                    .expect("config file should be proper JSON");
+        let json: serde_json::Value = match serde_json::from_reader(file) {
+            Ok(e) => e,
+            Err(_) => {
+                logger::log("config file should be proper JSON");
+                panic!("config file should be proper JSON");
+            }
+        };
 
-        let input = json.get("input")
-                    .expect("config file does not contain 'input' key");
+        let input = match json.get("input") {
+            Some(e) => e,
+            None => {
+                logger::log("config file does not contain 'input' key");
+                panic!("config file does not contain 'input' key");
+            }
+        };
 
         let input_type = match input["input_type"].as_u64().expect("config file does not contain expected sub key input/input_type") {
                         1 => InputType::Serial,
                         2 => todo!("RestApi is still not implemented"),
-                        _ => panic!("Unexpected InputType in config.json!\nAvailable:\n    1: Serial\n    2:RestApi")
+                        _ => {
+                            logger::log("Unexpected InputType in config.json!");
+                            panic!("Unexpected InputType in config.json!\nAvailable:\n    1: Serial\n    2:RestApi");
+                        }
                     };
         
         InputConfigStore {
@@ -165,14 +199,29 @@ impl DmxConfigStore {
     pub fn new() -> DmxConfigStore {
         let scanner_count = 5;
 
-        let file = File::open("config.json")
-            .expect("config file should open read only");
+        let file = match File::open("config.json") {
+            Ok(e) => e,
+            Err(_) => {
+                logger::log("config file should open read only");
+                panic!("config file should open read only");
+            }
+        };
 
-        let json: serde_json::Value = serde_json::from_reader(file)
-                    .expect("config file should be proper JSON");
+        let json: serde_json::Value = match serde_json::from_reader(file) {
+            Ok(e) => e,
+            Err(_) => {
+                logger::log("config file should be proper JSON");
+                panic!("config file should be proper JSON");
+            }
+        };
 
-        let dmx = json.get("dmx")
-                    .expect("config file does not contain 'dmx' key");
+        let dmx = match json.get("dmx") {
+            Some(e) => e,
+            None => {
+                logger::log("config file does not contain 'dmx' key");
+                panic!("config file does not contain 'dmx' key");
+            }
+        };
 
         DmxConfigStore {
             scanner_count: scanner_count,
@@ -193,14 +242,29 @@ impl DmxConfigStore {
 impl GeneralConfigStore {
     /// This creates, fills and returns a GeneralConfigStore object
     pub fn new() -> GeneralConfigStore {
-        let file = File::open("config.json")
-            .expect("config file should open read only");
+        let file = match File::open("config.json") {
+            Ok(e) => e,
+            Err(_) => {
+                logger::log("config file should open read only");
+                panic!("config file should open read only");
+            }
+        };
 
-        let json: serde_json::Value = serde_json::from_reader(file)
-                    .expect("config file should be proper JSON");
+        let json: serde_json::Value = match serde_json::from_reader(file) {
+            Ok(e) => e,
+            Err(_) => {
+                logger::log("config file should be proper JSON");
+                panic!("config file should be proper JSON");
+            }
+        };
 
-        let input = json.get("general")
-                    .expect("config file does not contain 'general' key");
+        let input = match json.get("general") {
+            Some(e) => e,
+            None => {
+                logger::log("config file does not contain 'general' key");
+                panic!("config file does not contain 'general' key");
+            }
+        };
 
         GeneralConfigStore {
             frame_timing: input["frame_timing"].as_u64().expect("config file does not contain expected sub key general/frame_timing")

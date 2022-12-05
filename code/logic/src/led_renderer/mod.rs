@@ -1,5 +1,6 @@
 use crate::config_store::LedConfigStore;
 use crate::config_store::GlobalVarsStore;
+use crate::logger;
 
 use std::time::Instant;
 use std::io::Write;
@@ -76,13 +77,22 @@ impl<'a> LedRenderer<'a> {
                                 .stdin(Stdio::piped())
                                 .spawn() {
                                     Ok(n) => n,
-                                    Err(error) => panic!("{}", error)
+                                    Err(error) => {
+                                        logger::log(format!("{}", error).as_str());
+                                        panic!("{}", error);
+                                    }
                                 };
-        assert!(python_instance.id() > 0, "Failed to spawn python instance!");
+        if python_instance.id() <= 0 {
+            logger::log("Failed to spawn python instance!");
+            panic!("Failed to spawn python instance");
+        }
         let mut python_instance_stdin: ChildStdin = python_instance.stdin.unwrap();
         match python_instance_stdin.flush() {
             Ok(()) => (),
-            Err(error) => panic!("Failed to flush python instance stdin - {}", error)
+            Err(error) => {
+                logger::log("Failed to flush python instance stdin");
+                panic!("Failed to flush python instance stdin - {}", error);
+            }
         };
         
         LedRenderer {
@@ -172,9 +182,12 @@ impl<'a> LedRenderer<'a> {
                     }
                 }
             }
-            assert!(result_pixels.len() == self.led_config_store.get_strip_count() as usize);
-            assert!(result_pixels[0].len() == self.led_config_store.get_led_count_per_strip() as usize);
-            assert!(result_pixels[0][0].len() == self.led_config_store.get_parameter_count() as usize);
+            if  result_pixels.len() == self.led_config_store.get_strip_count() as usize &&
+                result_pixels[0].len() == self.led_config_store.get_led_count_per_strip() as usize &&
+                result_pixels[0][0].len() == self.led_config_store.get_parameter_count() as usize {
+                    logger::log("result_pixels has the wrong size");
+                    panic!("result_pixels has the wrong size");
+            }
             self.pixels = result_pixels.to_vec();
             
             // ? draw

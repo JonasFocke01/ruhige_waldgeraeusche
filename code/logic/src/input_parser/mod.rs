@@ -2,13 +2,15 @@ use crate::led_renderer::LedRenderer;
 use crate::dmx_renderer::DmxRenderer;
 use crate::config_store::GlobalVarsStore;
 use crate::config_store::ColorMode;
+use crate::config_store::{InputConfigStore, InputType};
 use crate::scanners::Scanners;
+use crate::logger;
+
 
 use std::time::{Duration, Instant};
 use std::sync::Arc;
 use serial2::SerialPort;
 
-use crate::config_store::{InputConfigStore, InputType};
 
 /// The struct to define how the InputParser should look like
 pub struct InputParser<'a> {
@@ -29,11 +31,19 @@ impl<'a> InputParser<'a> {
     /// - opens and configures the serial input port
     /// - calculates bpm based on a hardcoded start beat_duration
     pub fn new(input_config_store: &InputConfigStore) -> InputParser {
-        let mut port = SerialPort::open("/dev/ttyACM0", 2000000)
-                                    .expect("Could not open Serial input port!");
+        let mut port = match SerialPort::open("/dev/ttyACM0", 2000000) {
+            Ok(e) => e,
+            Err(_) => {
+                logger::log("Could not open Serial input port");
+                panic!("Could not open Serial input port");
+            }
+        };
         match port.set_read_timeout(Duration::from_millis(1)) {
             Ok(()) => Some(0),
-            Err(error) => panic!("set_read_timeout returned an error: {}\n", error)
+            Err(error) => {
+                logger::log("set_read_timeout returned an Error");
+                panic!("set_read_timeout returned an error: {}\n", error);
+            }
         };
 	    let port = Arc::new(port);
 

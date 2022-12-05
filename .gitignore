@@ -7,3 +7,4 @@ code/logic/target/
 code/logic/target/debug/.cargo-lock
 /testing/rust_testing/audio_analysis/target
 /testing/rust_testing/scannerposition_fileformat/target
+/code/logic/.log

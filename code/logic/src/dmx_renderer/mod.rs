@@ -1,4 +1,5 @@
 use crate::scanners::Scanners;
+use crate::logger;
 
 use std::time::Instant;
 use serial2::SerialPort;
@@ -24,8 +25,13 @@ impl DmxRenderer {
     pub fn new() -> DmxRenderer {
         let render_timestamp = Instant::now();
 
-        let port = SerialPort::open("/dev/ttyUSB0", 115_200)
-		    .map_err(|e| eprintln!("Error: Failed to open {}: {}", "/dev/ttyUSB0", e)).unwrap();
+        let port = match SerialPort::open("/dev/ttyUSB0", 115_200) {
+            Ok(e) => e,
+            Err(_) => {
+                logger::log("Failed to open dmx-usb-adapter");
+                panic!("Failed to open dmx-usb-adapter"); // Todo: here it would be best to hold the program until a adapter is detected, instead of panicing
+            }
+        };
 
         DmxRenderer {
             render_timestamp: render_timestamp,
