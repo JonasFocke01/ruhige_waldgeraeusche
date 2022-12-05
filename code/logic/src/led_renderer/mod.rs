@@ -182,9 +182,9 @@ impl<'a> LedRenderer<'a> {
                     }
                 }
             }
-            if  result_pixels.len() == self.led_config_store.get_strip_count() as usize &&
-                result_pixels[0].len() == self.led_config_store.get_led_count_per_strip() as usize &&
-                result_pixels[0][0].len() == self.led_config_store.get_parameter_count() as usize {
+            if  result_pixels.len() != self.led_config_store.get_strip_count() as usize &&
+                result_pixels[0].len() != self.led_config_store.get_led_count_per_strip() as usize &&
+                result_pixels[0][0].len() != self.led_config_store.get_parameter_count() as usize {
                     logger::log("result_pixels has the wrong size");
                     panic!("result_pixels has the wrong size");
             }
