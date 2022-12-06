@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-12-06T11:20:55.306Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36" etag="_VaydWcNjqQNABpvKbUx" version="20.6.0" type="github">
+<mxfile host="app.diagrams.net" modified="2022-12-06T12:23:59.901Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36" etag="u5SS1Hx9qFK0wRxJX1Ng" version="20.6.0" type="github">
   <diagram id="EBs3eoclZNxCUd93gEGw" name="Page-1">
     <mxGraphModel dx="-1731" dy="1160" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -1233,13 +1233,13 @@
         <mxCell id="C1-JSDKfx9m8MS_s9Uuy-40" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.545;entryY=1.025;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="C1-JSDKfx9m8MS_s9Uuy-1" target="C1-JSDKfx9m8MS_s9Uuy-3">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="C1-JSDKfx9m8MS_s9Uuy-1" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="C1-JSDKfx9m8MS_s9Uuy-1" value="USB" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="7650" y="1783" width="100" height="32" as="geometry" />
         </mxCell>
         <mxCell id="C1-JSDKfx9m8MS_s9Uuy-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="C1-JSDKfx9m8MS_s9Uuy-2" target="C1-JSDKfx9m8MS_s9Uuy-34">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="C1-JSDKfx9m8MS_s9Uuy-2" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="C1-JSDKfx9m8MS_s9Uuy-2" value="USB" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="7770" y="1783" width="100" height="32" as="geometry" />
         </mxCell>
         <mxCell id="C1-JSDKfx9m8MS_s9Uuy-3" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
@@ -2012,11 +2012,6 @@
         </mxCell>
         <mxCell id="C1-JSDKfx9m8MS_s9Uuy-345" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="8395" y="690" width="20" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="C1-JSDKfx9m8MS_s9Uuy-346" value="Creater Sektion" style="swimlane;" vertex="1" parent="1">
-          <mxGeometry x="7832.5" y="1960" width="427.5" height="1070" as="geometry">
-            <mxRectangle x="-810" y="-35" width="80" height="30" as="alternateBounds" />
-          </mxGeometry>
         </mxCell>
         <mxCell id="C1-JSDKfx9m8MS_s9Uuy-367" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="9200" y="1580" width="1440" height="830" as="geometry" />
