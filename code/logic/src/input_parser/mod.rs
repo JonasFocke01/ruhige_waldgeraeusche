@@ -2,61 +2,30 @@ use crate::led_renderer::LedRenderer;
 use crate::dmx_renderer::DmxRenderer;
 use crate::config_store::GlobalVarsStore;
 use crate::config_store::ColorMode;
-use crate::config_store::{InputConfigStore, InputType};
 use crate::scanners::Scanners;
 use crate::logger;
 
-
-use std::time::{Duration, Instant};
+use std::time::Duration;
 use std::sync::Arc;
 use serial2::SerialPort;
-
-
+    
 /// The struct to define how the InputParser should look like
-pub struct InputParser<'a> {
-    /// InputConfigStore contains usefull informations for the parser
-    input_config_store: &'a InputConfigStore,
+pub struct InputParser {
     /// The input usb port
-    serial_port: Arc<SerialPort>,
-    /// The timestamp to support the beat detection
-    last_beat_timestamp: Instant,
-    /// Stores, how long is the interval between beats is
-    beat_duration: Duration,
-    /// The current bpm is calculated from the beat_duration
-    bpm: u16
+    module_connectors: Vec<Arc<SerialPort>>,
 }
+
 /// Responsible for reading and parsing possible input sources
-impl<'a> InputParser<'a> {
+impl InputParser {
     /// This creates, fills and returns the InputParser object
     /// - opens and configures the serial input port
     /// - calculates bpm based on a hardcoded start beat_duration
-    pub fn new(input_config_store: &InputConfigStore) -> InputParser {
-        let mut port = match SerialPort::open("/dev/ttyACM0", 2000000) {
-            Ok(e) => e,
-            Err(_) => {
-                logger::log("Could not open Serial input port");
-                panic!("Could not open Serial input port");
-            }
-        };
-        match port.set_read_timeout(Duration::from_millis(1)) {
-            Ok(()) => Some(0),
-            Err(error) => {
-                logger::log("set_read_timeout returned an Error");
-                panic!("set_read_timeout returned an error: {}\n", error);
-            }
-        };
-	    let port = Arc::new(port);
+    pub fn new(connected_modules: Vec<String>) -> InputParser {
 
-        let last_beat_timestamp = Instant::now();
-        let bpm = 120 as u16;
-        let beat_duration = Duration::from_millis( (60_000 / bpm) as u64 );
+        let module_connectors = Self::spawn_module_connectors(connected_modules);
         
         InputParser {
-            input_config_store: input_config_store,
-            serial_port: port,
-            last_beat_timestamp: last_beat_timestamp,
-            beat_duration: beat_duration,
-            bpm: bpm
+            module_connectors: module_connectors
         }
     }
     /// acts acordingly to the processed input gathered by gather_input()
@@ -86,68 +55,43 @@ impl<'a> InputParser<'a> {
         let mut return_vec: Vec<u8> = vec!();
 
         // ?process inputs
-        match self.input_config_store.get_input_type() {
-            InputType::Serial => {
                 
-                let mut buffer: [u8; 512] = [0x00; 512];
-                
-                match &self.serial_port.read(&mut buffer) {
-                    Ok(0) => return Err(String::from("Input source may be unplugged!")),
-                    Ok(n) => {
-                        for i in 0..*n {
-                            return_vec.push(buffer[i]);
-                        }
-                    },
-                    Err(_) => return Ok(return_vec)
-                }
-            },
-            InputType::RestApi => unimplemented!()
-        };
-            
-        // ? beat detection
-        if self.last_beat_timestamp.elapsed().as_millis() > self.beat_duration.as_millis() {
-            self.beat_duration = Duration::from_millis(self.last_beat_timestamp.elapsed().as_millis() as u64);
-            self.last_beat_timestamp = Instant::now();
-            self.bpm = (60000 / self.beat_duration.as_millis()) as u16;
+        for port in self.module_connectors.iter() {
+            let mut buffer: [u8; 512] = [0x00; 512];
+
+            match port.read(&mut buffer) {
+                Ok(0) => return Err(String::from("Input source may be unplugged!")),
+                Ok(n) => {
+                    for i in 0..n {
+                        return_vec.push(buffer[i]);
+                    }
+                },
+                Err(_) => return Ok(return_vec)
+            }
         }
-        Ok(return_vec)
         
+        Ok(return_vec)
     }
-    /// returns a reference to the established serial connection
-    pub fn get_serial_connection(&self) -> &Arc<SerialPort> {
-        &self.serial_port
+    /// This spawns and returns all available connectors
+    pub fn spawn_module_connectors(connectors_to_spawn: Vec<String>) -> Vec<Arc<SerialPort>> {
+        let mut connectors: Vec<Arc<SerialPort>> = vec!();
+        for connector in connectors_to_spawn.iter() {
+            let mut port = match SerialPort::open(format!("/dev/{}", connector).as_str(), 115200) {
+                Ok(e) => e,
+                Err(_) => {
+                    logger::log("Could not open Serial input port");
+                    panic!("Could not open Serial input port");
+                }
+            };
+            match port.set_read_timeout(Duration::from_millis(1)) {
+                Ok(()) => Some(0),
+                Err(error) => {
+                    logger::log("set_read_timeout returned an Error");
+                    panic!("set_read_timeout returned an error: {}\n", error);
+                }
+            };
+            connectors.push(Arc::new(port));         
+        }
+        connectors
     }
-}
-
-#[test]
-fn serial_port_is_valid() {
-    let input_config_store = InputConfigStore::new();
-    let input_parser = InputParser::new(&input_config_store);
-    assert!(input_parser.get_serial_connection().is_write_vectored());
-}
-
-#[test]
-fn input_function_gathers_something() {
-    let input_config_store = InputConfigStore::new();
-    let input_parser = InputParser::new(&input_config_store);
-    assert!(input_parser.get_serial_connection().is_write_vectored());
-}
-
-#[test]
-fn process_input_throws_no_errors() {
-    use crate::config_store::DmxConfigStore;
-    use crate::config_store::LedConfigStore;
-
-    let led_config_store = LedConfigStore::new();
-    let dmx_config_store = DmxConfigStore::new();
-    let mut scanners = Scanners::new(&dmx_config_store);
-    let input_config_store = InputConfigStore::new();
-    let mut global_vars_store = GlobalVarsStore::new();
-    let mut input_parser = InputParser::new(&input_config_store);
-    let mut led_renderer = LedRenderer::new(&led_config_store);
-    let mut dmx_renderer = DmxRenderer::new();
-    match input_parser.process_input(&mut led_renderer, &mut scanners, &mut dmx_renderer, &mut global_vars_store) {
-            Ok(_) => 0,
-            Err(error) => panic!("{}", error)
-        };
 }

@@ -22,10 +22,10 @@ pub struct DmxRenderer {
 impl DmxRenderer {
     /// This creates, fills and returns the DmxRenderer object
     /// - opens the serial port to the dmx adapter
-    pub fn new() -> DmxRenderer {
+    pub fn new(serial_input_port: &str) -> DmxRenderer {
         let render_timestamp = Instant::now();
 
-        let port = match SerialPort::open("/dev/ttyUSB0", 115_200) {
+        let port = match SerialPort::open(format!("/dev/{}", serial_input_port), 115_200) {
             Ok(e) => e,
             Err(_) => {
                 logger::log("Failed to open dmx-usb-adapter");
@@ -92,20 +92,4 @@ impl DmxRenderer {
         self.updateable = updateable.unwrap_or(true);
         self.updateable
     }
-}
-
-#[test]
-fn dmx_rendering_works_as_expected() {
-    use std::{thread, time};
-    use crate::config_store::DmxConfigStore;
-
-    let dmx_config_store = DmxConfigStore::new();
-    let scanners = Scanners::new(&dmx_config_store);
-    let mut dmx_renderer = DmxRenderer::new();
-    dmx_renderer.set_updateable(None);
-    thread::sleep(time::Duration::from_millis(100));
-    assert_eq!(dmx_renderer.render(&scanners).unwrap().len(), 513);
-    dmx_renderer.set_updateable(Some(false));
-    thread::sleep(time::Duration::from_millis(100));
-    assert_eq!(dmx_renderer.render(&scanners).unwrap().len(), 0);
 }

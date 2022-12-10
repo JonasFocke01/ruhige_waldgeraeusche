@@ -24,8 +24,7 @@ pub enum MovementMode {
 }
 /// The struct to define how the InputConfigStore should look like
 pub struct InputConfigStore {
-    button_count: u64,
-    input_type: InputType
+    input_ports: Vec<String>
 }
 /// The struct to define how the LedConfigStore should look like
 pub struct LedConfigStore {
@@ -169,27 +168,23 @@ impl InputConfigStore {
             }
         };
 
-        let input_type = match input["input_type"].as_u64().expect("config file does not contain expected sub key input/input_type") {
-                        1 => InputType::Serial,
-                        2 => todo!("RestApi is still not implemented"),
-                        _ => {
-                            logger::log("Unexpected InputType in config.json!");
-                            panic!("Unexpected InputType in config.json!\nAvailable:\n    1: Serial\n    2:RestApi");
-                        }
-                    };
-        
+        let input_ports_key = match input["input_ports"].as_array() {
+            Some(e) => e,
+            None => panic!("config does not contain key input/input_ports (array needed)")
+        };
+
+        let mut input_ports: Vec<String> = vec!();
+        for e in input_ports_key.iter() {
+            input_ports.push(e.as_str().expect("could not convert input/input_ports[i] as_str").to_string());
+        }
+
         InputConfigStore {
-            button_count: input["button_count"].as_u64().expect("config file does not contain expected sub key input/button_count"),
-            input_type: input_type
+            input_ports: input_ports
         }
     }
     /// Returns button_count
-    pub fn get_button_count(&self) -> u64 {
-        self.button_count
-    }
-    /// Returns input_type
-    pub fn get_input_type(&self) -> &InputType {
-        &self.input_type
+    pub fn get_input_ports(&self) -> &Vec<String> {
+        &self.input_ports
     }
 }
 
@@ -344,38 +339,5 @@ impl GlobalVarsStore {
                                             MovementMode::Synchronized => MovementMode::Asynchronized
                                         }
         }
-    }
-}
-
-#[test]
-fn general_config_store_loaded_its_attributes_correctly() {
-    let general_config_store = GeneralConfigStore::new();
-    assert!(general_config_store.get_frame_timing() > 0 as u64);
-}
-
-#[test]
-fn dmx_config_store_loaded_its_attributes_correctly() {
-    let dmx_config_store = DmxConfigStore::new();
-    assert!(dmx_config_store.get_scanner_count() > 0);
-}
-
-#[test]
-fn led_config_store_loaded_its_attributes_correctly() {
-    let led_config_store = LedConfigStore::new();
-    assert!(led_config_store.get_parameter_count() > 0 as u64);
-}
-
-#[test]
-fn input_config_store_loaded_its_attributes_correctly() {
-    let input_config_store = InputConfigStore::new();
-    assert!(input_config_store.get_button_count() > 0 as u64);
-}
-
-#[test]
-fn input_config_store_input_type_loaded_and_parsed_its_attributes_correctly() {
-    let input_config_store = InputConfigStore::new();
-    match input_config_store.get_input_type() {
-        InputType::Serial => (),
-        InputType::RestApi => ()
     }
 }

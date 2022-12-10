@@ -1,7 +1,9 @@
 {
     "input": {
-        "button_count": 5,
-        "input_type": 1
+        "input_ports": [
+            "ttyUSB0",
+            "ttyACM0"
+        ]
     },
     "leds": {
         "led_count_per_strip": 150,

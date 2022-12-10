@@ -3,6 +3,8 @@
 //! Please consult the README for in depth documentation
 
 use std::time::Instant;
+use std::sync::Arc;
+use serial2::SerialPort;
 
 /// Responsible for reading and parsing possible input sources
 pub mod input_parser;
@@ -28,6 +30,14 @@ use config_store::GlobalVarsStore;
 /// logs a message to the predefined file ".log"
 pub mod logger;
 
+/// This describes the to connected Arduino type
+pub enum ArduinoModule {
+    /// describes as a dmx adapter
+    DmxAdapter,
+    /// describes as an input device
+    Input
+}
+
 fn main() {
     //? setup
 
@@ -36,10 +46,23 @@ fn main() {
     let dmx_config_store = DmxConfigStore::new();
     let input_config_store = InputConfigStore::new();
     let mut global_vars_store = GlobalVarsStore::new();
-    let mut input_parser = InputParser::new(&input_config_store);
     let mut led_renderer = LedRenderer::new(&led_config_store);
     let mut scanners = Scanners::new(&dmx_config_store);
-    let mut dmx_renderer = DmxRenderer::new();
+    
+    let input_port_matches: Vec<(ArduinoModule, String)> = map_serial_connections_to_arduino_modules(input_config_store);
+    let mut input_port_paths: Vec<String> = vec!();
+    let mut dmx_adapter_port: &str = "";
+    // Todo: this could be an exceptional info logging
+    for e in input_port_matches.iter() {  
+        match e.0 {
+            ArduinoModule::DmxAdapter => {
+                dmx_adapter_port = &e.1;
+            },
+            ArduinoModule::Input => input_port_paths.push(e.1.to_string())
+        }
+    }
+    let mut input_parser = InputParser::new(input_port_paths);
+    let mut dmx_renderer = DmxRenderer::new(dmx_adapter_port);
 
     //? infinite programmloop whose speed is capped by the FRAME_TIMING attribute
 
@@ -61,5 +84,47 @@ fn main() {
 
         print!("Elapsed: {} | Frame timing: {}\n", fps_limit_timestamp.elapsed().as_millis(), general_config_store.get_frame_timing());
         while fps_limit_timestamp.elapsed().as_millis() < general_config_store.get_frame_timing() as u128 {}
+    }
+}
+
+fn map_serial_connections_to_arduino_modules(input_config_store: InputConfigStore) -> Vec<(ArduinoModule, String)> {
+    let mut to_be_checked_ports: Vec<String> = input_config_store.get_input_ports().to_vec();
+    let mut mapped_inputs = vec!();
+    for port in to_be_checked_ports.iter() {
+        match map_serial_connection_to_arduino_modules(port.to_string()) {
+            Ok(input_module) => mapped_inputs.push((input_module, port.to_string())),
+            Err(_) => ()
+        }
+    }
+    mapped_inputs
+}
+
+fn map_serial_connection_to_arduino_modules(serial_port_path: String) -> Result<ArduinoModule, String> {
+    let port = match SerialPort::open(format!("/dev/{}", serial_port_path).as_str(), 115_200) {
+        Ok(e) => e,
+        Err(_) => {
+            logger::log("Could not open Serial input port");
+            return Err("No input device found".to_string());
+        }
+    };
+    let port = Arc::new(port);
+    let mut buffer: [u8; 512] = [0x00; 512];
+    let mut return_vec = vec!();
+    match port.read(&mut buffer) {
+        Ok(0) => return Err("Input source may be unplugged!".to_string()),
+        Ok(n) => {
+            for i in 0..n {
+                return_vec.push(buffer[i]);
+            }
+        },
+        Err(_) => return Err("Error while reading serial port".to_string())
+    };
+    if return_vec.len() < 1 { return Err("No input found".to_string()); }
+    if return_vec[0] == 69 {
+        return Ok(ArduinoModule::DmxAdapter)
+    } else if return_vec[0] == 96 || return_vec[0] == 1 || return_vec[0] == 2 || return_vec[0] == 3 || return_vec[0] == 5 || return_vec[0] == 4 {
+        return Ok(ArduinoModule::Input)
+    } else {
+        return Err(format!("Correct input device for {} could not be determined\n", serial_port_path))
     }
 }
