@@ -22,7 +22,6 @@ use scanners::Scanners;
 
 /// holding all stores that load and provide configurations or global variables
 pub mod config_store;
-use config_store::GeneralConfigStore;
 use config_store::DmxConfigStore;
 use config_store::LedConfigStore;
 use config_store::InputConfigStore;
@@ -42,8 +41,8 @@ pub enum ArduinoModule {
 fn main() {
     //? setup
 
-    let general_config_store = GeneralConfigStore::new();
     let led_config_store = LedConfigStore::new();
+    let frame_timing = led_config_store.get_frame_timing();
     let dmx_config_store = DmxConfigStore::new();
     let input_config_store = InputConfigStore::new();
     let mut global_vars_store = GlobalVarsStore::new();
@@ -53,7 +52,7 @@ fn main() {
     let input_port_matches: Vec<(ArduinoModule, String)> = map_serial_connections_to_arduino_modules(input_config_store);
     let mut input_port_paths: Vec<String> = vec!();
     let mut dmx_adapter_port: &str = "";
-    // Todo: this could be an exceptional info logging
+    
     for e in input_port_matches.iter() {  
         match e.0 {
             ArduinoModule::DmxAdapter => {
@@ -69,8 +68,9 @@ fn main() {
 
     let mut truncate_peak_ms: u128 = 0;
     let mut truncate_index: u16 = 0;
+    let mut fps_limit_timestamp = Instant::now();
     loop {
-        let fps_limit_timestamp = Instant::now();
+        fps_limit_timestamp = Instant::now();
 
         match led_renderer.render() {
             Ok(_) => (),
@@ -85,10 +85,10 @@ fn main() {
             Err(error) => logging::log(error.as_str(), logging::LogLevel::Warning, true)
         };
 
-        if truncate_index == 600 {
+        if truncate_index == 6000 {
             let mut log_level = logging::LogLevel::Info;
             let mut persist = false;
-            if truncate_peak_ms > 35 {
+            if truncate_peak_ms > frame_timing.into() {
                 log_level = logging::LogLevel::Warning;
                 persist = true;
             }
@@ -99,8 +99,7 @@ fn main() {
             truncate_peak_ms = cmp::max(truncate_peak_ms, fps_limit_timestamp.elapsed().as_millis());
             truncate_index += 1;
         }
-
-        while fps_limit_timestamp.elapsed().as_millis() < general_config_store.get_frame_timing() as u128 {}
+        while(fps_limit_timestamp.elapsed().as_millis() < 1) {  } //This is to not totaly run at max speed and fry the processor
     }
 }
 

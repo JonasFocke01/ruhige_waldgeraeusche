@@ -37,16 +37,13 @@ pub struct LedConfigStore {
     led_invert: u64,
     led_channel: u64,
     pixel_offset: u64,
-    parameter_count: u64
+    parameter_count: u64,
+    frame_timing: u64
 }
 /// The struct to define how the DmxConfigStore should look like
 pub struct DmxConfigStore {
     scanner_count: u8,
     scanner_animation_count: u64
-}
-/// The struct to define how the GeneralConfigStore should look like
-pub struct GeneralConfigStore {
-    frame_timing: u64
 }
 /// The struct to define how the GlobalVarsStore should look like
 pub struct GlobalVarsStore {
@@ -97,6 +94,7 @@ impl LedConfigStore {
             led_invert: leds["led_invert"].as_u64().expect("config file does not contain expected sub key leds/led_invert"),
             led_channel: leds["led_channel"].as_u64().expect("config file does not contain expected sub key leds/led_channel"),
             pixel_offset: leds["pixel_offset"].as_u64().expect("config file does not contain expected sub key leds/pixel_offset"),
+            frame_timing: leds["frame_timing"].as_u64().expect("config file does not contain expected sub key leds/frame_timing"),
             parameter_count: parameter_count
         }
     }
@@ -139,6 +137,10 @@ impl LedConfigStore {
     /// Returns parameter_count
     pub fn get_parameter_count(&self) -> u64 {
         self.parameter_count
+    }
+    /// Returns frame_timing
+    pub fn get_frame_timing(&self) -> u64 {
+        self.frame_timing
     }
 }
 
@@ -232,44 +234,6 @@ impl DmxConfigStore {
     /// Returns the scanner_animation_count
     pub fn get_scanner_animation_count(&self) -> u64 {
         self.scanner_animation_count
-    }
-}
-
-/// Loads and defines general configurations
-impl GeneralConfigStore {
-    /// This creates, fills and returns a GeneralConfigStore object
-    pub fn new() -> GeneralConfigStore {
-        let file = match File::open("config.json") {
-            Ok(e) => e,
-            Err(_) => {
-                logging::log("config file should open read only", logging::LogLevel::Warning, true);
-                panic!("config file should open read only");
-            }
-        };
-
-        let json: serde_json::Value = match serde_json::from_reader(file) {
-            Ok(e) => e,
-            Err(_) => {
-                logging::log("config file should be proper JSON", logging::LogLevel::Warning, true);
-                panic!("config file should be proper JSON");
-            }
-        };
-
-        let input = match json.get("general") {
-            Some(e) => e,
-            None => {
-                logging::log("config file does not contain 'general' key", logging::LogLevel::Warning, true);
-                panic!("config file does not contain 'general' key");
-            }
-        };
-
-        GeneralConfigStore {
-            frame_timing: input["frame_timing"].as_u64().expect("config file does not contain expected sub key general/frame_timing")
-        }
-    }
-    /// Returns frame_timing
-    pub fn get_frame_timing(&self) -> u64 {
-        self.frame_timing
     }
 }
 

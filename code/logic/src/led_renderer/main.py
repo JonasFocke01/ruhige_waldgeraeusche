@@ -23,7 +23,6 @@ LED_BRIGHTNESS      = config["leds"]["led_brightness"]
 LED_INVERT          = config["leds"]["led_invert"]
 LED_CHANNEL         = config["leds"]["led_channel"]
 PIXEL_OFFSET        = config["leds"]["pixel_offset"]
-FRAME_TIMING        = config["general"]["frame_timing"]
 
 physical_strip      = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ,LED_DMA,LED_INVERT,LED_BRIGHTNESS,LED_CHANNEL)
 

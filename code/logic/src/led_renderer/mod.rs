@@ -51,7 +51,9 @@ pub struct LedRenderer<'a> {
     /// The direction the animation goes
     current_direction: Direction,
     /// The combination on where to show the current animation
-    current_combination: Combination
+    current_combination: Combination,
+    /// The time that should pass before the next render
+    frame_timing: u64
 }
 
 /// Responsible for storing and rendering the current pixel state 
@@ -94,6 +96,8 @@ impl<'a> LedRenderer<'a> {
                 panic!("Failed to flush python instance stdin - {}", error);
             }
         };
+
+        let frame_timing = led_config_store.get_frame_timing();
         
         LedRenderer {
             pixels: actual_pixels,
@@ -102,7 +106,8 @@ impl<'a> LedRenderer<'a> {
             render_timestamp: render_timestamp,
             current_animation: Animation::Snake,
             current_direction: Direction::Up,
-            current_combination: Combination::Parallel
+            current_combination: Combination::Parallel,
+            frame_timing: frame_timing
         }
     }
     /// Spawns a snake <br>
@@ -143,7 +148,7 @@ impl<'a> LedRenderer<'a> {
     pub fn render(&mut self) -> Result<Vec<Vec<Vec<f32>>>, String> {
         let mut result_pixels: Vec<Vec<Vec<f32>>> = vec!();
 
-        if self.render_timestamp.elapsed().as_millis() >= 5 {
+        if self.render_timestamp.elapsed().as_millis() >= self.led_config_store.get_frame_timing().into() {
 
             // ? fade
             for strip_i in 0..self.led_config_store.get_strip_count() {
