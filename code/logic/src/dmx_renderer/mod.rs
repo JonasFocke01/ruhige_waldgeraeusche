@@ -1,5 +1,5 @@
 use crate::scanners::Scanners;
-use crate::logger;
+use crate::logging;
 
 use std::time::Instant;
 use serial2::SerialPort;
@@ -26,10 +26,13 @@ impl DmxRenderer {
         let render_timestamp = Instant::now();
 
         let port = match SerialPort::open(format!("/dev/{}", serial_input_port), 115_200) {
-            Ok(e) => e,
+            Ok(e) => {
+                logging::log("Successfully opened dmx-usb-adapter", logging::LogLevel::Info, false);
+                e
+            },
             Err(_) => {
-                logger::log("Failed to open dmx-usb-adapter");
-                panic!("Failed to open dmx-usb-adapter"); // Todo: here it would be best to hold the program until a adapter is detected, instead of panicing
+                logging::log("Failed to open dmx-usb-adapter", logging::LogLevel::Warning, true);
+                panic!("Failed to open dmx-usb-adapter");
             }
         };
 
@@ -87,7 +90,7 @@ impl DmxRenderer {
         Ok(vec!())
     }
     /// sets the updateable field <br>
-    /// toggles if updateable: None
+    /// toggles if updateable = None
     pub fn set_updateable(&mut self, updateable: Option<bool>) -> bool {
         self.updateable = updateable.unwrap_or(true);
         self.updateable

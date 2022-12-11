@@ -1,6 +1,6 @@
 use crate::dmx_renderer::DmxRenderer;
 use crate::config_store::DmxConfigStore;
-use crate::logger;
+use crate::logging;
 
 use std::path::Path;
 
@@ -56,7 +56,7 @@ impl Scanners {
     fn read_scanner_animation_files(dmx_config_store: &DmxConfigStore) -> Vec<Vec<Vec<(u8, u8, bool, bool, bool, bool)>>> {
         let mut animations: Vec<Vec<Vec<(u8, u8, bool, bool, bool, bool)>>> = vec!();
         let scanner_count = dmx_config_store.get_scanner_count();
-        for animation_i in 0..dmx_config_store.get_scanner_animation_count() {
+        for animation_i in 0..dmx_config_store.get_scanner_animation_count() {// Todo: this should be a key in the config.json file
             animations.push(vec!());
             for _ in 0..scanner_count {
                 animations[animation_i as usize].push(vec!());
@@ -78,7 +78,7 @@ impl Scanners {
         let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/scanners/") + animation_file_name).as_str())) {
             Ok(e) => e,
             Err(e) => {
-                logger::log("Error occured while reading animation file");
+                logging::log(format!("Error occured while reading animation file {} {}", animation_file_name, e).as_str(), logging::LogLevel::Warning, true);
                 panic!("Error occured while reading animation file {}\n", e);
             }
         };
@@ -105,6 +105,7 @@ impl Scanners {
             scanner_return_vec[(line_i % 6) - 1 as usize][position_i as usize].4 = dir_in;
             scanner_return_vec[(line_i % 6) - 1 as usize][position_i as usize].5 = dir_out;
         }
+        logging::log(format!("successfully parsed scanner animation file {}", animation_file_name).as_str(), logging::LogLevel::Info, false);
         scanner_return_vec
     }
     /// Increments the animation index <br>
@@ -152,32 +153,32 @@ impl Scanners {
     /// ORANGE    188 <br>
     /// PINK      218
     pub fn set_current_color(&mut self, color: &(f32, f32, f32)) {
-        if color.0 == color.1 && color.0 == color.2 {
-            self.current_color = 0;
-        } else
+        let next_scanner_color: u8;
         if color.0 > 200.0 && color.1 < 30.0 && color.2 < 30.0 {
-            self.current_color = 98;
+            next_scanner_color = 98;
         } else
         if color.0 < 30.0 && color.1 > 200.0 && color.2 < 30.0 {
-            self.current_color = 68;
+            next_scanner_color = 68;
         } else
         if color.0 < 30.0 && color.1 < 30.0 && color.2 > 200.0 {
-            self.current_color = 38;
+            next_scanner_color = 38;
         } else
         if color.0 > color.2 && color.1 > color.2 {
-            self.current_color = 8;
+            next_scanner_color = 8;
         } else
         if color.0 > color.1 && color.2 > color.1 {
-            self.current_color = 128;
+            next_scanner_color = 128;
         } else
         if color.0 > color.1 + 30.0 && color.1 > color.2 + 100.0 {
-            self.current_color = 188;
+            next_scanner_color = 188;
         } else
         if color.0 > color.2 + 30.0 && color.2 > color.1 + 100.0 {
-            self.current_color = 218;
+            next_scanner_color = 218;
         } else {
-            self.current_color = 0;
+            next_scanner_color = 0;
         }
+        logging::log(format!("changed scanner color to {}", next_scanner_color).as_str(), logging::LogLevel::Info, false);
+        self.current_color = next_scanner_color;
     }
     /// Sets the current light mode for up <br>
     /// toggles if light_mode_up: None

@@ -1,6 +1,6 @@
 use crate::config_store::LedConfigStore;
 use crate::config_store::GlobalVarsStore;
-use crate::logger;
+use crate::logging;
 
 use std::time::Instant;
 use std::io::Write;
@@ -78,19 +78,19 @@ impl<'a> LedRenderer<'a> {
                                 .spawn() {
                                     Ok(n) => n,
                                     Err(error) => {
-                                        logger::log(format!("{}", error).as_str());
+                                        logging::log(format!("{}", error).as_str(), logging::LogLevel::Warning, true);
                                         panic!("{}", error);
                                     }
                                 };
         if python_instance.id() <= 0 {
-            logger::log("Failed to spawn python instance!");
+            logging::log("Failed to spawn python instance!", logging::LogLevel::Warning, true);
             panic!("Failed to spawn python instance");
         }
         let mut python_instance_stdin: ChildStdin = python_instance.stdin.unwrap();
         match python_instance_stdin.flush() {
-            Ok(()) => (),
+            Ok(()) => logging::log("successfully created python stdin", logging::LogLevel::Info, false),
             Err(error) => {
-                logger::log("Failed to flush python instance stdin");
+                logging::log("Failed to flush python instance stdin", logging::LogLevel::Warning, true);
                 panic!("Failed to flush python instance stdin - {}", error);
             }
         };
@@ -185,7 +185,7 @@ impl<'a> LedRenderer<'a> {
             if  result_pixels.len() != self.led_config_store.get_strip_count() as usize &&
                 result_pixels[0].len() != self.led_config_store.get_led_count_per_strip() as usize &&
                 result_pixels[0][0].len() != self.led_config_store.get_parameter_count() as usize {
-                    logger::log("result_pixels has the wrong size");
+                    logging::log("result_pixels has the wrong size", logging::LogLevel::Warning, true);
                     panic!("result_pixels has the wrong size");
             }
             self.pixels = result_pixels.to_vec();

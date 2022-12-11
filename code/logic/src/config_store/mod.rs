@@ -1,4 +1,4 @@
-use crate::logger;
+use crate::logging;
 use std::fs::File;
 
 /// Enums all possible input types
@@ -62,7 +62,7 @@ impl LedConfigStore {
         let file = match File::open("config.json") {
             Ok(e) => e,
             Err(_) => {
-                logger::log("config file should open read only");
+                logging::log("config file should open read only", logging::LogLevel::Warning, true);
                 panic!("config file should open read only");
             }
         };
@@ -70,7 +70,7 @@ impl LedConfigStore {
         let json: serde_json::Value = match serde_json::from_reader(file) {
             Ok(e) => e,
             Err(_) => {
-                logger::log("config file should be proper JSON");
+                logging::log("config file should be proper JSON", logging::LogLevel::Warning, true);
                 panic!("config file should be proper JSON");
             }
         };
@@ -78,13 +78,15 @@ impl LedConfigStore {
         let leds = match json.get("leds") {
             Some(e) => e,
             None => {
-                logger::log("config file does not contain 'leds' key");
+                logging::log("config file does not contain 'leds' key", logging::LogLevel::Warning, true);
                 panic!("config file does not contain 'leds' key");
             }
         };
 
+        //Todo: this has no need to be in the config store
         let parameter_count = 6;
 
+        //Todo: cleanup config store
         LedConfigStore {
             led_count_per_strip: leds["led_count_per_strip"].as_u64().expect("config file does not contain expected sub key leds/led_count_per_strip"),
             strip_count: leds["strip_count"].as_u64().expect("config file does not contain expected sub key leds/strip_count"),
@@ -147,7 +149,7 @@ impl InputConfigStore {
         let file = match File::open("config.json") {
             Ok(e) => e,
             Err(_) => {
-                logger::log("config file should open read only");
+                logging::log("config file should open read only", logging::LogLevel::Warning, true);
                 panic!("config file should open read only");
             }
         };
@@ -155,7 +157,7 @@ impl InputConfigStore {
         let json: serde_json::Value = match serde_json::from_reader(file) {
             Ok(e) => e,
             Err(_) => {
-                logger::log("config file should be proper JSON");
+                logging::log("config file should be proper JSON", logging::LogLevel::Warning, true);
                 panic!("config file should be proper JSON");
             }
         };
@@ -163,7 +165,7 @@ impl InputConfigStore {
         let input = match json.get("input") {
             Some(e) => e,
             None => {
-                logger::log("config file does not contain 'input' key");
+                logging::log("config file does not contain 'input' key", logging::LogLevel::Warning, true);
                 panic!("config file does not contain 'input' key");
             }
         };
@@ -197,7 +199,7 @@ impl DmxConfigStore {
         let file = match File::open("config.json") {
             Ok(e) => e,
             Err(_) => {
-                logger::log("config file should open read only");
+                logging::log("config file should open read only", logging::LogLevel::Warning, true);
                 panic!("config file should open read only");
             }
         };
@@ -205,7 +207,7 @@ impl DmxConfigStore {
         let json: serde_json::Value = match serde_json::from_reader(file) {
             Ok(e) => e,
             Err(_) => {
-                logger::log("config file should be proper JSON");
+                logging::log("config file should be proper JSON", logging::LogLevel::Warning, true);
                 panic!("config file should be proper JSON");
             }
         };
@@ -213,7 +215,7 @@ impl DmxConfigStore {
         let dmx = match json.get("dmx") {
             Some(e) => e,
             None => {
-                logger::log("config file does not contain 'dmx' key");
+                logging::log("config file does not contain 'dmx' key", logging::LogLevel::Warning, true);
                 panic!("config file does not contain 'dmx' key");
             }
         };
@@ -240,7 +242,7 @@ impl GeneralConfigStore {
         let file = match File::open("config.json") {
             Ok(e) => e,
             Err(_) => {
-                logger::log("config file should open read only");
+                logging::log("config file should open read only", logging::LogLevel::Warning, true);
                 panic!("config file should open read only");
             }
         };
@@ -248,7 +250,7 @@ impl GeneralConfigStore {
         let json: serde_json::Value = match serde_json::from_reader(file) {
             Ok(e) => e,
             Err(_) => {
-                logger::log("config file should be proper JSON");
+                logging::log("config file should be proper JSON", logging::LogLevel::Warning, true);
                 panic!("config file should be proper JSON");
             }
         };
@@ -256,7 +258,7 @@ impl GeneralConfigStore {
         let input = match json.get("general") {
             Some(e) => e,
             None => {
-                logger::log("config file does not contain 'general' key");
+                logging::log("config file does not contain 'general' key", logging::LogLevel::Warning, true);
                 panic!("config file does not contain 'general' key");
             }
         };

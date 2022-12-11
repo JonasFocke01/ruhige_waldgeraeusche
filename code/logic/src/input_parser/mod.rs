@@ -3,7 +3,7 @@ use crate::dmx_renderer::DmxRenderer;
 use crate::config_store::GlobalVarsStore;
 use crate::config_store::ColorMode;
 use crate::scanners::Scanners;
-use crate::logger;
+use crate::logging;
 
 use std::time::Duration;
 use std::sync::Arc;
@@ -35,7 +35,7 @@ impl InputParser {
             Err(error) => return Err(error)
         };
         if input.len() > 5 && input[0] == 96 && input[1] == 1 && input[2] == 2 && input[3] == 3 && input[4] == 5 && input[5] == 4 {
-            print!("====================================================================================================\n");
+            logging::log("Testinput triggered!", logging::LogLevel::Info, false);
             match global_vars_store.get_color_mode() {
                 ColorMode::Primary => {
                     led_renderer.trigger_current_animation(&global_vars_store.get_primary_color());
@@ -79,14 +79,14 @@ impl InputParser {
             let mut port = match SerialPort::open(format!("/dev/{}", connector).as_str(), 115200) {
                 Ok(e) => e,
                 Err(_) => {
-                    logger::log("Could not open Serial input port");
+                    logging::log(format!("Could not open Serial input port {}", connector).as_str(), logging::LogLevel::Warning, true);
                     panic!("Could not open Serial input port");
                 }
             };
             match port.set_read_timeout(Duration::from_millis(1)) {
                 Ok(()) => Some(0),
                 Err(error) => {
-                    logger::log("set_read_timeout returned an Error");
+                    logging::log(format!("set_read_timeout returned an Error {}", error).as_str(), logging::LogLevel::Warning, true);
                     panic!("set_read_timeout returned an error: {}\n", error);
                 }
             };

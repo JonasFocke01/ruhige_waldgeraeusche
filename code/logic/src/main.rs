@@ -5,6 +5,7 @@
 use std::time::Instant;
 use std::sync::Arc;
 use serial2::SerialPort;
+use std::cmp;
 
 /// Responsible for reading and parsing possible input sources
 pub mod input_parser;
@@ -28,7 +29,7 @@ use config_store::InputConfigStore;
 use config_store::GlobalVarsStore;
 
 /// logs a message to the predefined file ".log"
-pub mod logger;
+pub mod logging;
 
 /// This describes the to connected Arduino type
 pub enum ArduinoModule {
@@ -66,34 +67,56 @@ fn main() {
 
     //? infinite programmloop whose speed is capped by the FRAME_TIMING attribute
 
+    let mut truncate_peak_ms: u128 = 0;
+    let mut truncate_index: u16 = 0;
     loop {
         let fps_limit_timestamp = Instant::now();
 
         match led_renderer.render() {
             Ok(_) => (),
-            Err(error) => logger::log(error.as_str())
+            Err(error) => logging::log(error.as_str(), logging::LogLevel::Warning, true)
         };
         match dmx_renderer.render(&scanners) {
             Ok(_) => (),
-            Err(error) => logger::log(error.as_str())
+            Err(error) => logging::log(error.as_str(), logging::LogLevel::Warning, true)
         }
         match input_parser.process_input(&mut led_renderer, &mut scanners, &mut dmx_renderer, &mut global_vars_store) {
             Ok(_) => (),
-            Err(error) => logger::log(error.as_str())
+            Err(error) => logging::log(error.as_str(), logging::LogLevel::Warning, true)
         };
 
-        print!("Elapsed: {} | Frame timing: {}\n", fps_limit_timestamp.elapsed().as_millis(), general_config_store.get_frame_timing());
+        if truncate_index == 600 {
+            let mut log_level = logging::LogLevel::Info;
+            let mut persist = false;
+            if truncate_peak_ms > 35 {
+                log_level = logging::LogLevel::Warning;
+                persist = true;
+            }
+            logging::log(format!("Peak elapsed ms since last log: {}", truncate_peak_ms.to_string()).as_str(), log_level, persist);
+            truncate_peak_ms = 0;
+            truncate_index = 0;
+        } else {
+            truncate_peak_ms = cmp::max(truncate_peak_ms, fps_limit_timestamp.elapsed().as_millis());
+            truncate_index += 1;
+        }
+
         while fps_limit_timestamp.elapsed().as_millis() < general_config_store.get_frame_timing() as u128 {}
     }
 }
 
 fn map_serial_connections_to_arduino_modules(input_config_store: InputConfigStore) -> Vec<(ArduinoModule, String)> {
-    let mut to_be_checked_ports: Vec<String> = input_config_store.get_input_ports().to_vec();
+    let to_be_checked_ports: Vec<String> = input_config_store.get_input_ports().to_vec();
     let mut mapped_inputs = vec!();
     for port in to_be_checked_ports.iter() {
         match map_serial_connection_to_arduino_modules(port.to_string()) {
             Ok(input_module) => mapped_inputs.push((input_module, port.to_string())),
             Err(_) => ()
+        }
+    }
+    for port in mapped_inputs.iter() {
+        match port.0 {
+            ArduinoModule::Input => logging::log(format!("mapped port {} to Input", port.1).as_str(), logging::LogLevel::Info, false),
+            ArduinoModule::DmxAdapter => logging::log(format!("mapped port {} to DmxAdapter", port.1).as_str(), logging::LogLevel::Info, false)
         }
     }
     mapped_inputs
@@ -103,7 +126,7 @@ fn map_serial_connection_to_arduino_modules(serial_port_path: String) -> Result<
     let port = match SerialPort::open(format!("/dev/{}", serial_port_path).as_str(), 115_200) {
         Ok(e) => e,
         Err(_) => {
-            logger::log("Could not open Serial input port");
+            logging::log(format!("Could not open Serial input port {}", serial_port_path).as_str(), logging::LogLevel::Warning, true);
             return Err("No input device found".to_string());
         }
     };
