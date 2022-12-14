@@ -5,7 +5,7 @@ int button_states[5] = {1, 2, 3, 5, 4};
 unsigned long render_timestamp;
 
 void setup() {
-  Serial.begin(2000000);
+  Serial.begin(1000000);
 
  pinMode(LED_BUILTIN, OUTPUT);
 
