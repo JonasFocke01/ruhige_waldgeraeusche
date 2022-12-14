@@ -6,7 +6,7 @@ int incomming_bytes[512];
 
 void setup()
 {
-  Serial.begin(1000000);
+  Serial.begin(250000);
 
   DmxSimple.usePin(6); // digital output for DMX serial data
 

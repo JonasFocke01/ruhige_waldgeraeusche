@@ -3,7 +3,8 @@
         "input_ports": [
             "ttyUSB0",
             "ttyACM0"
-        ]
+        ],
+        "baud_rate" : 250000
     },
     "leds": {
         "led_count_per_strip": 150,

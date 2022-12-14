@@ -16,6 +16,8 @@ pub enum LogLevel {
 const LOG_LEVEL: LogLevel = LogLevel::Info; // Todo: evaluate if it is worth it to make this to a consolearg
 
 /// This loggs a given message with the given prioritylevel to the console and to a logfile if persist is true.
+/// Todo: divide logs into batches to make logfile more readable
+/// Todo: develop "read-analyse-logfile" function
 pub fn log(message: &str, log_level: LogLevel, persist: bool) {
     let datetime = format!("{}", chrono::offset::Local::now().format("%Y-%m-%d %H:%M:%S"));
     let mut file: fs::File = fs::OpenOptions::new()

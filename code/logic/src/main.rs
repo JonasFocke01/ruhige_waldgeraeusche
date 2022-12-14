@@ -49,7 +49,7 @@ fn main() {
     let mut led_renderer = LedRenderer::new(&led_config_store);
     let mut scanners = Scanners::new(&dmx_config_store);
     
-    let input_port_matches: Vec<(ArduinoModule, String)> = map_serial_connections_to_arduino_modules(input_config_store);
+    let input_port_matches: Vec<(ArduinoModule, String)> = map_serial_connections_to_arduino_modules(&input_config_store);
     let mut input_port_paths: Vec<String> = vec!();
     let mut dmx_adapter_port: &str = "";
     
@@ -61,8 +61,8 @@ fn main() {
             ArduinoModule::Input => input_port_paths.push(e.1.to_string())
         }
     }
-    let mut input_parser = InputParser::new(input_port_paths);
-    let mut dmx_renderer = DmxRenderer::new(dmx_adapter_port);
+    let mut input_parser = InputParser::new(&input_config_store, input_port_paths);
+    let mut dmx_renderer = DmxRenderer::new(&input_config_store, dmx_adapter_port);
 
     //? infinite programmloop whose speed is capped by the FRAME_TIMING attribute
 
@@ -99,15 +99,15 @@ fn main() {
             truncate_peak_ms = cmp::max(truncate_peak_ms, fps_limit_timestamp.elapsed().as_millis());
             truncate_index += 1;
         }
-        while(fps_limit_timestamp.elapsed().as_millis() < 1) {  } //This is to not totaly run at max speed and fry the processor
+        while fps_limit_timestamp.elapsed().as_millis() < 1 {  } //This is to not totaly run at max speed and fry the processor
     }
 }
 
-fn map_serial_connections_to_arduino_modules(input_config_store: InputConfigStore) -> Vec<(ArduinoModule, String)> {
+fn map_serial_connections_to_arduino_modules(input_config_store: &InputConfigStore) -> Vec<(ArduinoModule, String)> {
     let to_be_checked_ports: Vec<String> = input_config_store.get_input_ports().to_vec();
     let mut mapped_inputs = vec!();
     for port in to_be_checked_ports.iter() {
-        match map_serial_connection_to_arduino_modules(port.to_string()) {
+        match map_serial_connection_to_arduino_modules(port.to_string(), input_config_store) {
             Ok(input_module) => mapped_inputs.push((input_module, port.to_string())),
             Err(_) => ()
         }
@@ -121,8 +121,8 @@ fn map_serial_connections_to_arduino_modules(input_config_store: InputConfigStor
     mapped_inputs
 }
 
-fn map_serial_connection_to_arduino_modules(serial_port_path: String) -> Result<ArduinoModule, String> {
-    let port = match SerialPort::open(format!("/dev/{}", serial_port_path).as_str(), 115_200) {
+fn map_serial_connection_to_arduino_modules(serial_port_path: String, input_config_store: &InputConfigStore) -> Result<ArduinoModule, String> {
+    let port = match SerialPort::open(format!("/dev/{}", serial_port_path).as_str(), input_config_store.get_baud_rate() as u32) {
         Ok(e) => e,
         Err(_) => {
             logging::log(format!("Could not open Serial input port {}", serial_port_path).as_str(), logging::LogLevel::Warning, true);

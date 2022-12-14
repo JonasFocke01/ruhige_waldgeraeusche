@@ -2,6 +2,7 @@ use crate::led_renderer::LedRenderer;
 use crate::dmx_renderer::DmxRenderer;
 use crate::config_store::GlobalVarsStore;
 use crate::config_store::ColorMode;
+use crate::config_store::InputConfigStore;
 use crate::scanners::Scanners;
 use crate::logging;
 
@@ -20,9 +21,9 @@ impl InputParser {
     /// This creates, fills and returns the InputParser object
     /// - opens and configures the serial input port
     /// - calculates bpm based on a hardcoded start beat_duration
-    pub fn new(connected_modules: Vec<String>) -> InputParser {
+    pub fn new(input_config_store: &InputConfigStore, connected_modules: Vec<String>) -> InputParser {
 
-        let module_connectors = Self::spawn_module_connectors(connected_modules);
+        let module_connectors = Self::spawn_module_connectors(connected_modules, input_config_store.get_baud_rate());
         
         InputParser {
             module_connectors: module_connectors
@@ -73,10 +74,10 @@ impl InputParser {
         Ok(return_vec)
     }
     /// This spawns and returns all available connectors
-    pub fn spawn_module_connectors(connectors_to_spawn: Vec<String>) -> Vec<Arc<SerialPort>> {
+    pub fn spawn_module_connectors(connectors_to_spawn: Vec<String>, baud_rate: u64) -> Vec<Arc<SerialPort>> {
         let mut connectors: Vec<Arc<SerialPort>> = vec!();
         for connector in connectors_to_spawn.iter() {
-            let mut port = match SerialPort::open(format!("/dev/{}", connector).as_str(), 115200) {
+            let mut port = match SerialPort::open(format!("/dev/{}", connector).as_str(), baud_rate as u32) {
                 Ok(e) => e,
                 Err(_) => {
                     logging::log(format!("Could not open Serial input port {}", connector).as_str(), logging::LogLevel::Warning, true);

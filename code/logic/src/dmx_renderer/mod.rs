@@ -1,3 +1,4 @@
+use crate::config_store::InputConfigStore;
 use crate::scanners::Scanners;
 use crate::logging;
 
@@ -22,10 +23,10 @@ pub struct DmxRenderer {
 impl DmxRenderer {
     /// This creates, fills and returns the DmxRenderer object
     /// - opens the serial port to the dmx adapter
-    pub fn new(serial_input_port: &str) -> DmxRenderer {
+    pub fn new(input_config_store: &InputConfigStore, serial_input_port: &str) -> DmxRenderer {
         let render_timestamp = Instant::now();
 
-        let port = match SerialPort::open(format!("/dev/{}", serial_input_port), 115_200) {
+        let port = match SerialPort::open(format!("/dev/{}", serial_input_port), input_config_store.get_baud_rate() as u32) {
             Ok(e) => {
                 logging::log("Successfully opened dmx-usb-adapter", logging::LogLevel::Info, false);
                 e

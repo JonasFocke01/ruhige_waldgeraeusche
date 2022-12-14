@@ -24,7 +24,8 @@ pub enum MovementMode {
 }
 /// The struct to define how the InputConfigStore should look like
 pub struct InputConfigStore {
-    input_ports: Vec<String>
+    input_ports: Vec<String>,
+    baud_rate: u64
 }
 /// The struct to define how the LedConfigStore should look like
 pub struct LedConfigStore {
@@ -183,12 +184,16 @@ impl InputConfigStore {
         }
 
         InputConfigStore {
-            input_ports: input_ports
+            input_ports: input_ports,
+            baud_rate: input["baud_rate"].as_u64().expect("config file does not contain expected sub key input/baud_rate"),
         }
     }
     /// Returns button_count
     pub fn get_input_ports(&self) -> &Vec<String> {
         &self.input_ports
+    }
+    pub fn get_baud_rate(&self) -> u64 {
+        self.baud_rate
     }
 }
 
