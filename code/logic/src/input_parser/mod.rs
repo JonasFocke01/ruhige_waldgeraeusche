@@ -54,9 +54,7 @@ impl InputParser {
     /// gathers input from the configured input source
     pub fn gather_input(&mut self) -> Result<Vec<u8>, String> {
         let mut return_vec: Vec<u8> = vec!();
-
-        // ?process inputs
-                
+      
         for port in self.module_connectors.iter() {
             let mut buffer: [u8; 512] = [0x00; 512];
 
