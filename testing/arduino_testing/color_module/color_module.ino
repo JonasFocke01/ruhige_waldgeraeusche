@@ -1,0 +1,205 @@
+#include <Adafruit_NeoPixel.h>
+
+#define BUTTON_COUNT 11
+#define BUTTON_ROW_START_PIN 10
+#define BUTTON_ROW_COUNT 3
+#define BUTTON_COL_START_PIN 6
+#define BUTTON_COL_COUNT 4
+
+unsigned long timestamp = 0;
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(11, A2, NEO_GRB + NEO_KHZ800);
+int index = 0;
+
+// (rows + special-buttons) * cols
+bool button_click_states            [BUTTON_ROW_COUNT + 1][BUTTON_COL_COUNT];
+bool button_click_prevent_ghosting  [BUTTON_ROW_COUNT + 1][BUTTON_COL_COUNT];
+
+int fader_read = 0;
+int fader_dest = 0;
+int saved_fader_dest = 512;
+int fader_read_dest_diff = 0;
+bool fader_motor_write = true;
+int active_color = 10;
+
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(BUTTON_ROW_START_PIN + 0, OUTPUT);
+  pinMode(BUTTON_ROW_START_PIN + 1, OUTPUT);
+  pinMode(BUTTON_ROW_START_PIN + 2, OUTPUT);
+  digitalWrite(BUTTON_ROW_START_PIN + 0, HIGH);
+  digitalWrite(BUTTON_ROW_START_PIN + 1, HIGH);
+  digitalWrite(BUTTON_ROW_START_PIN + 2, HIGH);
+
+  // special button
+  pinMode(4, OUTPUT);
+  digitalWrite(4, LOW);
+  pinMode(2, INPUT_PULLUP);
+
+
+  pinMode(BUTTON_COL_START_PIN + 0, INPUT_PULLUP);
+  pinMode(BUTTON_COL_START_PIN + 1, INPUT_PULLUP);
+  pinMode(BUTTON_COL_START_PIN + 2, INPUT_PULLUP);
+  pinMode(BUTTON_COL_START_PIN + 3, INPUT_PULLUP);
+
+  // poti
+  pinMode(A1, INPUT);
+
+  // motor fader
+  pinMode(3, OUTPUT);
+  pinMode(5, OUTPUT);
+
+  pixels.begin();
+}
+
+void loop() {
+  read_buttons();
+
+  process_logic();
+
+  move_fader();
+
+  write_leds();
+
+  // write_serial();
+}
+
+void process_logic() {
+  if (button_click_states[3][0] != button_click_prevent_ghosting[3][0]) {
+    if (button_click_states[3][0]) {
+      fader_dest = 0;
+      fader_motor_write = true;
+      fader_dest = random(0, 1023);
+    } else {
+      //fader_dest = saved_fader_dest;
+      fader_motor_write = true;
+    }
+    button_click_prevent_ghosting[3][0] = button_click_states[3][0];
+  }
+
+  if (button_click_states[0][1]) {
+    active_color = 0;
+  } else if (button_click_states[0][2]) {
+    active_color = 1;
+  } else if (button_click_states[1][0]) {
+    active_color = 2;
+  } else if (button_click_states[1][1]) {
+    active_color = 3;
+  } else if (button_click_states[1][2]) {
+    active_color = 4;
+  } else if (button_click_states[1][3]) {
+    active_color = 9;
+  } else if (button_click_states[2][0]) {
+    active_color = 10;
+  } else if (button_click_states[2][1]) {
+    active_color = 7;
+  } else if (button_click_states[2][2]) {
+    active_color = 8;
+  } else if (button_click_states[2][3]) {
+    active_color = 5;
+  }
+}
+
+void write_leds() {
+  timestamp = millis();
+  int timestamp_led_blinkable = (timestamp / 150) % 2 == 0;
+  int timestamp_color_fadeable = timestamp / 50;
+  pixels.setPixelColor(0,  pixels.Color(220, 200,   0));
+  pixels.setPixelColor(1,  pixels.Color(  0, 255,   0));
+  pixels.setPixelColor(9,  pixels.Color( 67, 216, 201));
+  pixels.setPixelColor(5,  pixels.Color(  0,   0, 255));
+  pixels.setPixelColor(8,  pixels.Color(238, 130, 238));
+  pixels.setPixelColor(7,  pixels.Color(255, 192, 203));
+  pixels.setPixelColor(2,  pixels.Color(255, 165,   0));
+  pixels.setPixelColor(10, pixels.Color(255,   0,   0));
+  pixels.setPixelColor(3,  pixels.Color(timestamp_color_fadeable % 255, timestamp_color_fadeable % 70, timestamp_color_fadeable % 150));
+  pixels.setPixelColor(4,  pixels.Color(250, 250, 250));
+
+  switch (active_color) {
+    case 0 :
+      pixels.setPixelColor(0,  pixels.Color(220 * timestamp_led_blinkable, 200 * timestamp_led_blinkable,   0 * timestamp_led_blinkable));
+      break;
+    case 1 :
+      pixels.setPixelColor(1,  pixels.Color(  0 * timestamp_led_blinkable, 255 * timestamp_led_blinkable,   0 * timestamp_led_blinkable));
+      break;
+    case 9 :
+      pixels.setPixelColor(9,  pixels.Color( 67 * timestamp_led_blinkable, 216 * timestamp_led_blinkable, 201 * timestamp_led_blinkable));
+      break;
+    case 5 :
+      pixels.setPixelColor(5,  pixels.Color(  0 * timestamp_led_blinkable,   0 * timestamp_led_blinkable, 255 * timestamp_led_blinkable));
+      break;
+    case 8 :
+      pixels.setPixelColor(8,  pixels.Color(238 * timestamp_led_blinkable, 130 * timestamp_led_blinkable, 238 * timestamp_led_blinkable));
+      break;
+    case 7 :
+      pixels.setPixelColor(7,  pixels.Color(255 * timestamp_led_blinkable, 192 * timestamp_led_blinkable, 203 * timestamp_led_blinkable));
+      break;
+    case 2 :
+      pixels.setPixelColor(2,  pixels.Color(255 * timestamp_led_blinkable, 165 * timestamp_led_blinkable,   0 * timestamp_led_blinkable));
+      break;
+    case 10:
+      pixels.setPixelColor(10, pixels.Color(255 * timestamp_led_blinkable,   0 * timestamp_led_blinkable,   0 * timestamp_led_blinkable));
+      break;
+    case 3 :
+      pixels.setPixelColor(3,  pixels.Color((timestamp_color_fadeable % 255) * timestamp_led_blinkable, (timestamp_color_fadeable % 150) * timestamp_led_blinkable, (timestamp_color_fadeable % 90) * timestamp_led_blinkable));
+      break;
+    case 4 :
+      pixels.setPixelColor(4,  pixels.Color(250 * timestamp_led_blinkable, 250 * timestamp_led_blinkable, 250 * timestamp_led_blinkable));
+      break;
+  }
+  pixels.show();
+}
+
+void read_buttons() {
+
+  for (int i = 0; i < BUTTON_ROW_COUNT; i++) {
+    if (i > 0) {
+      digitalWrite(BUTTON_ROW_START_PIN + i - 1, HIGH);
+    }
+    digitalWrite(BUTTON_ROW_START_PIN + i, LOW);
+    for (int j = 0; j < BUTTON_COL_COUNT; j++) {
+      if (!digitalRead(j + BUTTON_COL_START_PIN)) {
+        button_click_states[i][j] = true;
+      } else {
+        button_click_states[i][j] = false;
+      }
+      if ( button_click_states[i][j] ) {
+        Serial.print("    ");
+        Serial.print(i);
+        Serial.print("/");
+        Serial.print(j);
+        Serial.print("\n");
+      }
+    }
+  }
+  digitalWrite(BUTTON_ROW_START_PIN + BUTTON_ROW_COUNT - 1, HIGH);
+
+  // special button
+  if (!digitalRead(2)) {
+    button_click_states[3][0] = true;
+    Serial.println("Special button is pressed");
+  } else {
+    button_click_states[3][0] = false;
+  }
+
+  // poti
+  fader_read = map(analogRead(A1), 0, 1023, 1023, 0);
+  fader_read_dest_diff = abs(fader_read - fader_dest);
+}
+
+void move_fader() {
+  if ( fader_read_dest_diff > 2 && fader_motor_write ) {
+    if ( fader_read < fader_dest ) {
+      analogWrite(3, 0);
+      analogWrite(5, map(fader_read_dest_diff, 0, 1023, 90, 250));
+    } else {
+      analogWrite(3, map(fader_read_dest_diff, 0, 1023, 90, 250));
+      analogWrite(5, 0);
+    }
+  } else {
+    fader_motor_write = false;
+    saved_fader_dest = fader_read;
+    analogWrite(3, 0);
+    analogWrite(5, 0);
+  }
+}
