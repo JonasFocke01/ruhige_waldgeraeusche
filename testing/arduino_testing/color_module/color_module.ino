@@ -17,12 +17,13 @@ bool button_click_prevent_ghosting  [BUTTON_ROW_COUNT + 1][BUTTON_COL_COUNT];
 int fader_read = 0;
 int fader_dest = 0;
 int saved_fader_dest = 512;
+int fader_last_read = 0;
 int fader_read_dest_diff = 0;
 bool fader_motor_write = true;
 int active_color = 10;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(250000);
 
   pinMode(BUTTON_ROW_START_PIN + 0, OUTPUT);
   pinMode(BUTTON_ROW_START_PIN + 1, OUTPUT);
@@ -53,6 +54,8 @@ void setup() {
 }
 
 void loop() {
+  Serial.write(2);
+
   read_buttons();
 
   process_logic();
@@ -60,8 +63,6 @@ void loop() {
   move_fader();
 
   write_leds();
-
-  // write_serial();
 }
 
 void process_logic() {
@@ -71,7 +72,6 @@ void process_logic() {
       fader_motor_write = true;
       fader_dest = random(0, 1023);
     } else {
-      //fader_dest = saved_fader_dest;
       fader_motor_write = true;
     }
     button_click_prevent_ghosting[3][0] = button_click_states[3][0];
@@ -79,24 +79,44 @@ void process_logic() {
 
   if (button_click_states[0][1]) {
     active_color = 0;
+    Serial.write(25);
+    Serial.write(1);
   } else if (button_click_states[0][2]) {
     active_color = 1;
+    Serial.write(24);
+    Serial.write(1);
   } else if (button_click_states[1][0]) {
     active_color = 2;
+    Serial.write(21);
+    Serial.write(1);
   } else if (button_click_states[1][1]) {
     active_color = 3;
+    Serial.write(29);
+    Serial.write(1);
   } else if (button_click_states[1][2]) {
     active_color = 4;
+    Serial.write(26);
+    Serial.write(1);
   } else if (button_click_states[1][3]) {
     active_color = 9;
+    Serial.write(27);
+    Serial.write(1);
   } else if (button_click_states[2][0]) {
     active_color = 10;
+    Serial.write(20);
+    Serial.write(1);
   } else if (button_click_states[2][1]) {
     active_color = 7;
+    Serial.write(28);
+    Serial.write(1);
   } else if (button_click_states[2][2]) {
     active_color = 8;
+    Serial.write(22);
+    Serial.write(1);
   } else if (button_click_states[2][3]) {
     active_color = 5;
+    Serial.write(23);
+    Serial.write(1);
   }
 }
 
@@ -164,11 +184,11 @@ void read_buttons() {
         button_click_states[i][j] = false;
       }
       if ( button_click_states[i][j] ) {
-        Serial.print("    ");
-        Serial.print(i);
-        Serial.print("/");
-        Serial.print(j);
-        Serial.print("\n");
+        // Serial.print("    ");
+        // Serial.print(i);
+        // Serial.print("/");
+        // Serial.print(j);
+        // Serial.print("\n");
       }
     }
   }
@@ -177,13 +197,19 @@ void read_buttons() {
   // special button
   if (!digitalRead(2)) {
     button_click_states[3][0] = true;
-    Serial.println("Special button is pressed");
+    Serial.write(30);
+    Serial.write(1);
+    // Serial.println("Special button is pressed");
   } else {
     button_click_states[3][0] = false;
   }
 
   // poti
   fader_read = map(analogRead(A1), 0, 1023, 1023, 0);
+  if (fader_read != fader_last_read && !fader_motor_write) {
+    Serial.write(31);
+    Serial.write(map(fader_read, 0, 1023, 0, 255));
+  }
   fader_read_dest_diff = abs(fader_read - fader_dest);
 }
 
