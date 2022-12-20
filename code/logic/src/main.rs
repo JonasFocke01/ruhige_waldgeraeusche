@@ -92,6 +92,7 @@ fn main() {
                 log_level = logging::LogLevel::Warning;
                 persist = true;
             }
+            scanners.trigger_next_step(&mut dmx_renderer);
             logging::log(format!("Peak elapsed ms since last log: {}", truncate_peak_ms.to_string()).as_str(), log_level, persist);
             truncate_peak_ms = 0;
             truncate_index = 0;

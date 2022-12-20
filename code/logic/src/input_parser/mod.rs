@@ -31,7 +31,7 @@ impl InputParser {
     }
     /// acts acordingly to the processed input gathered by gather_input()
     pub fn process_input(&mut self, led_renderer: &mut LedRenderer, scanners: &mut Scanners, dmx_renderer: &mut DmxRenderer, global_vars_store: &mut GlobalVarsStore) -> Result<Vec<u8>, String> {
-        let input: Vec<u8> = match InputParser::gather_input(self) {
+        let mut input: Vec<u8> = match InputParser::gather_input(self) {
             Ok(e) => e,
             Err(error) => return Err(error)
         };
@@ -54,10 +54,62 @@ impl InputParser {
         //         print!("{}\n", byte);
         //     }
         // }
-
-        /// This if-else block will grow extremely large
-        print!("{:?}\n", input);
-        if (inupt)
+        
+        /// ! This is the matching of input to functions
+        while input.len() >= 2 {
+            match input.remove(0) {
+                1..=19 => (),
+                20 => { // Color to red
+                    scanners.set_current_color(dmx_renderer, 60);
+                    input.remove(0);
+                },
+                21 => { // color to orange
+                    scanners.set_current_color(dmx_renderer, 103);
+                    input.remove(0);
+                },
+                22 => { // color to Purple
+                    scanners.set_current_color(dmx_renderer, 80);
+                    input.remove(0);
+                },
+                23 => { // color to blue
+                    scanners.set_current_color(dmx_renderer, 89);
+                    input.remove(0);
+                },
+                24 => { // color to green
+                    scanners.set_current_color(dmx_renderer, 49);
+                    input.remove(0);
+                },
+                25 => { // color to yellow
+                    scanners.set_current_color(dmx_renderer, 16);
+                    input.remove(0);
+                },
+                26 => { // color to white
+                    scanners.set_current_color(dmx_renderer, 0);
+                    input.remove(0);
+                },
+                27 => { // color to light blue
+                    scanners.set_current_color(dmx_renderer, 34);
+                    input.remove(0);
+                },
+                28 => { // color to pink
+                    scanners.set_current_color(dmx_renderer, 117);
+                    input.remove(0);
+                },
+                29 => {
+                    scanners.set_current_color(dmx_renderer, 0);// Todo: implement rainbow effect for scanners
+                    input.remove(0);
+                },
+                30 => {
+                    // Todo: implement something for smart color transition
+                    input.remove(0);
+                },
+                30 => {
+                    // Todo: implement something for color transition
+                    input.remove(0);
+                }
+                _ => ()
+            }
+        }
         
         Ok(input)
     }

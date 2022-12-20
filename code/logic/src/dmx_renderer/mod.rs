@@ -92,8 +92,7 @@ impl DmxRenderer {
     }
     /// sets the updateable field <br>
     /// toggles if updateable = None
-    pub fn set_updateable(&mut self, updateable: Option<bool>) -> bool {
+    pub fn set_updateable(&mut self, updateable: Option<bool>) {
         self.updateable = updateable.unwrap_or(true);
-        self.updateable
     }
 }

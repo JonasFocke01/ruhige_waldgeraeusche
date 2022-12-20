@@ -144,41 +144,46 @@ impl Scanners {
     /// sets the current color by processing the given three bytes into one <br>
     /// Available colors by the here used JB Systems LED Victory Scan are <br>
     /// WHITE       0 <br>
-    /// YELLOW      8 <br>
-    /// BLUE       38 <br>
-    /// GREEN      68 <br>
-    /// RED        98 <br>
-    /// PURPLE    128 <br>
-    /// DARK_BLUE 158 <br>
-    /// ORANGE    188 <br>
-    /// PINK      218
-    pub fn set_current_color(&mut self, color: &(f32, f32, f32)) {
-        let next_scanner_color: u8;
-        if color.0 > 200.0 && color.1 < 30.0 && color.2 < 30.0 {
-            next_scanner_color = 98;
-        } else
-        if color.0 < 30.0 && color.1 > 200.0 && color.2 < 30.0 {
-            next_scanner_color = 68;
-        } else
-        if color.0 < 30.0 && color.1 < 30.0 && color.2 > 200.0 {
-            next_scanner_color = 38;
-        } else
-        if color.0 > color.2 && color.1 > color.2 {
-            next_scanner_color = 8;
-        } else
-        if color.0 > color.1 && color.2 > color.1 {
-            next_scanner_color = 128;
-        } else
-        if color.0 > color.1 + 30.0 && color.1 > color.2 + 100.0 {
-            next_scanner_color = 188;
-        } else
-        if color.0 > color.2 + 30.0 && color.2 > color.1 + 100.0 {
-            next_scanner_color = 218;
-        } else {
-            next_scanner_color = 0;
-        }
-        logging::log(format!("changed scanner color to {}", next_scanner_color).as_str(), logging::LogLevel::Info, false);
-        self.current_color = next_scanner_color;
+    /// YELLOW     16 <br>
+    /// BLUE       89 <br>
+    /// GREEN      49 <br>
+    /// RED        60 <br>
+    /// PURPLE     80 <br>
+    /// DARK_BLUE  93 <br>
+    /// PINK      117 <br>
+    /// ORANGE    188
+    pub fn set_current_color(&mut self, dmx_renderer: &mut DmxRenderer, color: u8/*&(f32, f32, f32)*/) {// Todo: implement corrent color mapping
+        //let next_scanner_color: u8;
+        // if color.0 > 200.0 && color.1 < 30.0 && color.2 < 30.0 {
+        //     next_scanner_color = 60; // Red
+        // } else
+        // if color.0 < 30.0 && color.1 > 200.0 && color.2 < 30.0 {
+        //     next_scanner_color = 49; // Green
+        // } else
+        // if color.0 < 30.0 && color.1 < 30.0 && color.2 > 200.0 {
+        //     next_scanner_color = 34; // Dark Blue
+        // } else
+        // if color.0 > color.2 && color.1 > color.2 {
+        //     next_scanner_color = 16; // Yellow
+        // } else
+        // if color.0 > color.1 && color.2 > color.1 {
+        //     next_scanner_color = 80; // Purple
+        // } else
+        // if color.0 > color.1 + 30.0 && color.1 > color.2 + 100.0 {
+        //     next_scanner_color = 188; // Orange
+        // } else
+        // if color.0 > color.2 + 30.0 && color.2 > color.1 + 100.0 {
+        //     next_scanner_color = 117; // Pink
+        // } else
+        // if color.2 > color.0 + 60.0 && color.0 < color.1 + 100.0 {
+        //     next_scanner_color = 80; // Blue
+        // }        
+        // else {
+        //     next_scanner_color = 0; // White
+        // }
+        logging::log(format!("changed scanner color to {}", color).as_str(), logging::LogLevel::Info, false);
+        self.current_color = color;
+        dmx_renderer.set_updateable(Some(true));
     }
     /// Sets the current light mode for up <br>
     /// toggles if light_mode_up: None
