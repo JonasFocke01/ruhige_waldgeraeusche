@@ -35,23 +35,34 @@ impl InputParser {
             Ok(e) => e,
             Err(error) => return Err(error)
         };
-        if input.len() > 5 && input[0] == 96 && input[1] == 1 && input[2] == 2 && input[3] == 3 && input[4] == 5 && input[5] == 4 {
-            logging::log("Testinput triggered!", logging::LogLevel::Info, false);
-            match global_vars_store.get_color_mode() {
-                ColorMode::Primary => {
-                    led_renderer.trigger_current_animation(&global_vars_store.get_primary_color());
-                    scanners.trigger_next_step(dmx_renderer);
-                },
-                ColorMode::Complementary => {
-                    led_renderer.trigger_current_animation(&global_vars_store.get_secondary_color());
-                    scanners.trigger_next_step(dmx_renderer);
-                }
-            }
-        }
+        // if input.len() > 5 && input[0] == 96 && input[1] == 1 && input[2] == 2 && input[3] == 3 && input[4] == 5 && input[5] == 4 {
+        //     logging::log("Testinput triggered!", logging::LogLevel::Info, false);
+        //     match global_vars_store.get_color_mode() {
+        //         ColorMode::Primary => {
+        //             led_renderer.trigger_current_animation(&global_vars_store.get_primary_color());
+        //             scanners.trigger_next_step(dmx_renderer);
+        //         },
+        //         ColorMode::Complementary => {
+        //             led_renderer.trigger_current_animation(&global_vars_store.get_secondary_color());
+        //             scanners.trigger_next_step(dmx_renderer);
+        //         }
+        //     }
+        // }
+        // // print!("--------------------------------\n");
+        // for byte in input.iter() {
+        //     if *byte != 2 {
+        //         print!("{}\n", byte);
+        //     }
+        // }
+
+        /// This if-else block will grow extremely large
+        print!("{:?}\n", input);
+        if (inupt)
         
         Ok(input)
     }
     /// gathers input from the configured input source
+    /// Todo: this should happen in a sepparate thread for performance reasons
     pub fn gather_input(&mut self) -> Result<Vec<u8>, String> {
         let mut return_vec: Vec<u8> = vec!();
       

@@ -109,7 +109,7 @@ fn map_serial_connections_to_arduino_modules(input_config_store: &InputConfigSto
     for port in to_be_checked_ports.iter() {
         match map_serial_connection_to_arduino_modules(port.to_string(), input_config_store) {
             Ok(input_module) => mapped_inputs.push((input_module, port.to_string())),
-            Err(_) => ()
+            Err(e) => logging::log(e.as_str(), logging::LogLevel::Warning, true)
         }
     }
     for port in mapped_inputs.iter() {
@@ -125,8 +125,7 @@ fn map_serial_connection_to_arduino_modules(serial_port_path: String, input_conf
     let port = match SerialPort::open(format!("/dev/{}", serial_port_path).as_str(), input_config_store.get_baud_rate() as u32) {
         Ok(e) => e,
         Err(_) => {
-            logging::log(format!("Could not open Serial input port {}", serial_port_path).as_str(), logging::LogLevel::Warning, true);
-            return Err("No input device found".to_string());
+            return Err(format!("Could not open Serial input port {}", serial_port_path));
         }
     };
     let port = Arc::new(port);
@@ -139,12 +138,14 @@ fn map_serial_connection_to_arduino_modules(serial_port_path: String, input_conf
                 return_vec.push(buffer[i]);
             }
         },
-        Err(_) => return Err("Error while reading serial port".to_string())
+        Err(e) => return Err(format!("Error while reading serial port: {} {}", serial_port_path, e))
     };
     if return_vec.len() < 1 { return Err("No input found".to_string()); }
-    if return_vec[0] == 69 {
+
+    // print!("{:?}\n", return_vec);
+    if return_vec[0] == 69 { //Todo: this should be 1
         return Ok(ArduinoModule::DmxAdapter)
-    } else if return_vec[0] == 96 || return_vec[0] == 1 || return_vec[0] == 2 || return_vec[0] == 3 || return_vec[0] == 5 || return_vec[0] == 4 {
+    } else if return_vec[0] == 2 {
         return Ok(ArduinoModule::Input)
     } else {
         return Err(format!("Correct input device for {} could not be determined\n", serial_port_path))
