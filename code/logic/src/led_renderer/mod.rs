@@ -75,6 +75,8 @@ pub struct LedRenderer<'a> {
     /// color_transition_steps: 10.0 <br>
     /// current_color next iteration: (90.0, 90.0, 90.0)
     color_transition_steps: f32,
+    /// if the rainbow mode is active (true), the color changes rapidly and unpredictable
+    rainbow_mode: bool
 }
 
 /// Responsible for storing and rendering the current pixel state 
@@ -128,7 +130,8 @@ impl<'a> LedRenderer<'a> {
             current_combination: Combination::Parallel,
             current_color: (255.0, 0.0, 0.0),
             dest_color: (100.0, 100.0, 100.0),
-            color_transition_steps: 0.0
+            color_transition_steps: 0.0,
+            rainbow_mode: false
         }
     }
     /// Spawns a snake <br>
@@ -179,6 +182,18 @@ impl<'a> LedRenderer<'a> {
         let mut result_pixels: Vec<Vec<Led>> = vec!();
 
         if self.render_timestamp.elapsed().as_millis() >= self.led_config_store.get_frame_timing().into() {
+
+            // ? rainbow mode
+
+            if self.rainbow_mode {
+                let new_color = (
+                    if self.current_color.0 < 255.0 { self.current_color.0 + 1.0 } else { 0.0 },
+                    if self.current_color.1 < 255.0 { self.current_color.1 + 5.0 } else { 0.0 },
+                    if self.current_color.2 < 255.0 { self.current_color.2 + 20.0 } else { 0.0 },
+                );
+                self.current_color = new_color;
+                self.dest_color = new_color;
+            }
 
             //  Todo: repair: pixel fading is broken
 
@@ -307,5 +322,9 @@ impl<'a> LedRenderer<'a> {
     /// Sets the color transition steps
     pub fn set_color_transition_steps(&mut self, transition_steps: f32) {
         self.color_transition_steps = transition_steps;
+    }
+    /// Sets the rainbox mode
+    pub fn set_rainbow_mode(&mut self, new_mode: bool) {
+        self.rainbow_mode = new_mode;
     }
 }

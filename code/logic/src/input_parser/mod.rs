@@ -60,52 +60,61 @@ impl InputParser {
                 20 => { // Color to red
                     scanners.set_current_color(dmx_renderer, 60);
                     led_renderer.set_current_color((255.0, 0.0, 0.0));
+                    led_renderer.set_rainbow_mode(false);
                     input.remove(0);
                 },
                 21 => { // color to orange
                     scanners.set_current_color(dmx_renderer, 103);
                     led_renderer.set_current_color((255.0, 165.0, 0.0));
+                    led_renderer.set_rainbow_mode(false);
                     input.remove(0);
                 },
                 22 => { // color to Purple
                     scanners.set_current_color(dmx_renderer, 80);
                     led_renderer.set_current_color((128.0, 0.0, 128.0));
+                    led_renderer.set_rainbow_mode(false);
                     input.remove(0);
                 },
                 23 => { // color to blue
                     scanners.set_current_color(dmx_renderer, 89);
                     led_renderer.set_current_color((0.0, 0.0, 255.0));
+                    led_renderer.set_rainbow_mode(false);
                     input.remove(0);
                 },
                 24 => { // color to green
                     scanners.set_current_color(dmx_renderer, 49);
                     led_renderer.set_current_color((0.0, 255.0, 0.0));
+                    led_renderer.set_rainbow_mode(false);
                     input.remove(0);
                 },
                 25 => { // color to yellow
                     scanners.set_current_color(dmx_renderer, 16);
                     led_renderer.set_current_color((255.0, 255.0, 0.0));
+                    led_renderer.set_rainbow_mode(false);
                     input.remove(0);
                 },
                 26 => { // color to white
                     scanners.set_current_color(dmx_renderer, 0);
                     led_renderer.set_current_color((255.0, 255.0, 255.0));
+                    led_renderer.set_rainbow_mode(false);
                     input.remove(0);
                 },
                 27 => { // color to light blue
                     scanners.set_current_color(dmx_renderer, 34);
                     led_renderer.set_current_color((173.0, 216.0, 230.0));
+                    led_renderer.set_rainbow_mode(false);
                     input.remove(0);
                 },
                 28 => { // color to pink
                     scanners.set_current_color(dmx_renderer, 117);
                     led_renderer.set_current_color((255.0, 182.0, 193.0));
+                    led_renderer.set_rainbow_mode(false);
                     input.remove(0);
                 },
                 29 => {
                     scanners.set_current_color(dmx_renderer, 0);
                     // Todo: implement rainbow effect for scanners and 
-                    // Todo: implement rainbow effect for led strips
+                    led_renderer.set_rainbow_mode(true);
                     input.remove(0);
                 },
                 30 => {
