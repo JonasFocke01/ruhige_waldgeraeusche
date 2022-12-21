@@ -6,7 +6,6 @@ use std::time::Instant;
 use std::io::Write;
 use std::process::{Command, Stdio, ChildStdin};
 use rand::Rng;
-use std::f64;
 
 /// Holds every possible animation
 pub enum Animation {
@@ -36,24 +35,46 @@ pub enum Combination {
     Async
 }
 
+/// This struct contains all values associatet with an individual led
+/// This is created (strip_count * pixels_per_strip) times
+/// Todo: implement fading in
+/// Todo: implement fading out
+/// Todo: implement destination
+#[derive(Clone)]
+pub struct Led {
+    brightness: f32,
+    speed: f32
+}
+
 /// The struct to define how the LedRenderer should look like
 pub struct LedRenderer<'a> {
     /// The actual pixels stored like Strip< Pixels< Parameters >>>
-    pixels: Vec<Vec<Vec<f32>>>,
+    pixels: Vec<Vec<Led>>,
     /// The python script instance responsible for writing to the physical strip
     python_instance_stdin: ChildStdin,
     /// LedConfigStore contains usefull informations for the renderer
     led_config_store: &'a LedConfigStore,
     /// The last timestamp the leds where written. The leds framerate is capped to a hardcoded number of milliseconds
     render_timestamp: Instant,
+    // Todo: extract this variables into object to not clutter up LedRenderer
     /// The animation displayed on the strips
     current_animation: Animation,
     /// The direction the animation goes
     current_direction: Direction,
     /// The combination on where to show the current animation
     current_combination: Combination,
-    /// The time that should pass before the next render
-    frame_timing: u64
+    // Todo: extract current color into object to not clutter up LedRenderer
+    /// The current color of all led strips
+    current_color: (f32, f32, f32),
+    /// The next color of all led strips
+    /// Todo: implement color transition
+    dest_color: (f32, f32, f32),
+    /// How much the color should transition each step <br>
+    /// current_color: (100.0, 100.0, 100.0) <br>
+    /// dest_color: (50.0, 50.0, 50.0) <br>
+    /// color_transition_steps: 10.0 <br>
+    /// current_color next iteration: (90.0, 90.0, 90.0)
+    color_transition_steps: f32,
 }
 
 /// Responsible for storing and rendering the current pixel state 
@@ -65,11 +86,11 @@ impl<'a> LedRenderer<'a> {
         let mut actual_pixels = vec!();
         for i in 0..led_config_store.get_strip_count() {
             actual_pixels.push(vec!());
-            for j in 0..led_config_store.get_led_count_per_strip() {
-                actual_pixels[i as usize].push(vec!());
-                for _ in 0..led_config_store.get_parameter_count() {
-                    actual_pixels[i as usize][j as usize].push(0.0);
-                }
+            for _ in 0..led_config_store.get_led_count_per_strip() {
+                actual_pixels[i as usize].push(Led {
+                    brightness: 0.0,
+                    speed: 0.0
+                });
             }
         }
         let render_timestamp = Instant::now();
@@ -96,8 +117,6 @@ impl<'a> LedRenderer<'a> {
                 panic!("Failed to flush python instance stdin - {}", error);
             }
         };
-
-        let frame_timing = led_config_store.get_frame_timing();
         
         LedRenderer {
             pixels: actual_pixels,
@@ -107,102 +126,100 @@ impl<'a> LedRenderer<'a> {
             current_animation: Animation::Snake,
             current_direction: Direction::Up,
             current_combination: Combination::Parallel,
-            frame_timing: frame_timing
+            current_color: (255.0, 0.0, 0.0),
+            dest_color: (100.0, 100.0, 100.0),
+            color_transition_steps: 0.0
         }
     }
     /// Spawns a snake <br>
     /// ! This is a test function !
-    pub fn spawn_snake(&mut self, color: &(f32, f32, f32)) { 
+    pub fn spawn_snake(&mut self) { 
         for strip_i in 0..self.led_config_store.get_strip_count() {   
             for index in self.led_config_store.get_pixel_offset()..12 {
-                self.pixels[strip_i as usize][index as usize] = vec![color.0 * index as f32 / 12.0, color.1 * index as f32 / 12.0, color.2 * index as f32 / 12.0, 0.0, 3.0, 0.0];
+                self.pixels[strip_i as usize][index as usize] = Led {
+                                                                brightness: index as f32 / 12.0,
+                                                                speed: 3.0
+                                                            }
             }
         }
     }
     /// Spawns a fading block  <br>
     /// ! This is a test function !
-    pub fn spawn_fading_blocks(&mut self, color: &(f32, f32, f32)) {
+    /// Todo: repair: pixel fading is broken
+    pub fn spawn_fading_blocks(&mut self) {
         let mut rng = rand::thread_rng();
         for strip_i in 0..self.led_config_store.get_strip_count() { 
             let random_start = rng.gen_range(self.led_config_store.get_pixel_offset()..(self.led_config_store.get_led_count_per_strip() - 16));
             for index in random_start..(random_start + 15) {
-                self.pixels[strip_i as usize][index as usize] = vec![color.0, color.1, color.2, 0.0, 0.0, 0.1];
+                self.pixels[strip_i as usize][index as usize] = Led {
+                                                                brightness: 1.0,
+                                                                speed: 0.0
+                                                            }
             }
         }
     }
     /// Flashes the whole strip and lets it fade out <br>
     /// ! This is a test function !
-    pub fn flash_fade_whole_strip(&mut self, color: &(f32, f32, f32)) {
+    ///  Todo: repair: pixel fading is broken
+    pub fn flash_fade_whole_strip(&mut self) {
         for strip_i in 0..self.led_config_store.get_strip_count() {
             for pixel_i in self.led_config_store.get_pixel_offset()..self.led_config_store.get_led_count_per_strip() {
-                if  self.pixels[strip_i as usize][pixel_i as usize][0] < 10.0 || 
-                    self.pixels[strip_i as usize][pixel_i as usize][1] < 10.0 || 
-                    self.pixels[strip_i as usize][pixel_i as usize][2] < 10.0 {
-                        self.pixels[strip_i as usize][pixel_i as usize] = vec![color.0, color.1, color.2, 0.0, 0.0, 0.1];
-                    }
+                if  self.pixels[strip_i as usize][pixel_i as usize].brightness < 10.0 {
+                        self.pixels[strip_i as usize][pixel_i as usize] = Led {
+                                                                        brightness: 1.0,
+                                                                        speed: 0.0
+                                                                    }
+                }
             }
         }
     }
     /// Renders the current state of the pixel vec to a format understandable by python and writes it to pythons stdin <br>
     /// Three bytes for each pixel (RGB)
-    pub fn render(&mut self) -> Result<Vec<Vec<Vec<f32>>>, String> {
-        let mut result_pixels: Vec<Vec<Vec<f32>>> = vec!();
+    pub fn render(&mut self) -> Result<Vec<Vec<Led>>, String> {
+        let mut result_pixels: Vec<Vec<Led>> = vec!();
 
         if self.render_timestamp.elapsed().as_millis() >= self.led_config_store.get_frame_timing().into() {
 
-            // ? fade
-            for strip_i in 0..self.led_config_store.get_strip_count() {
-                for pixel_i in 0..self.led_config_store.get_led_count_per_strip() { 
-                    if  self.pixels[strip_i as usize][pixel_i as usize][0] > 0.0 || 
-                        self.pixels[strip_i as usize][pixel_i as usize][1] > 0.0 || 
-                        self.pixels[strip_i as usize][pixel_i as usize][2] > 0.0 {
-                            self.pixels[strip_i as usize][pixel_i as usize][0] = (self.pixels[strip_i as usize][pixel_i as usize][0] * (1.0 - self.pixels[strip_i as usize][pixel_i as usize][5])) as f32;
-                            self.pixels[strip_i as usize][pixel_i as usize][1] = (self.pixels[strip_i as usize][pixel_i as usize][1] * (1.0 - self.pixels[strip_i as usize][pixel_i as usize][5])) as f32;
-                            self.pixels[strip_i as usize][pixel_i as usize][2] = (self.pixels[strip_i as usize][pixel_i as usize][2] * (1.0 - self.pixels[strip_i as usize][pixel_i as usize][5])) as f32;
-                        }
-                }
-            }
-            
+            //  Todo: repair: pixel fading is broken
+
+            // Todo: fade in   
+
             // ? move
-            // ! Sometimes in the future, the priority of the pixels should be respected
             for i in 0..self.led_config_store.get_strip_count() {
                 result_pixels.push(vec!());
-                for j in 0..self.led_config_store.get_led_count_per_strip() {
-                    result_pixels[i as usize].push(vec!());
-                    for _ in 0..self.led_config_store.get_parameter_count() {
-                        result_pixels[i as usize][j as usize].push(0.0);
-                    }
+                for _ in 0..self.led_config_store.get_led_count_per_strip() {
+                    result_pixels[i as usize].push(Led {
+                        brightness: 0.0,
+                        speed: 0.0
+                    });
                 }
             }
             
             for strip_i in 0..self.led_config_store.get_strip_count() {
                 for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
-                    if  self.pixels[strip_i as usize][pixel_i as usize][0] > 0.0 || 
-                        self.pixels[strip_i as usize][pixel_i as usize][1] > 0.0 || 
-                        self.pixels[strip_i as usize][pixel_i as usize][2] > 0.0 {
-                            if  pixel_i as f64 + self.pixels[strip_i as usize][pixel_i as usize][4] as f64 >= 0.0 &&
-                                pixel_i as f64 + (self.pixels[strip_i as usize][pixel_i as usize][4] as f64) < self.led_config_store.get_led_count_per_strip() as f64 {
-                                    result_pixels[strip_i as usize][(pixel_i as f64 + (self.pixels[strip_i as usize][pixel_i as usize][4] as f64)) as usize] = self.pixels[strip_i as usize][pixel_i as usize].to_vec();
-                            }
+                    if  self.pixels[strip_i as usize][pixel_i as usize].brightness > 0.0 {
+                        if  pixel_i as f32 + self.pixels[strip_i as usize][pixel_i as usize].brightness >= 0.0 &&
+                            pixel_i as f32 + (self.pixels[strip_i as usize][pixel_i as usize].speed) < self.led_config_store.get_led_count_per_strip() as f32 - 1.0 {
+                                result_pixels[strip_i as usize][(pixel_i as f32 + (self.pixels[strip_i as usize][pixel_i as usize].speed)) as usize] = self.pixels[strip_i as usize][pixel_i as usize].clone();
+                        }
                     }
                 }
             }
             if  result_pixels.len() != self.led_config_store.get_strip_count() as usize &&
-                result_pixels[0].len() != self.led_config_store.get_led_count_per_strip() as usize &&
-                result_pixels[0][0].len() != self.led_config_store.get_parameter_count() as usize {
+                result_pixels[0].len() != self.led_config_store.get_led_count_per_strip() as usize {
                     logging::log("result_pixels has the wrong size", logging::LogLevel::Warning, true);
                     panic!("result_pixels has the wrong size");
             }
             self.pixels = result_pixels.to_vec();
-            
+
             // ? draw
             let mut writable_pixels = vec!();
             for strip_i in 0..self.led_config_store.get_strip_count() {
                 for mut pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
                     if strip_i % 2 == 1 { pixel_i = GlobalVarsStore::map_range(pixel_i as f64, (0.0, self.led_config_store.get_led_count_per_strip() as f64 - 1.0), (self.led_config_store.get_led_count_per_strip() as f64 - 1.0, 0.0)) as u64; }
-                    for parameter_i in 0..3 {
-                        writable_pixels.push(self.pixels[strip_i as usize][pixel_i as usize][parameter_i as usize] as u8);
-                    }
+                    writable_pixels.push((self.pixels[strip_i as usize][pixel_i as usize].brightness as f32 * self.current_color.0) as u8);
+                    writable_pixels.push((self.pixels[strip_i as usize][pixel_i as usize].brightness as f32 * self.current_color.1) as u8);
+                    writable_pixels.push((self.pixels[strip_i as usize][pixel_i as usize].brightness as f32 * self.current_color.2) as u8);
                 }
             }
             for i in 0..writable_pixels.len() {
@@ -227,24 +244,24 @@ impl<'a> LedRenderer<'a> {
     /// Sets every pixel and its values to 0.0 to achieve a total blackout
     pub fn clear_strips(&mut self) -> bool {
         let mut actual_pixels = vec!();
-        for i in 0..self.led_config_store.get_strip_count() {
+        for _ in 0..self.led_config_store.get_strip_count() {
             actual_pixels.push(vec!());
-            for j in 0..self.led_config_store.get_led_count_per_strip() {
-                actual_pixels[i as usize].push(vec!());
-                for _ in 0..self.led_config_store.get_parameter_count() {
-                    actual_pixels[i as usize][j as usize].push(0.0);
-                }
+            for _ in 0..self.led_config_store.get_led_count_per_strip() {
+                Led {
+                    brightness: 0.0,
+                    speed: 0.0
+                };
             }
         }
         self.pixels = actual_pixels;
         true
     }
     /// Triggers the function responsible for the current animation
-    pub fn trigger_current_animation(&mut self, color: &(f32, f32, f32)) {
+    pub fn trigger_current_animation(&mut self) {
         match self.current_animation {
-            Animation::Snake => self.spawn_snake(color),
-            Animation::FadingBlocks => self.spawn_fading_blocks(color),
-            Animation::FlashFadeWholeStrip => self.spawn_fading_blocks(color),
+            Animation::Snake => self.spawn_snake(),
+            Animation::FadingBlocks => self.spawn_fading_blocks(),
+            Animation::FlashFadeWholeStrip => self.spawn_fading_blocks(),
             Animation::Blackout => {
                 self.clear_strips();
                 return ()
@@ -252,7 +269,7 @@ impl<'a> LedRenderer<'a> {
         }
     }
     /// Returns the current pixel vec
-    pub fn get_pixels(&self) -> &Vec<Vec<Vec<f32>>> {
+    pub fn get_pixels(&self) -> &Vec<Vec<Led>> {
         &self.pixels
     }
     /// Returns the current animation
@@ -278,5 +295,17 @@ impl<'a> LedRenderer<'a> {
     /// Sets the current combination
     pub fn set_current_combination(&mut self, combination: Combination) {
         self.current_combination = combination
+    }
+    /// Sets the current color
+    pub fn set_current_color(&mut self, color: (f32, f32, f32)) {
+        self.current_color = color;
+    }
+    /// Sets the color, the current color should fade towards
+    pub fn set_dest_color(&mut self, color: (f32, f32, f32)) {
+        self.dest_color = color;
+    }
+    /// Sets the color transition steps
+    pub fn set_color_transition_steps(&mut self, transition_steps: f32) {
+        self.color_transition_steps = transition_steps;
     }
 }

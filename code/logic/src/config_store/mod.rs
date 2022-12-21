@@ -136,6 +136,7 @@ impl LedConfigStore {
         self.pixel_offset
     }
     /// Returns parameter_count
+    /// Todo: This should not be configurabe
     pub fn get_parameter_count(&self) -> u64 {
         self.parameter_count
     }
@@ -192,6 +193,7 @@ impl InputConfigStore {
     pub fn get_input_ports(&self) -> &Vec<String> {
         &self.input_ports
     }
+    /// This returns the baud rate
     pub fn get_baud_rate(&self) -> u64 {
         self.baud_rate
     }

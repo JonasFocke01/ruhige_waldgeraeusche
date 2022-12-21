@@ -25,7 +25,6 @@ pub mod config_store;
 use config_store::DmxConfigStore;
 use config_store::LedConfigStore;
 use config_store::InputConfigStore;
-use config_store::GlobalVarsStore;
 
 /// logs a message to the predefined file ".log"
 pub mod logging;
@@ -45,7 +44,6 @@ fn main() {
     let frame_timing = led_config_store.get_frame_timing();
     let dmx_config_store = DmxConfigStore::new();
     let input_config_store = InputConfigStore::new();
-    let mut global_vars_store = GlobalVarsStore::new();
     let mut led_renderer = LedRenderer::new(&led_config_store);
     let mut scanners = Scanners::new(&dmx_config_store);
     
@@ -68,9 +66,8 @@ fn main() {
 
     let mut truncate_peak_ms: u128 = 0;
     let mut truncate_index: u16 = 0;
-    let mut fps_limit_timestamp = Instant::now();
     loop {
-        fps_limit_timestamp = Instant::now();
+        let fps_limit_timestamp = Instant::now();
 
         match led_renderer.render() {
             Ok(_) => (),
@@ -80,19 +77,20 @@ fn main() {
             Ok(_) => (),
             Err(error) => logging::log(error.as_str(), logging::LogLevel::Warning, true)
         }
-        match input_parser.process_input(&mut led_renderer, &mut scanners, &mut dmx_renderer, &mut global_vars_store) {
+        match input_parser.process_input(&mut led_renderer, &mut scanners, &mut dmx_renderer) {
             Ok(_) => (),
             Err(error) => logging::log(error.as_str(), logging::LogLevel::Warning, true)
         };
 
-        if truncate_index == 6000 {
+        if truncate_index == 600 {
             let mut log_level = logging::LogLevel::Info;
             let mut persist = false;
             if truncate_peak_ms > frame_timing.into() {
                 log_level = logging::LogLevel::Warning;
                 persist = true;
             }
-            scanners.trigger_next_step(&mut dmx_renderer);
+            scanners.trigger_next_step(&mut dmx_renderer);// * This is only for test reasons and should probably triggered by something like beat
+            led_renderer.trigger_current_animation();// * This is only for test reasons and should probably triggered by something like beat
             logging::log(format!("Peak elapsed ms since last log: {}", truncate_peak_ms.to_string()).as_str(), log_level, persist);
             truncate_peak_ms = 0;
             truncate_index = 0;

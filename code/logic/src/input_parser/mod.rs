@@ -1,7 +1,5 @@
 use crate::led_renderer::LedRenderer;
 use crate::dmx_renderer::DmxRenderer;
-use crate::config_store::GlobalVarsStore;
-use crate::config_store::ColorMode;
 use crate::config_store::InputConfigStore;
 use crate::scanners::Scanners;
 use crate::logging;
@@ -30,7 +28,7 @@ impl InputParser {
         }
     }
     /// acts acordingly to the processed input gathered by gather_input()
-    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, scanners: &mut Scanners, dmx_renderer: &mut DmxRenderer, global_vars_store: &mut GlobalVarsStore) -> Result<Vec<u8>, String> {
+    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, scanners: &mut Scanners, dmx_renderer: &mut DmxRenderer) -> Result<Vec<u8>, String> {
         let mut input: Vec<u8> = match InputParser::gather_input(self) {
             Ok(e) => e,
             Err(error) => return Err(error)
@@ -55,55 +53,66 @@ impl InputParser {
         //     }
         // }
         
-        /// ! This is the matching of input to functions
+        // ! This computes, how the programm should behave by analysing the given input
         while input.len() >= 2 {
             match input.remove(0) {
                 1..=19 => (),
                 20 => { // Color to red
                     scanners.set_current_color(dmx_renderer, 60);
+                    led_renderer.set_current_color((255.0, 0.0, 0.0));
                     input.remove(0);
                 },
                 21 => { // color to orange
                     scanners.set_current_color(dmx_renderer, 103);
+                    led_renderer.set_current_color((255.0, 165.0, 0.0));
                     input.remove(0);
                 },
                 22 => { // color to Purple
                     scanners.set_current_color(dmx_renderer, 80);
+                    led_renderer.set_current_color((128.0, 0.0, 128.0));
                     input.remove(0);
                 },
                 23 => { // color to blue
                     scanners.set_current_color(dmx_renderer, 89);
+                    led_renderer.set_current_color((0.0, 0.0, 255.0));
                     input.remove(0);
                 },
                 24 => { // color to green
                     scanners.set_current_color(dmx_renderer, 49);
+                    led_renderer.set_current_color((0.0, 255.0, 0.0));
                     input.remove(0);
                 },
                 25 => { // color to yellow
                     scanners.set_current_color(dmx_renderer, 16);
+                    led_renderer.set_current_color((255.0, 255.0, 0.0));
                     input.remove(0);
                 },
                 26 => { // color to white
                     scanners.set_current_color(dmx_renderer, 0);
+                    led_renderer.set_current_color((255.0, 255.0, 255.0));
                     input.remove(0);
                 },
                 27 => { // color to light blue
                     scanners.set_current_color(dmx_renderer, 34);
+                    led_renderer.set_current_color((173.0, 216.0, 230.0));
                     input.remove(0);
                 },
                 28 => { // color to pink
                     scanners.set_current_color(dmx_renderer, 117);
+                    led_renderer.set_current_color((255.0, 182.0, 193.0));
                     input.remove(0);
                 },
                 29 => {
-                    scanners.set_current_color(dmx_renderer, 0);// Todo: implement rainbow effect for scanners
+                    scanners.set_current_color(dmx_renderer, 0);
+                    // Todo: implement rainbow effect for scanners and 
+                    // Todo: implement rainbow effect for led strips
                     input.remove(0);
                 },
                 30 => {
                     // Todo: implement something for smart color transition
                     input.remove(0);
                 },
-                30 => {
+                31 => {
                     // Todo: implement something for color transition
                     input.remove(0);
                 }
