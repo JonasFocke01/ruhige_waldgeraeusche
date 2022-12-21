@@ -38,7 +38,6 @@ pub struct LedConfigStore {
     led_invert: u64,
     led_channel: u64,
     pixel_offset: u64,
-    parameter_count: u64,
     frame_timing: u64
 }
 /// The struct to define how the DmxConfigStore should look like
@@ -81,9 +80,6 @@ impl LedConfigStore {
             }
         };
 
-        //Todo: this has no need to be in the config store
-        let parameter_count = 6;
-
         //Todo: cleanup config store
         LedConfigStore {
             led_count_per_strip: leds["led_count_per_strip"].as_u64().expect("config file does not contain expected sub key leds/led_count_per_strip"),
@@ -95,8 +91,7 @@ impl LedConfigStore {
             led_invert: leds["led_invert"].as_u64().expect("config file does not contain expected sub key leds/led_invert"),
             led_channel: leds["led_channel"].as_u64().expect("config file does not contain expected sub key leds/led_channel"),
             pixel_offset: leds["pixel_offset"].as_u64().expect("config file does not contain expected sub key leds/pixel_offset"),
-            frame_timing: leds["frame_timing"].as_u64().expect("config file does not contain expected sub key leds/frame_timing"),
-            parameter_count: parameter_count
+            frame_timing: leds["frame_timing"].as_u64().expect("config file does not contain expected sub key leds/frame_timing")
         }
     }
     /// Returns led_count_per_strip
@@ -134,11 +129,6 @@ impl LedConfigStore {
     /// Returns pixel_offset
     pub fn get_pixel_offset(&self) -> u64 {
         self.pixel_offset
-    }
-    /// Returns parameter_count
-    /// Todo: This should not be configurabe
-    pub fn get_parameter_count(&self) -> u64 {
-        self.parameter_count
     }
     /// Returns frame_timing
     pub fn get_frame_timing(&self) -> u64 {
