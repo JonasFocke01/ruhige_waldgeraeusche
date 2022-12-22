@@ -189,7 +189,7 @@ impl<'a> LedRenderer<'a> {
                 let new_color = (
                     if self.current_color.0 < 255.0 { self.current_color.0 + 1.0 } else { 0.0 },
                     if self.current_color.1 < 255.0 { self.current_color.1 + 5.0 } else { 0.0 },
-                    if self.current_color.2 < 255.0 { self.current_color.2 + 20.0 } else { 0.0 },
+                    if self.current_color.2 < 255.0 { self.current_color.2 + 2.0 } else { 0.0 },
                 );
                 self.current_color = new_color;
                 self.dest_color = new_color;
