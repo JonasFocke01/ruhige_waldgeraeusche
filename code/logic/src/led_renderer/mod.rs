@@ -37,14 +37,21 @@ pub enum Combination {
 
 /// This struct contains all values associatet with an individual led
 /// This is created (strip_count * pixels_per_strip) times
-/// Todo: implement fading in
-/// Todo: implement fading out
 /// Todo: implement destination
 /// Todo: each pixel should have own color
 #[derive(Clone)]
 pub struct Led {
+    /// The brightness of each led in the range of 0.0 to 1.0
+    /// Todo: enforce brightness range 0.0 to 1.0
     brightness: f32,
-    speed: f32
+    /// The speed at which the pixel moves accross the strip
+    /// Todo: test cases (-1.0, 0.0, 1.0)
+    speed: f32,
+    /// The brightness fading of each led
+    /// > 1.0 -> fade in
+    /// < 1.0 -> fade out
+    /// = 1.0 -> neutral
+    fade: f32
 }
 
 /// The struct to define how the LedRenderer should look like
@@ -92,7 +99,8 @@ impl<'a> LedRenderer<'a> {
             for _ in 0..led_config_store.get_led_count_per_strip() {
                 actual_pixels[i as usize].push(Led {
                     brightness: 0.0,
-                    speed: 0.0
+                    speed: 0.0,
+                    fade: 1.0
                 });
             }
         }
@@ -142,14 +150,14 @@ impl<'a> LedRenderer<'a> {
             for index in self.led_config_store.get_pixel_offset()..12 {
                 self.pixels[strip_i as usize][index as usize] = Led {
                                                                 brightness: index as f32 / 12.0,
-                                                                speed: 3.0
+                                                                speed: 3.0,
+                                                                fade: 1.0
                                                             }
             }
         }
     }
     /// Spawns a fading block  <br>
     /// ! This is a test function !
-    /// Todo: repair: pixel fading is broken
     pub fn spawn_fading_blocks(&mut self) {
         let mut rng = rand::thread_rng();
         for strip_i in 0..self.led_config_store.get_strip_count() { 
@@ -157,21 +165,22 @@ impl<'a> LedRenderer<'a> {
             for index in random_start..(random_start + 15) {
                 self.pixels[strip_i as usize][index as usize] = Led {
                                                                 brightness: 1.0,
-                                                                speed: 0.0
+                                                                speed: 0.0,
+                                                                fade: 0.9
                                                             }
             }
         }
     }
     /// Flashes the whole strip and lets it fade out <br>
     /// ! This is a test function !
-    ///  Todo: repair: pixel fading is broken
     pub fn flash_fade_whole_strip(&mut self) {
         for strip_i in 0..self.led_config_store.get_strip_count() {
             for pixel_i in self.led_config_store.get_pixel_offset()..self.led_config_store.get_led_count_per_strip() {
                 if  self.pixels[strip_i as usize][pixel_i as usize].brightness < 10.0 {
                         self.pixels[strip_i as usize][pixel_i as usize] = Led {
                                                                         brightness: 1.0,
-                                                                        speed: 0.0
+                                                                        speed: 0.0,
+                                                                        fade: 1.0
                                                                     }
                 }
             }
@@ -182,6 +191,7 @@ impl<'a> LedRenderer<'a> {
     pub fn render(&mut self) -> Result<Vec<Vec<Led>>, String> {
         let mut result_pixels: Vec<Vec<Led>> = vec!();
 
+        // Todo: implement garbage collection on led strips (pixels who are brightness 0.0001 should not live long)
         if self.render_timestamp.elapsed().as_millis() >= self.led_config_store.get_frame_timing().into() {
 
             // ? rainbow mode
@@ -196,17 +206,26 @@ impl<'a> LedRenderer<'a> {
                 self.dest_color = new_color;
             }
 
-            //  Todo: repair: pixel fading is broken
+            // ? fade
 
-            // Todo: fade in   
+            for strip_i in 0..self.led_config_store.get_strip_count() {
+                for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
+                    if  self.pixels[strip_i as usize][pixel_i as usize].brightness > 0.0 &&
+                        self.pixels[strip_i as usize][pixel_i as usize].fade      != 0.0 {
+                            self.pixels[strip_i as usize][pixel_i as usize].brightness *= self.pixels[strip_i as usize][pixel_i as usize].fade;
+                    }
+                }
+            }
 
             // ? move
+
             for i in 0..self.led_config_store.get_strip_count() {
                 result_pixels.push(vec!());
                 for _ in 0..self.led_config_store.get_led_count_per_strip() {
                     result_pixels[i as usize].push(Led {
                         brightness: 0.0,
-                        speed: 0.0
+                        speed: 0.0,
+                        fade: 1.0
                     });
                 }
             }
@@ -221,14 +240,11 @@ impl<'a> LedRenderer<'a> {
                     }
                 }
             }
-            if  result_pixels.len() != self.led_config_store.get_strip_count() as usize &&
-                result_pixels[0].len() != self.led_config_store.get_led_count_per_strip() as usize {
-                    logging::log("result_pixels has the wrong size", logging::LogLevel::Warning, true);
-                    panic!("result_pixels has the wrong size");
-            }
+            
             self.pixels = result_pixels.to_vec();
 
             // ? draw
+            
             let mut writable_pixels = vec!();
             for strip_i in 0..self.led_config_store.get_strip_count() {
                 for mut pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
@@ -265,7 +281,8 @@ impl<'a> LedRenderer<'a> {
             for _ in 0..self.led_config_store.get_led_count_per_strip() {
                 Led {
                     brightness: 0.0,
-                    speed: 0.0
+                    speed: 0.0,
+                    fade: 1.0
                 };
             }
         }
