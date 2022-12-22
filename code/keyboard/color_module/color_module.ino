@@ -67,57 +67,93 @@ void loop() {
 }
 
 void process_logic() {
-  if (button_click_states[3][0] != button_click_prevent_ghosting[3][0]) {
-    if (button_click_states[3][0]) {
-      fader_dest = 0;
+  if (button_click_states[3][0] && !button_click_prevent_ghosting[3][0]) {
       fader_motor_write = true;
       fader_dest = random(0, 1023);
-    } else {
-      fader_motor_write = true;
-    }
-    button_click_prevent_ghosting[3][0] = button_click_states[3][0];
+    button_click_prevent_ghosting[3][0] = true;
+  } else if (!button_click_states[3][0]) {
+    button_click_prevent_ghosting[3][0] = false;
   }
 
-  if (button_click_states[0][1]) {
+  if (button_click_states[0][1] && !button_click_prevent_ghosting[0][1]) {
     active_color = 0;
     Serial.write(25);
     Serial.write(1);
-  } else if (button_click_states[0][2]) {
+    button_click_prevent_ghosting[0][1] = true;
+  } else if (!button_click_states[0][1]) {
+    button_click_prevent_ghosting[0][1] = false;
+  }
+  if (button_click_states[0][2] && !button_click_prevent_ghosting[0][2]) {
     active_color = 1;
     Serial.write(24);
     Serial.write(1);
-  } else if (button_click_states[1][0]) {
+    button_click_prevent_ghosting[0][2] = true;
+  } else if (!button_click_states[0][2]) {
+    button_click_prevent_ghosting[0][2] = false;
+  }
+  if (button_click_states[1][0] && !button_click_prevent_ghosting[1][0]) {
     active_color = 2;
     Serial.write(21);
     Serial.write(1);
-  } else if (button_click_states[1][1]) {
+    button_click_prevent_ghosting[1][0] = true;
+  } else if (!button_click_states[1][0]) {
+    button_click_prevent_ghosting[1][0] = false;
+  }
+  if (button_click_states[1][1] && !button_click_prevent_ghosting[1][1]) {
     active_color = 3;
     Serial.write(29);
     Serial.write(1);
-  } else if (button_click_states[1][2]) {
+    button_click_prevent_ghosting[1][1] = true;
+  } else if (!button_click_states[1][1]) {
+    button_click_prevent_ghosting[1][1] = false;
+  }
+  if (button_click_states[1][2] && !button_click_prevent_ghosting[1][2]) {
     active_color = 4;
     Serial.write(26);
     Serial.write(1);
-  } else if (button_click_states[1][3]) {
+    button_click_prevent_ghosting[1][2] = true;
+  } else if (!button_click_states[1][2]) {
+    button_click_prevent_ghosting[1][2] = false;
+  }
+  if (button_click_states[1][3] && !button_click_prevent_ghosting[1][3]) {
     active_color = 9;
     Serial.write(27);
     Serial.write(1);
-  } else if (button_click_states[2][0]) {
+    button_click_prevent_ghosting[1][3] = true;
+  } else if (!button_click_states[1][3]) {
+    button_click_prevent_ghosting[1][3] = false;
+  }
+  if (button_click_states[2][0] && !button_click_prevent_ghosting[2][0]) {
     active_color = 10;
     Serial.write(20);
     Serial.write(1);
-  } else if (button_click_states[2][1]) {
+    button_click_prevent_ghosting[2][0] = true;
+  } else if (!button_click_states[2][0]) {
+    button_click_prevent_ghosting[2][0] = false;
+  }
+  if (button_click_states[2][1] && !button_click_prevent_ghosting[2][1]) {
     active_color = 7;
     Serial.write(28);
     Serial.write(1);
-  } else if (button_click_states[2][2]) {
+    button_click_prevent_ghosting[2][1] = true;
+  } else if (!button_click_states[2][1]) {
+    button_click_prevent_ghosting[2][1] = false;
+  }
+  if (button_click_states[2][2] && !button_click_prevent_ghosting[2][2]) {
     active_color = 8;
     Serial.write(22);
     Serial.write(1);
-  } else if (button_click_states[2][3]) {
+    button_click_prevent_ghosting[2][2] = true;
+  } else if (!button_click_states[2][2]) {
+    button_click_prevent_ghosting[2][2] = false;
+  }
+  if (button_click_states[2][3] && !button_click_prevent_ghosting[2][3]) {
     active_color = 5;
     Serial.write(23);
     Serial.write(1);
+    button_click_prevent_ghosting[2][3] = true;
+  } else if (!button_click_states[2][3]) {
+    button_click_prevent_ghosting[2][3] = false;
   }
 }
 
