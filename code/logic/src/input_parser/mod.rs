@@ -58,72 +58,91 @@ impl InputParser {
             match input.remove(0) {
                 1..=19 => (),
                 20 => { // Color to red
-                    scanners.set_current_color(dmx_renderer, 60);
-                    led_renderer.set_current_color((255.0, 0.0, 0.0));
-                    led_renderer.set_rainbow_mode(false);
-                    input.remove(0);
+                    if input.remove(0) == 1 {
+                        scanners.set_current_color(dmx_renderer, 60);
+                        led_renderer.set_current_color((255.0, 0.0, 0.0));
+                        led_renderer.set_rainbow_mode(false);
+                    }
                 },
                 21 => { // color to orange
-                    scanners.set_current_color(dmx_renderer, 103);
-                    led_renderer.set_current_color((255.0, 165.0, 0.0));
-                    led_renderer.set_rainbow_mode(false);
-                    input.remove(0);
+                    if input.remove(0) == 1 {
+                        scanners.set_current_color(dmx_renderer, 103);
+                        led_renderer.set_current_color((255.0, 165.0, 0.0));
+                        led_renderer.set_rainbow_mode(false);
+                    }
                 },
                 22 => { // color to Purple
-                    scanners.set_current_color(dmx_renderer, 80);
-                    led_renderer.set_current_color((128.0, 0.0, 128.0));
-                    led_renderer.set_rainbow_mode(false);
-                    input.remove(0);
+                    if input.remove(0) == 1 {
+                        scanners.set_current_color(dmx_renderer, 80);
+                        led_renderer.set_current_color((128.0, 0.0, 128.0));
+                        led_renderer.set_rainbow_mode(false);
+                    }
                 },
                 23 => { // color to blue
-                    scanners.set_current_color(dmx_renderer, 89);
-                    led_renderer.set_current_color((0.0, 0.0, 255.0));
-                    led_renderer.set_rainbow_mode(false);
-                    input.remove(0);
+                    if input.remove(0) == 1 {
+                        scanners.set_current_color(dmx_renderer, 89);
+                        led_renderer.set_current_color((0.0, 0.0, 255.0));
+                        led_renderer.set_rainbow_mode(false);
+                    }
                 },
                 24 => { // color to green
-                    scanners.set_current_color(dmx_renderer, 49);
-                    led_renderer.set_current_color((0.0, 255.0, 0.0));
-                    led_renderer.set_rainbow_mode(false);
-                    input.remove(0);
+                    if input.remove(0) == 1 {
+                        scanners.set_current_color(dmx_renderer, 49);
+                        led_renderer.set_current_color((0.0, 255.0, 0.0));
+                        led_renderer.set_rainbow_mode(false);
+                    }
                 },
                 25 => { // color to yellow
-                    scanners.set_current_color(dmx_renderer, 16);
-                    led_renderer.set_current_color((255.0, 255.0, 0.0));
-                    led_renderer.set_rainbow_mode(false);
-                    input.remove(0);
+                    if input.remove(0) == 1 {
+                        scanners.set_current_color(dmx_renderer, 16);
+                        led_renderer.set_current_color((255.0, 255.0, 0.0));
+                        led_renderer.set_rainbow_mode(false);
+                    }
                 },
                 26 => { // color to white
-                    scanners.set_current_color(dmx_renderer, 0);
-                    led_renderer.set_current_color((255.0, 255.0, 255.0));
-                    led_renderer.set_rainbow_mode(false);
-                    input.remove(0);
+                    if input.remove(0) == 1 {
+                        scanners.set_current_color(dmx_renderer, 0);
+                        led_renderer.set_current_color((255.0, 255.0, 255.0));
+                        led_renderer.set_rainbow_mode(false);
+                    }
                 },
                 27 => { // color to light blue
-                    scanners.set_current_color(dmx_renderer, 34);
-                    led_renderer.set_current_color((173.0, 216.0, 230.0));
-                    led_renderer.set_rainbow_mode(false);
-                    input.remove(0);
+                    if input.remove(0) == 1 {
+                        scanners.set_current_color(dmx_renderer, 34);
+                        led_renderer.set_current_color((173.0, 216.0, 230.0));
+                        led_renderer.set_rainbow_mode(false);
+                    }
                 },
                 28 => { // color to pink
-                    scanners.set_current_color(dmx_renderer, 117);
-                    led_renderer.set_current_color((255.0, 182.0, 193.0));
-                    led_renderer.set_rainbow_mode(false);
-                    input.remove(0);
+                    if input.remove(0) == 1 {
+                        scanners.set_current_color(dmx_renderer, 117);
+                        led_renderer.set_current_color((255.0, 182.0, 193.0));
+                        led_renderer.set_rainbow_mode(false);
+                    }
                 },
                 29 => {
-                    scanners.set_current_color(dmx_renderer, 0);
-                    // Todo: implement rainbow effect for scanners and 
-                    led_renderer.set_rainbow_mode(true);
-                    input.remove(0);
+                    if input.remove(0) == 1 {
+                        scanners.set_current_color(dmx_renderer, 0);
+                        // Todo: implement rainbow effect for scanners
+                        led_renderer.set_rainbow_mode(true);
+                    }
                 },
                 30 => {
-                    // Todo: implement something for smart color transition
-                    input.remove(0);
+                    // Todo: implement smart color toggle.
+                    // smart on -> color change is like one snake is red, other is green
+                    // smart off-> all snakes change imediately
+                    // ! Keep not only the led stripes in mind but also all other fixtures
+                    if input.remove(0) == 1 {
+                        logging::log("button pressed", logging::LogLevel::Info, false);
+                    } else {
+                        logging::log("button released", logging::LogLevel::Info, false);
+                    }
+
+                    
                 },
                 31 => {
                     // Todo: implement something for color transition
-                    input.remove(0);
+                    logging::log(format!("Fader change to: {}", input.remove(0)).as_str(), logging::LogLevel::Info, false);
                 }
                 _ => ()
             }

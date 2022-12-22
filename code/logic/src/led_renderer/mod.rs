@@ -40,6 +40,7 @@ pub enum Combination {
 /// Todo: implement fading in
 /// Todo: implement fading out
 /// Todo: implement destination
+/// Todo: each pixel should have own color
 #[derive(Clone)]
 pub struct Led {
     brightness: f32,
