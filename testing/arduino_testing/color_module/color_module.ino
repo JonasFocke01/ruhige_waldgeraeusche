@@ -1,5 +1,6 @@
 #include <Adafruit_NeoPixel.h>
 
+#define BRIGHTNESS 0.25
 #define BUTTON_COUNT 11
 #define BUTTON_ROW_START_PIN 10
 #define BUTTON_ROW_COUNT 3
@@ -124,47 +125,47 @@ void write_leds() {
   timestamp = millis();
   int timestamp_led_blinkable = (timestamp / 150) % 2 == 0;
   int timestamp_color_fadeable = timestamp / 50;
-  pixels.setPixelColor(0,  pixels.Color(220, 200,   0));
-  pixels.setPixelColor(1,  pixels.Color(  0, 255,   0));
-  pixels.setPixelColor(9,  pixels.Color( 67, 216, 201));
-  pixels.setPixelColor(5,  pixels.Color(  0,   0, 255));
-  pixels.setPixelColor(8,  pixels.Color(238, 130, 238));
-  pixels.setPixelColor(7,  pixels.Color(255, 192, 203));
-  pixels.setPixelColor(2,  pixels.Color(255, 165,   0));
-  pixels.setPixelColor(10, pixels.Color(255,   0,   0));
-  pixels.setPixelColor(3,  pixels.Color(timestamp_color_fadeable % 255, timestamp_color_fadeable % 70, timestamp_color_fadeable % 150));
-  pixels.setPixelColor(4,  pixels.Color(250, 250, 250));
+  pixels.setPixelColor(0,  pixels.Color(220 * BRIGHTNESS, 200 * BRIGHTNESS,   0 * BRIGHTNESS));
+  pixels.setPixelColor(1,  pixels.Color(  0 * BRIGHTNESS, 200 * BRIGHTNESS,   0 * BRIGHTNESS));
+  pixels.setPixelColor(9,  pixels.Color( 67 * BRIGHTNESS, 216 * BRIGHTNESS, 201 * BRIGHTNESS));
+  pixels.setPixelColor(5,  pixels.Color(  0 * BRIGHTNESS,   0 * BRIGHTNESS, 150 * BRIGHTNESS));
+  pixels.setPixelColor(8,  pixels.Color(238 * BRIGHTNESS, 130 * BRIGHTNESS, 238 * BRIGHTNESS));
+  pixels.setPixelColor(7,  pixels.Color(255 * BRIGHTNESS, 192 * BRIGHTNESS, 203 * BRIGHTNESS));
+  pixels.setPixelColor(2,  pixels.Color(255 * BRIGHTNESS, 165 * BRIGHTNESS,   0 * BRIGHTNESS));
+  pixels.setPixelColor(10, pixels.Color(255 * BRIGHTNESS,   0 * BRIGHTNESS,   0 * BRIGHTNESS));
+  pixels.setPixelColor(3,  pixels.Color(timestamp_color_fadeable % 255 * BRIGHTNESS, timestamp_color_fadeable % 70 * BRIGHTNESS, timestamp_color_fadeable % 150 * BRIGHTNESS));
+  pixels.setPixelColor(4,  pixels.Color(250 * BRIGHTNESS, 250 * BRIGHTNESS, 250 * BRIGHTNESS));
 
   switch (active_color) {
     case 0 :
-      pixels.setPixelColor(0,  pixels.Color(220 * timestamp_led_blinkable, 200 * timestamp_led_blinkable,   0 * timestamp_led_blinkable));
+      pixels.setPixelColor(0,  pixels.Color(220 * timestamp_led_blinkable * BRIGHTNESS, 200 * timestamp_led_blinkable * BRIGHTNESS,   0 * timestamp_led_blinkable * BRIGHTNESS));
       break;
     case 1 :
-      pixels.setPixelColor(1,  pixels.Color(  0 * timestamp_led_blinkable, 255 * timestamp_led_blinkable,   0 * timestamp_led_blinkable));
+      pixels.setPixelColor(1,  pixels.Color(  0 * timestamp_led_blinkable * BRIGHTNESS, 255 * timestamp_led_blinkable * BRIGHTNESS,   0 * timestamp_led_blinkable * BRIGHTNESS));
       break;
     case 9 :
-      pixels.setPixelColor(9,  pixels.Color( 67 * timestamp_led_blinkable, 216 * timestamp_led_blinkable, 201 * timestamp_led_blinkable));
+      pixels.setPixelColor(9,  pixels.Color( 67 * timestamp_led_blinkable * BRIGHTNESS, 216 * timestamp_led_blinkable * BRIGHTNESS, 201 * timestamp_led_blinkable * BRIGHTNESS));
       break;
     case 5 :
-      pixels.setPixelColor(5,  pixels.Color(  0 * timestamp_led_blinkable,   0 * timestamp_led_blinkable, 255 * timestamp_led_blinkable));
+      pixels.setPixelColor(5,  pixels.Color(  0 * timestamp_led_blinkable * BRIGHTNESS,   0 * timestamp_led_blinkable * BRIGHTNESS, 255 * timestamp_led_blinkable * BRIGHTNESS));
       break;
     case 8 :
-      pixels.setPixelColor(8,  pixels.Color(238 * timestamp_led_blinkable, 130 * timestamp_led_blinkable, 238 * timestamp_led_blinkable));
+      pixels.setPixelColor(8,  pixels.Color(238 * timestamp_led_blinkable * BRIGHTNESS, 130 * timestamp_led_blinkable * BRIGHTNESS, 238 * timestamp_led_blinkable * BRIGHTNESS));
       break;
     case 7 :
-      pixels.setPixelColor(7,  pixels.Color(255 * timestamp_led_blinkable, 192 * timestamp_led_blinkable, 203 * timestamp_led_blinkable));
+      pixels.setPixelColor(7,  pixels.Color(255 * timestamp_led_blinkable * BRIGHTNESS, 192 * timestamp_led_blinkable * BRIGHTNESS, 203 * timestamp_led_blinkable * BRIGHTNESS));
       break;
     case 2 :
-      pixels.setPixelColor(2,  pixels.Color(255 * timestamp_led_blinkable, 165 * timestamp_led_blinkable,   0 * timestamp_led_blinkable));
+      pixels.setPixelColor(2,  pixels.Color(255 * timestamp_led_blinkable * BRIGHTNESS, 165 * timestamp_led_blinkable * BRIGHTNESS,   0 * timestamp_led_blinkable * BRIGHTNESS));
       break;
     case 10:
-      pixels.setPixelColor(10, pixels.Color(255 * timestamp_led_blinkable,   0 * timestamp_led_blinkable,   0 * timestamp_led_blinkable));
+      pixels.setPixelColor(10, pixels.Color(255 * timestamp_led_blinkable * BRIGHTNESS,   0 * timestamp_led_blinkable * BRIGHTNESS,   0 * timestamp_led_blinkable * BRIGHTNESS));
       break;
     case 3 :
-      pixels.setPixelColor(3,  pixels.Color((timestamp_color_fadeable % 255) * timestamp_led_blinkable, (timestamp_color_fadeable % 150) * timestamp_led_blinkable, (timestamp_color_fadeable % 90) * timestamp_led_blinkable));
+      pixels.setPixelColor(3,  pixels.Color((timestamp_color_fadeable % 255) * timestamp_led_blinkable * BRIGHTNESS, (timestamp_color_fadeable % 150) * timestamp_led_blinkable * BRIGHTNESS, (timestamp_color_fadeable % 90) * timestamp_led_blinkable * BRIGHTNESS));
       break;
     case 4 :
-      pixels.setPixelColor(4,  pixels.Color(250 * timestamp_led_blinkable, 250 * timestamp_led_blinkable, 250 * timestamp_led_blinkable));
+      pixels.setPixelColor(4,  pixels.Color(250 * timestamp_led_blinkable * BRIGHTNESS, 250 * timestamp_led_blinkable * BRIGHTNESS, 250 * timestamp_led_blinkable * BRIGHTNESS));
       break;
   }
   pixels.show();
