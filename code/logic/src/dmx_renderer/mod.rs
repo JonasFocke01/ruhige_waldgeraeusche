@@ -14,6 +14,15 @@ pub struct DmxRenderer {
     /// The SerialPort object, the adapter is connected to
     dmx_port: SerialPort
 }
+/// All the fixture must implement this to be handled by the dmx renderer
+pub trait DmxFixture {
+    /// The stage is divided into a 255 * 255 grid where each fixture has a coordinate
+    fn get_coordinates(&self) -> (u8, u8);
+    /// Should set the color of the fixture
+    fn set_color(&mut self);
+    /// Should set the brightness of the fixture
+    fn set_brightness(&mut self);
+}
 
 /// Responsible for
 /// - collecting the current state of
