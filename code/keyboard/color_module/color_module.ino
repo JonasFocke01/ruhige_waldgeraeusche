@@ -68,10 +68,14 @@ void loop() {
 
 void process_logic() {
   if (button_click_states[3][0] && !button_click_prevent_ghosting[3][0]) {
-      fader_motor_write = true;
+      fader_motor_write = false;
       fader_dest = random(0, 1023);
+      Serial.write(30);
+      Serial.write(1);
     button_click_prevent_ghosting[3][0] = true;
-  } else if (!button_click_states[3][0]) {
+  } else if (!button_click_states[3][0] && button_click_prevent_ghosting[3][0]) {
+    Serial.write(30);
+    Serial.write(0);
     button_click_prevent_ghosting[3][0] = false;
   }
 
@@ -234,8 +238,6 @@ void read_buttons() {
   // special button
   if (!digitalRead(2)) {
     button_click_states[3][0] = true;
-    Serial.write(30);
-    Serial.write(1);
     // Serial.println("Special button is pressed");
   } else {
     button_click_states[3][0] = false;
@@ -243,9 +245,10 @@ void read_buttons() {
 
   // poti
   fader_read = map(analogRead(A1), 0, 1023, 1023, 0);
-  if (fader_read != fader_last_read && !fader_motor_write) {
+  if ((fader_read < fader_last_read - 15 || fader_read > fader_last_read + 15) && !fader_motor_write) {
     Serial.write(31);
     Serial.write(map(fader_read, 0, 1023, 0, 255));
+    fader_last_read = fader_read;
   }
   fader_read_dest_diff = abs(fader_read - fader_dest);
 }
