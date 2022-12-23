@@ -19,6 +19,12 @@
         "frame_timing": 34
     },
     "dmx": {
-        "scanner_animation_count": 1
+        "fixtures": [
+            "Victory Scan",
+            "Victory Scan",
+            "Victory Scan",
+            "Victory Scan",
+            "Victory Scan"
+        ]
      }
 }

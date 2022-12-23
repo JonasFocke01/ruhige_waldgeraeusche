@@ -1,6 +1,11 @@
-use crate::config_store::InputConfigStore;
-use crate::scanners::Scanners;
+use crate::config_store::{InputConfigStore, DmxConfigStore};
 use crate::logging;
+
+/// A separate module that contains the DmxFixture struct and implementation
+/// The DmxFixture struct is responsible for a single DmxFixture and is created multiple times from the DmxRenderer
+pub mod fixture;
+use fixture::DmxFixture;
+use fixture::FixtureType;
 
 use std::time::Instant;
 use serial2::SerialPort;
@@ -9,30 +14,24 @@ use serial2::SerialPort;
 pub struct DmxRenderer {
     /// limit writing to once every 50ms to not confuse the adapter
     render_timestamp: Instant,
-    /// writing speed is further limited by this variable, which should indicate if an actual update happened, to further reduce confusion to the adapter
-    updateable: bool,
     /// The SerialPort object, the adapter is connected to
-    dmx_port: SerialPort
-}
-/// All the fixture must implement this to be handled by the dmx renderer
-pub trait DmxFixture {
-    /// The stage is divided into a 255 * 255 grid where each fixture has a coordinate
-    fn get_coordinates(&self) -> (u8, u8);
-    /// Should set the color of the fixture
-    fn set_color(&mut self);
-    /// Should set the brightness of the fixture
-    fn set_brightness(&mut self);
+    dmx_port: SerialPort,
+    /// This is the position index all fixtures need to calculate theyr currrent position
+    position_index: u64,
+    /// This stores all fixtures
+    fixtures: Vec<DmxFixture>,
+    /// Should only be true at the start of the programm to review how much dmx channels are used
+    print_dmx_channel_ocupied: bool
 }
 
 /// Responsible for
-/// - collecting the current state of
-///     - scanners
+/// - collecting the current state of all fixtures
 /// - processing them by building a dmx ready vec of 512 bytes
 /// - writing the build vec to the usb connected dmx adapter
 impl DmxRenderer {
     /// This creates, fills and returns the DmxRenderer object
     /// - opens the serial port to the dmx adapter
-    pub fn new(input_config_store: &InputConfigStore, serial_input_port: &str) -> DmxRenderer {
+    pub fn new(input_config_store: &InputConfigStore, dmx_config_store: &DmxConfigStore, serial_input_port: &str) -> DmxRenderer {
         let render_timestamp = Instant::now();
 
         let port = match SerialPort::open(format!("/dev/{}", serial_input_port), input_config_store.get_baud_rate() as u32) {
@@ -46,43 +45,48 @@ impl DmxRenderer {
             }
         };
 
+        let mut fixtures: Vec<DmxFixture> = vec!();
+
+        for (fixture_i, fixture) in dmx_config_store.get_dmx_fixtures().iter().enumerate() {
+            fixtures.push(DmxFixture::new(fixture_i as u8, fixture.to_string(), &dmx_config_store));
+        }
+
         DmxRenderer {
             render_timestamp: render_timestamp,
             dmx_port: port,
-            updateable: false
+            position_index: 0,
+            fixtures: fixtures,
+            print_dmx_channel_ocupied: true
         }
     }
-    /// Gathers all usefull infomations of scanners etc., builds a 513 size vec and writes it to the dmx adapter
-    /// only writes after 50 ms passed since last run AND an actual update can be written
-    /// The current DMX channel configuration:
-    /// channel_start-channel_end(channel_footprint): fixture_type - fixture_name
-    ///   1-  7(  7):   scanner - JB Systems LED Victory Scan
-    ///   8- 14(  7):   scanner - JB Systems LED Victory Scan
-    ///  15- 21(  7):   scanner - JB Systems LED Victory Scan
-    ///  22- 28(  7):   scanner - JB Systems LED Victory Scan
-    ///  29- 35(  7):   scanner - JB Systems LED Victory Scan
-    pub fn render(&mut self, scanners: &Scanners) -> Result<Vec<u8>, String> {
+    /// Gathers all dmx footprints from all available DmxFixtures
+    /// Builds and writes the channel vector
+    /// If the Vector is less than 513 bytes, it will be filled with zeros
+    pub fn render(&mut self) -> Result<Vec<u8>, String> {
 
-        if self.updateable && self.render_timestamp.elapsed().as_millis() >= 50 {
-                        
+        if self.render_timestamp.elapsed().as_millis() >= 50 {
+
+            self.position_index += 1;
+
             // ? dmx value array construction
             let mut channel_vec: Vec<u8> = vec!();
             
             // ? start byte
             channel_vec.push(69);
-            
-            // ? scanner
-            let scanner_positions = scanners.get_current_position();
-            let scanner_color = scanners.get_current_color();
-            for scanner_i in 0..scanner_positions.len() {
-                channel_vec.push(scanner_positions[scanner_i as usize].0);
-                channel_vec.push(scanner_positions[scanner_i as usize].1);
-                channel_vec.push(8);
-                channel_vec.push(0);
-                channel_vec.push(*scanner_color);
-                channel_vec.push(if scanner_positions[scanner_i as usize].2 { 60 } else { 0 });
-                channel_vec.push(0);
+
+            for fixture in self.fixtures.iter() {
+                for parameter in fixture.get_dmx_footprint(self.position_index).iter() {
+                    channel_vec.push(*parameter);
+                }
             }
+            
+            if self.print_dmx_channel_ocupied {
+                // Todo: log fixture count
+                logging::log(format!("Occupied dmx-channels: {}", channel_vec.len() - 1).as_str(), logging::LogLevel::Info, true);
+                self.print_dmx_channel_ocupied = false;
+            }
+
+            //logging::log(format!("channel_vec: {:?}", channel_vec).as_str(), logging::LogLevel::Info, true);
 
             while channel_vec.len() < 513 {
                 channel_vec.push(0);
@@ -94,14 +98,19 @@ impl DmxRenderer {
             };
 
             self.render_timestamp = Instant::now();
-            self.updateable = false;
             return Ok(channel_vec)
         }
         Ok(vec!())
     }
-    /// sets the updateable field <br>
-    /// toggles if updateable = None
-    pub fn set_updateable(&mut self, updateable: Option<bool>) {
-        self.updateable = updateable.unwrap_or(true);
+    /// This maps the given color to all fixtures given in the fixture_types parameter
+    pub fn set_color(&mut self, fixture_types: Vec<FixtureType>, color: ((f32, f32, f32), u8)) {
+        for _ in fixture_types.iter() {
+            for fixture in self.fixtures.iter_mut() {
+                // Todo: this should truly react to the fixture type
+                // if fixture_type == fixture.get_type() {
+                    fixture.set_current_color(color);
+                // }
+            }
+        }
     }
 }

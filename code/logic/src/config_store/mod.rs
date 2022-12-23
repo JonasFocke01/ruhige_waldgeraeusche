@@ -42,8 +42,7 @@ pub struct LedConfigStore {
 }
 /// The struct to define how the DmxConfigStore should look like
 pub struct DmxConfigStore {
-    scanner_count: u8,
-    scanner_animation_count: u64
+    dmx_fixtures: Vec<String>
 }
 /// The struct to define how the GlobalVarsStore should look like
 pub struct GlobalVarsStore {
@@ -193,8 +192,6 @@ impl InputConfigStore {
 impl DmxConfigStore {
     /// This creates, fills and returns a DmxConfigStore object
     pub fn new() -> DmxConfigStore {
-        let scanner_count = 5;
-
         let file = match File::open("config.json") {
             Ok(e) => e,
             Err(_) => {
@@ -219,18 +216,23 @@ impl DmxConfigStore {
             }
         };
 
+        let dmx_fixtures_key = match dmx["fixtures"].as_array() {
+            Some(e) => e,
+            None => panic!("config does not contain key dmx/fixtures (array needed)")
+        };
+
+        let mut dmx_fixtures: Vec<String> = vec!();
+        for e in dmx_fixtures_key.iter() {
+            dmx_fixtures.push(e.as_str().expect("could not convert dmx/fixtures[i] as_str").to_string());
+        }
+
         DmxConfigStore {
-            scanner_count: scanner_count,
-            scanner_animation_count: dmx["scanner_animation_count"].as_u64().expect("config file does not contain expected sub key dmx/scanner_animation_count")
+            dmx_fixtures: dmx_fixtures
         }
     }
-    /// Returns scanner_count
-    pub fn get_scanner_count(&self) -> u8 {
-        self.scanner_count
-    }
-    /// Returns the scanner_animation_count
-    pub fn get_scanner_animation_count(&self) -> u64 {
-        self.scanner_animation_count
+    /// Returns dmx_fixtures
+    pub fn get_dmx_fixtures(&self) -> &Vec<String> {
+        &self.dmx_fixtures
     }
 }
 

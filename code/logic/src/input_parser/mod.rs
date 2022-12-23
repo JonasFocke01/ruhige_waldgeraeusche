@@ -1,7 +1,7 @@
 use crate::led_renderer::LedRenderer;
 use crate::dmx_renderer::DmxRenderer;
+use crate::dmx_renderer::fixture::FixtureType;
 use crate::config_store::InputConfigStore;
-use crate::scanners::Scanners;
 use crate::logging;
 
 use std::time::Duration;
@@ -28,30 +28,11 @@ impl InputParser {
         }
     }
     /// acts acordingly to the processed input gathered by gather_input()
-    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, scanners: &mut Scanners, dmx_renderer: &mut DmxRenderer) -> Result<Vec<u8>, String> {
+    pub fn process_input(&mut self, led_renderer: &mut LedRenderer, dmx_renderer: &mut DmxRenderer) -> Result<Vec<u8>, String> {
         let mut input: Vec<u8> = match InputParser::gather_input(self) {
             Ok(e) => e,
             Err(error) => return Err(error)
         };
-        // if input.len() > 5 && input[0] == 96 && input[1] == 1 && input[2] == 2 && input[3] == 3 && input[4] == 5 && input[5] == 4 {
-        //     logging::log("Testinput triggered!", logging::LogLevel::Info, false);
-        //     match global_vars_store.get_color_mode() {
-        //         ColorMode::Primary => {
-        //             led_renderer.trigger_current_animation(&global_vars_store.get_primary_color());
-        //             scanners.trigger_next_step(dmx_renderer);
-        //         },
-        //         ColorMode::Complementary => {
-        //             led_renderer.trigger_current_animation(&global_vars_store.get_secondary_color());
-        //             scanners.trigger_next_step(dmx_renderer);
-        //         }
-        //     }
-        // }
-        // // print!("--------------------------------\n");
-        // for byte in input.iter() {
-        //     if *byte != 2 {
-        //         print!("{}\n", byte);
-        //     }
-        // }
         
         // ! This computes, how the programm should behave by analysing the given input
         while input.len() >= 2 {
@@ -59,70 +40,72 @@ impl InputParser {
                 1..=19 => (),
                 20 => { // Color to red
                     if input.remove(0) == 1 {
-                        scanners.set_current_color(dmx_renderer, 60);
+                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 0.0, 0.0), 60));
                         led_renderer.set_current_color((255.0, 0.0, 0.0));
+                        // Todo: rainbox mode should be handled internaly (led_renderer)
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
                 21 => { // color to orange
                     if input.remove(0) == 1 {
-                        scanners.set_current_color(dmx_renderer, 103);
+                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 165.0, 0.0), 103));
                         led_renderer.set_current_color((255.0, 165.0, 0.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
                 22 => { // color to Purple
                     if input.remove(0) == 1 {
-                        scanners.set_current_color(dmx_renderer, 80);
+                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((128.0, 0.0, 128.0), 80));
                         led_renderer.set_current_color((128.0, 0.0, 128.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
                 23 => { // color to blue
                     if input.remove(0) == 1 {
-                        scanners.set_current_color(dmx_renderer, 89);
+                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 0.0, 255.0), 89));
                         led_renderer.set_current_color((0.0, 0.0, 255.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
                 24 => { // color to green
                     if input.remove(0) == 1 {
-                        scanners.set_current_color(dmx_renderer, 49);
+                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 255.0, 0.0), 49));
                         led_renderer.set_current_color((0.0, 255.0, 0.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
                 25 => { // color to yellow
                     if input.remove(0) == 1 {
-                        scanners.set_current_color(dmx_renderer, 16);
+                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 255.0, 0.0), 16));
                         led_renderer.set_current_color((255.0, 255.0, 0.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
                 26 => { // color to white
                     if input.remove(0) == 1 {
-                        scanners.set_current_color(dmx_renderer, 0);
+                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 255.0, 255.0), 0));
                         led_renderer.set_current_color((255.0, 255.0, 255.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
                 27 => { // color to light blue
                     if input.remove(0) == 1 {
-                        scanners.set_current_color(dmx_renderer, 34);
+                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((173.0, 216.0, 230.0), 34));
                         led_renderer.set_current_color((173.0, 216.0, 230.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
                 28 => { // color to pink
                     if input.remove(0) == 1 {
-                        scanners.set_current_color(dmx_renderer, 117);
+                        // Todo: the mapping to "117" should not happen here
+                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 182.0, 193.0), 117));
                         led_renderer.set_current_color((255.0, 182.0, 193.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
                 29 => {
                     if input.remove(0) == 1 {
-                        scanners.set_current_color(dmx_renderer, 0);
+                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 0.0, 0.0), 0));
                         // Todo: implement rainbow effect for scanners
                         led_renderer.set_rainbow_mode(true);
                     }

@@ -16,9 +16,6 @@ use led_renderer::LedRenderer;
 /// Responsible for collecting and rendering all values from dmx devices
 pub mod dmx_renderer;
 use dmx_renderer::DmxRenderer;
-/// This is responsible for storing the current scanner state and how they should react to certain situations
-pub mod scanners;
-use scanners::Scanners;
 
 /// holding all stores that load and provide configurations or global variables
 pub mod config_store;
@@ -45,7 +42,6 @@ fn main() {
     let dmx_config_store = DmxConfigStore::new();
     let input_config_store = InputConfigStore::new();
     let mut led_renderer = LedRenderer::new(&led_config_store);
-    let mut scanners = Scanners::new(&dmx_config_store);
     
     let input_port_matches: Vec<(ArduinoModule, String)> = map_serial_connections_to_arduino_modules(&input_config_store);
     let mut input_port_paths: Vec<String> = vec!();
@@ -60,7 +56,7 @@ fn main() {
         }
     }
     let mut input_parser = InputParser::new(&input_config_store, input_port_paths);
-    let mut dmx_renderer = DmxRenderer::new(&input_config_store, dmx_adapter_port);
+    let mut dmx_renderer = DmxRenderer::new(&input_config_store, &dmx_config_store, dmx_adapter_port);
 
     //? infinite programmloop whose speed is capped by the FRAME_TIMING attribute
 
@@ -73,11 +69,11 @@ fn main() {
             Ok(_) => (),
             Err(error) => logging::log(error.as_str(), logging::LogLevel::Warning, true)
         };
-        match dmx_renderer.render(&scanners) {
+        match dmx_renderer.render() {
             Ok(_) => (),
             Err(error) => logging::log(error.as_str(), logging::LogLevel::Warning, true)
         }
-        match input_parser.process_input(&mut led_renderer, &mut scanners, &mut dmx_renderer) {
+        match input_parser.process_input(&mut led_renderer, &mut dmx_renderer) {
             Ok(_) => (),
             Err(error) => logging::log(error.as_str(), logging::LogLevel::Warning, true)
         };
@@ -89,7 +85,6 @@ fn main() {
                 log_level = logging::LogLevel::Warning;
                 persist = true;
             }
-            scanners.trigger_next_step(&mut dmx_renderer);// * This is only for test reasons and should probably be triggered by something like beat
             led_renderer.trigger_current_animation();// * This is only for test reasons and should probably be triggered by something like beat
             logging::log(format!("Peak elapsed ms since last log: {}", truncate_peak_ms.to_string()).as_str(), log_level, persist);
             truncate_peak_ms = 0;
