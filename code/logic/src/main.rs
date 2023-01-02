@@ -35,6 +35,8 @@ pub enum ArduinoModule {
 }
 
 fn main() {
+    logging::log("", logging::LogLevel::Start, true);
+
     //? setup
 
     let led_config_store = LedConfigStore::new();
@@ -136,7 +138,6 @@ fn map_serial_connection_to_arduino_modules(serial_port_path: String, input_conf
     };
     if return_vec.len() < 1 { return Err("No input found".to_string()); }
 
-    // print!("{:?}\n", return_vec);
     if return_vec[0] == 69 { //Todo: this should be 1
         return Ok(ArduinoModule::DmxAdapter)
     } else if return_vec[0] == 2 {

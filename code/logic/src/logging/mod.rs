@@ -10,13 +10,14 @@ pub enum LogLevel {
     /// level-2
     Warning,
     /// level-3
-    Debug
+    Debug,
+    /// filed only once (at bootup of the programm)
+    Start
 }
 
 const LOG_LEVEL: LogLevel = LogLevel::Info; // Todo: evaluate if it is worth it to make this to a consolearg
 
 /// This loggs a given message with the given prioritylevel to the console and to a logfile if persist is true.
-/// Todo: divide logs into batches to make logfile more readable
 /// Todo: develop "read-analyse-logfile" function
 pub fn log(message: &str, log_level: LogLevel, persist: bool) {
     let datetime = format!("{}", chrono::offset::Local::now().format("%Y-%m-%d %H:%M:%S"));
@@ -34,6 +35,9 @@ pub fn log(message: &str, log_level: LogLevel, persist: bool) {
                     print!("{} {}\n", "Warn:".bright_red(), message.bright_white());
                     if persist { writeln!(&mut file, "{} - {}", datetime, format!("Warn : {}", message)).unwrap(); }
                 },
+                LogLevel::Start => {
+                    writeln!(&mut file, "\n{} - {}", datetime, "STARTUP").unwrap();
+                },
                 _ => return
             },
         LogLevel::Info =>  
@@ -46,6 +50,9 @@ pub fn log(message: &str, log_level: LogLevel, persist: bool) {
                     print!("{} {}\n", "Warn:".bright_red(), message.bright_white());
                     if persist { writeln!(&mut file, "{} - {}", datetime, format!("Warn : {}", message)).unwrap() };
                 },
+                LogLevel::Start => {
+                    writeln!(&mut file, "\n{} - {}", datetime, "STARTUP").unwrap();
+                },
                 _ => return
             },
         LogLevel::Debug =>  
@@ -56,5 +63,6 @@ pub fn log(message: &str, log_level: LogLevel, persist: bool) {
                 },
                 _ => return
             }
+        _ => return
     }
 }
