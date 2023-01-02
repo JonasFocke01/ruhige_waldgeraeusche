@@ -79,7 +79,6 @@ impl DmxFixture {
     /// reads the animation files and returns the constructed animation vec
     fn read_animation_files(fixture_id: u8, dmx_config_store: &DmxConfigStore) -> Vec<Vec<(u8, u8, bool, bool, bool, bool)>> {
         let mut animations: Vec<Vec<(u8, u8, bool, bool, bool, bool)>> = vec!();
-        // Todo: There should be an configurable array in the config file containing the names of the fixtures
         let fixture_count = dmx_config_store.get_dmx_fixtures().len();
         for _ in dmx_config_store.get_dmx_fixtures().iter() {
             animations.push(vec!());
