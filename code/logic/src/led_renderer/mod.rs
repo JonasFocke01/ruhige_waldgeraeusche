@@ -42,7 +42,6 @@ pub enum Combination {
 #[derive(Clone)]
 pub struct Led {
     /// The brightness of each led in the range of 0.0 to 1.0
-    /// Todo: enforce brightness range 0.0 to 1.0
     brightness: f32,
     /// The speed at which the pixel moves accross the strip
     /// Todo: test cases (-1.0, 0.0, 1.0)

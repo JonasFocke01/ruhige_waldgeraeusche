@@ -116,8 +116,12 @@ impl DmxFixture {
             let dir_down: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
             let dir_in: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
             let dir_out: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
-            // Todo: force range 0.0 to 1.0
-            let brightness: f32 = line_params.next().unwrap().parse::<f32>().unwrap();
+            let mut brightness: f32 = line_params.next().unwrap().parse::<f32>().unwrap();
+            // force brightness range 0.0 to 1.0
+            if brightness < 0.0 || brightness > 1.0 {
+                logging::log(format!("brightness need to be in range 0.0 to 1.0 but found {} in file {}\n", brightness, animation_file_name).as_str(), logging::LogLevel::Warning, false);
+                brightness = 0.0;
+            }
             
             fixture_result.push((x, y, dir_up, dir_down, dir_in, dir_out, brightness));
         }
@@ -142,9 +146,12 @@ impl DmxFixture {
         self.brightness
     }
     /// sets the brightness of the fixture
-    /// Todo: force range 0.0 to 1.0
-    pub fn set_brightness(&mut self, dimm: f32) {
-        self.brightness = dimm;
+    pub fn set_brightness(&mut self, mut brightness: f32) {
+        if brightness < 0.0 || brightness > 1.0 {
+            logging::log(format!("brightness need to be in range 0.0 to 1.0 but attempt to set to {}\n", brightness).as_str(), logging::LogLevel::Warning, false);
+            brightness = 0.0;
+        }
+        self.brightness = brightness;
     }
     /// returns the current color of the fixture
     pub fn get_current_color(&self) -> ((f32, f32, f32), u8) {
