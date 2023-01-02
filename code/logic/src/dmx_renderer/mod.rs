@@ -12,7 +12,9 @@ use serial2::SerialPort;
 
 /// The struct to define how a DmxRenderer should look like (more than one is possible and intended)
 pub struct DmxRenderer {
-    /// limit writing to once every 50ms to not confuse the adapter
+    /// the fixture positions advance every 100 ms
+    position_timestamp: Instant,
+    /// limit writing to dmx once every 50ms to not confuse the adapter
     render_timestamp: Instant,
     /// The SerialPort object, the adapter is connected to
     dmx_port: SerialPort,
@@ -21,7 +23,9 @@ pub struct DmxRenderer {
     /// This stores all fixtures
     fixtures: Vec<DmxFixture>,
     /// Should only be true at the start of the programm to review how much dmx channels are used
-    print_dmx_channel_ocupied: bool
+    print_dmx_channel_ocupied: bool,
+    /// Stores if an dmx update happened to further slow down dmx writing
+    updateable: bool
 }
 
 /// Responsible for
@@ -32,8 +36,6 @@ impl DmxRenderer {
     /// This creates, fills and returns the DmxRenderer object
     /// - opens the serial port to the dmx adapter
     pub fn new(input_config_store: &InputConfigStore, dmx_config_store: &DmxConfigStore, serial_input_port: &str) -> DmxRenderer {
-        let render_timestamp = Instant::now();
-
         let port = match SerialPort::open(format!("/dev/{}", serial_input_port), input_config_store.get_baud_rate() as u32) {
             Ok(e) => {
                 logging::log("Successfully opened dmx-usb-adapter", logging::LogLevel::Info, false);
@@ -52,21 +54,28 @@ impl DmxRenderer {
         }
 
         DmxRenderer {
-            render_timestamp: render_timestamp,
+            position_timestamp: Instant::now(),
+            render_timestamp: Instant::now(),
             dmx_port: port,
             position_index: 0,
             fixtures: fixtures,
-            print_dmx_channel_ocupied: true
+            print_dmx_channel_ocupied: true,
+            updateable: false
         }
     }
     /// Gathers all dmx footprints from all available DmxFixtures
     /// Builds and writes the channel vector
-    /// If the Vector is less than 513 bytes, it will be filled with zeros
+    /// The Vector is prepended with a 69 as a startbyte
+    /// If the Vector is less than 513 bytes, it will be appended with zeros
     pub fn render(&mut self) -> Result<Vec<u8>, String> {
 
-        if self.render_timestamp.elapsed().as_millis() >= 50 {
-
+        if self.position_timestamp.elapsed().as_millis() > 100 {
             self.position_index += 1;
+            self.updateable = true;
+            self.position_timestamp = Instant::now();
+        }
+
+        if self.render_timestamp.elapsed().as_millis() >= 50 {
 
             // ? dmx value array construction
             let mut channel_vec: Vec<u8> = vec!();
@@ -97,6 +106,7 @@ impl DmxRenderer {
                 Err(_) => return Err("Error while writing to Serial DMX port".to_string())
             };
 
+            self.updateable = false;
             self.render_timestamp = Instant::now();
             return Ok(channel_vec)
         }
