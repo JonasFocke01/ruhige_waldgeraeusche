@@ -1,0 +1,28 @@
+Custom USB protocol to communicate with the dmx adapter and all input modules.
+All USB connected arduinos are kind of mixed together on the rpi.
+At startup, the pi connects all arduinos and listens for the startbyte.
+After receiving that, the arduino connects the arduinos depending on the previous mapping.
+The rpi programm might be restarted, so the rpis keep sending theyr startbyte indefinetely.
+The startbytes are
+
+1 -> DMX Adapter
+2 -> Color Module
+
+The DMX Adapter wont send anything else, but all input modules send keystrokes or other commands each in two bytes.
+First the id byte of the key and then instructions, if it is pressed or, in case of a poti, at what value it stands.
+When the arduino receives a known id byte, it waits for the corresponding data byte for that key.
+ID bytes and possible values are
+(1 = pressed, 0 = released, 0-255 = poti values)
+
+20 -> Color change to RED (1)
+21 -> Color change to ORANGE (1)
+22 -> Color change to VIOLET (1)
+23 -> Color change to BLUE (1)
+24 -> Color change to GREEN (1)
+25 -> Color change to YELLOW (1)
+26 -> Color change to WHITE (1)
+27 -> Color change to Turquise (1)
+28 -> Color change to PINK (1)
+29 -> Color change to RAINBOW (1)
+30 -> Color transition (duration) INTELLIGENT (1)
+31 -> Color transition (duration) SPEED (0-255)

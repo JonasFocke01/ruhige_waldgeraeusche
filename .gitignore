@@ -1,0 +1,10 @@
+/testing/rust_testing/rust_to_python_communication/target
+/testing/rust_testing/rust_to_python/target
+/testing/rust_testing/rust_serial_communication/target
+/testing/rust_testing/dmx/target
+/testing/rust_testing/language/target
+code/logic/target/
+code/logic/target/debug/.cargo-lock
+/testing/rust_testing/audio_analysis/target
+/testing/rust_testing/scannerposition_fileformat/target
+/code/logic/.log

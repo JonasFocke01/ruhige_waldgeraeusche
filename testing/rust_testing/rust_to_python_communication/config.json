@@ -1,0 +1,15 @@
+{
+    "input": {},
+    "leds": {
+        "led_count_per_strip": 1,
+        "strip_count": 1,
+        "led_pin": 21,
+        "led_freq_hz": 800000,
+        "led_dma": 10,
+        "led_brightness": 255,
+        "led_invert": false,
+        "led_channel": 0,
+        "pixel_offset": 0,
+        "frame_timing": 33
+    }
+}

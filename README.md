@@ -11,6 +11,14 @@
 
 You can download this repo and use it as you please, or you can customize the behavior by changing your local copy or contribute to this repository.
 
+ ## Installing
+
+ - install rust/cargo
+ - enable uart port:
+    - sudo nano /boot/config.txt
+    - enable_uart=1
+    - -> reboot
+
 # Contributing
 
 Any contributing is highly appreciated!
