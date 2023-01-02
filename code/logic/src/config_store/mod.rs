@@ -42,7 +42,8 @@ pub struct LedConfigStore {
 }
 /// The struct to define how the DmxConfigStore should look like
 pub struct DmxConfigStore {
-    dmx_fixtures: Vec<String>
+    dmx_fixtures: Vec<String>,
+    animation_count: u8
 }
 /// The struct to define how the GlobalVarsStore should look like
 pub struct GlobalVarsStore {
@@ -227,12 +228,18 @@ impl DmxConfigStore {
         }
 
         DmxConfigStore {
-            dmx_fixtures: dmx_fixtures
+            dmx_fixtures: dmx_fixtures,
+            // Todo: this should be a string array in the config file containing the names of the animations
+            animation_count: 2
         }
     }
     /// Returns dmx_fixtures
     pub fn get_dmx_fixtures(&self) -> &Vec<String> {
         &self.dmx_fixtures
+    }
+    /// Returns animation_count
+    pub fn get_animation_count(&self) -> u8 {
+        self.animation_count
     }
 }
 

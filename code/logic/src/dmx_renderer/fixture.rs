@@ -21,11 +21,11 @@ pub struct DmxFixture {
     /// The up, down, in, out bools indicate, in which direction the fixture is moving <br>
     /// The Index vec contains the individual steps the fixture should take <br>
     /// Animation< Index< x_position, y_position, up, down, in, out >>
-    animations: Vec<Vec<(u8, u8, bool, bool, bool, bool)>>,
+    animations: Vec<Vec<(u8, u8, bool, bool, bool, bool, f32)>>,
     /// Stores the current animation the fixture is in
     current_animation: u8,
     /// The fixtures dimm value
-    dimmer: u8,
+    brightness: f32,
     /// The fixtures color as a tuple containing <br>
     /// the RGB representation at all times <br>
     /// the one-byte representation for that fixure if it is needed, otherwise always 0
@@ -63,10 +63,10 @@ impl DmxFixture {
             stage_coordinates: (0, 0),
             animations: animations,
             current_animation: 0,
-            dimmer: 255,
+            brightness: 1.0,
             current_color: ((150.0, 0.0, 0.0), 60),
             light_mode_up: true,
-            light_mode_down: true,
+            light_mode_down: false,
             light_mode_in: false,
             light_mode_out: false,
             enabled: true
@@ -77,21 +77,22 @@ impl DmxFixture {
     // Todo: this can possibly done in one function now
     // Todo: the parsing should only happen once to not read one file multiple times
     /// reads the animation files and returns the constructed animation vec
-    fn read_animation_files(fixture_id: u8, dmx_config_store: &DmxConfigStore) -> Vec<Vec<(u8, u8, bool, bool, bool, bool)>> {
-        let mut animations: Vec<Vec<(u8, u8, bool, bool, bool, bool)>> = vec!();
+    fn read_animation_files(fixture_id: u8, dmx_config_store: &DmxConfigStore) -> Vec<Vec<(u8, u8, bool, bool, bool, bool, f32)>> {
+        let mut animations: Vec<Vec<(u8, u8, bool, bool, bool, bool, f32)>> = vec!();
         let fixture_count = dmx_config_store.get_dmx_fixtures().len();
-        for _ in dmx_config_store.get_dmx_fixtures().iter() {
+        for _ in 0..dmx_config_store.get_animation_count() {
             animations.push(vec!());
         }
 
-        animations[0] = DmxFixture::help_read_animation_files(fixture_id, "snake.tpl", fixture_count as u8);
+        animations[0] = DmxFixture::help_read_animation_files(fixture_id, "test.tpl", fixture_count as u8);
+        animations[1] = DmxFixture::help_read_animation_files(fixture_id, "square.tpl", fixture_count as u8);
 
         animations
     }
     /// helper function for read_animation_files <br>
     /// returns the positions for each fixture from a given file for x fixtures
-    fn help_read_animation_files(fixture_id: u8, animation_file_name: &str, fixture_count: u8) -> Vec<(u8, u8, bool, bool, bool, bool)> {
-        let mut fixture_result: Vec<(u8, u8, bool, bool, bool, bool)> = vec!();
+    fn help_read_animation_files(fixture_id: u8, animation_file_name: &str, fixture_count: u8) -> Vec<(u8, u8, bool, bool, bool, bool, f32)> {
+        let mut fixture_result: Vec<(u8, u8, bool, bool, bool, bool, f32)> = vec!();
         let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/dmx_renderer/") + animation_file_name).as_str())) {
             Ok(e) => e,
             Err(e) => {
@@ -115,11 +116,12 @@ impl DmxFixture {
             let dir_down: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
             let dir_in: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
             let dir_out: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
+            // Todo: force range 0.0 to 1.0
+            let brightness: f32 = line_params.next().unwrap().parse::<f32>().unwrap();
             
-            fixture_result.push((x, y, dir_up, dir_down, dir_in, dir_out));
+            fixture_result.push((x, y, dir_up, dir_down, dir_in, dir_out, brightness));
         }
         logging::log(format!("successfully parsed animation file {}", animation_file_name).as_str(), logging::LogLevel::Info, false);
-        print!("{:?}\n", fixture_result);
         fixture_result
     }
     /// returns the stage_coordinates
@@ -135,13 +137,14 @@ impl DmxFixture {
     pub fn set_current_animation(&mut self, animation: u8) {
         self.current_animation = animation;
     }
-    /// returns the dimmer of the fixture
-    pub fn get_dimmer(&self) -> u8 {
-        self.dimmer
+    /// returns the brightness of the fixture
+    pub fn get_brightness(&self) -> f32 {
+        self.brightness
     }
-    /// sets the dimmer of the fixture
-    pub fn set_dimmer(&mut self, dimm: u8) {
-        self.dimmer = dimm;
+    /// sets the brightness of the fixture
+    /// Todo: force range 0.0 to 1.0
+    pub fn set_brightness(&mut self, dimm: f32) {
+        self.brightness = dimm;
     }
     /// returns the current color of the fixture
     pub fn get_current_color(&self) -> ((f32, f32, f32), u8) {
@@ -192,7 +195,6 @@ impl DmxFixture {
     pub fn get_dmx_footprint(&self, position_index: u64) -> Vec<u8> {
         let mut footprint = vec!();
         let position_index = position_index % self.animations[self.current_animation as usize].len() as u64;
-        //print!("position_index: {}\n", position_index);
         match self.fixture_name.as_str() {
             "Victory Scan" => {
                 footprint.push(self.animations[self.current_animation as usize][position_index as usize].0);
@@ -200,9 +202,12 @@ impl DmxFixture {
                 footprint.push(8);
                 footprint.push(0);
                 footprint.push(self.current_color.1);
-                //footprint.push(if self.animations[scanner_i as usize].2 { 60 /*Todo: Is this the dimmer? */ } else { 0 });// Todo: fixme
-
-                footprint.push(100);
+                if  (self.light_mode_up && self.animations[self.current_animation as usize][position_index as usize].2)   ||
+                    (self.light_mode_down && self.animations[self.current_animation as usize][position_index as usize].3) ||
+                    (self.light_mode_in && self.animations[self.current_animation as usize][position_index as usize].4)   ||
+                    (self.light_mode_out && self.animations[self.current_animation as usize][position_index as usize].5)   {
+                        footprint.push((255 as f32 * self.animations[self.current_animation as usize][position_index as usize].6 * self.brightness) as u8);
+                }
                 footprint.push(0);
             },
             e => logging::log(format!("unknown fixture name found: {}", e).as_str(), logging::LogLevel::Warning, true)
