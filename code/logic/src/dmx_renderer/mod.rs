@@ -91,7 +91,7 @@ impl DmxRenderer {
             
             if self.print_dmx_channel_ocupied {
                 // Todo: log fixture count
-                logging::log(format!("Occupied dmx-channels: {}", channel_vec.len() - 1).as_str(), logging::LogLevel::Info, true);
+                logging::log(format!("Occupied dmx-channels: {}", channel_vec.len()).as_str(), logging::LogLevel::Info, true);
                 self.print_dmx_channel_ocupied = false;
             }
 

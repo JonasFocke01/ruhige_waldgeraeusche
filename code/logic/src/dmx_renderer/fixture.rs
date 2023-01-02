@@ -108,16 +108,14 @@ impl DmxFixture {
             parsed_line_i += 1;
             if (parsed_line_i + 1) % fixture_count as isize != fixture_id as isize { continue; }
 
-            // Todo: improve error handling
             let mut line_params = line.split(",");
             let x: u8 = line_params.next().unwrap().parse().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str());
-            let y: u8 = line_params.next().unwrap().parse().unwrap();
-            let dir_up: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
-            let dir_down: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
-            let dir_in: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
-            let dir_out: bool = if line_params.next().unwrap().parse::<u8>().unwrap() == 1 { true } else { false };
-            let mut brightness: f32 = line_params.next().unwrap().parse::<f32>().unwrap();
-            // force brightness range 0.0 to 1.0
+            let y: u8 = line_params.next().unwrap().parse().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str());
+            let dir_up: bool = if line_params.next().unwrap().parse::<u8>().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str()) == 1 { true } else { false };
+            let dir_down: bool = if line_params.next().unwrap().parse::<u8>().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str()) == 1 { true } else { false };
+            let dir_in: bool = if line_params.next().unwrap().parse::<u8>().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str()) == 1 { true } else { false };
+            let dir_out: bool = if line_params.next().unwrap().parse::<u8>().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str()) == 1 { true } else { false };
+            let mut brightness: f32 = line_params.next().unwrap().parse::<f32>().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str());
             if brightness < 0.0 || brightness > 1.0 {
                 logging::log(format!("brightness need to be in range 0.0 to 1.0 but found {} in file {}\n", brightness, animation_file_name).as_str(), logging::LogLevel::Warning, false);
                 brightness = 0.0;

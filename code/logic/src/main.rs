@@ -142,6 +142,6 @@ fn map_serial_connection_to_arduino_modules(serial_port_path: String, input_conf
     } else if return_vec[0] == 2 {
         return Ok(ArduinoModule::Input)
     } else {
-        return Err(format!("Correct input device for {} could not be determined\n", serial_port_path))
+        return Err(format!("Correct input device for {} could not be determined", serial_port_path))
     }
 }
