@@ -60,18 +60,16 @@ impl DmxFixture {
         DmxFixture {
             fixture_name: fixture_name,
             fixture_type: fixture_type,
-            stage_coordinates: (0, 0),
+            stage_coordinates: (125, 0),
             animations: animations,
             current_animation: 0,
             brightness: 1.0,
             current_color: ((150.0, 0.0, 0.0), 60),
             light_mode_up: true,
-            light_mode_down: false,
+            light_mode_down: true,
             light_mode_in: false,
             light_mode_out: false,
             enabled: true
-
-            
         }
     }
     // Todo: this can possibly done in one function now

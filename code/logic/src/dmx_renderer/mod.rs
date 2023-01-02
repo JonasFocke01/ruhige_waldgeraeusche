@@ -1,4 +1,4 @@
-use crate::config_store::{InputConfigStore, DmxConfigStore};
+use crate::config_store::{InputConfigStore, DmxConfigStore, GlobalVarsStore};
 use crate::logging;
 
 /// A separate module that contains the DmxFixture struct and implementation
@@ -8,8 +8,28 @@ use fixture::DmxFixture;
 use fixture::FixtureType;
 
 use std::time::Instant;
+use std::ops::Not;
 use serial2::SerialPort;
 
+/// The mode that determines how the fixtures should change theyr color
+#[derive(Clone, Copy)]
+pub enum ColorTransitionMode {
+    /// The fixtures should change instant
+    Instant,
+    /// The fixtures should change theyr color animative
+    Animative
+}
+
+impl Not for ColorTransitionMode {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        match self {
+            ColorTransitionMode::Instant => ColorTransitionMode::Animative,
+            ColorTransitionMode::Animative => ColorTransitionMode::Instant
+        }
+    }
+}
 /// The struct to define how a DmxRenderer should look like (more than one is possible and intended)
 pub struct DmxRenderer {
     /// the fixture positions advance every 100 ms
@@ -25,7 +45,11 @@ pub struct DmxRenderer {
     /// Should only be true at the start of the programm to review how much dmx channels are used
     print_dmx_channel_ocupied: bool,
     /// Stores if an dmx update happened to further slow down dmx writing
-    updateable: bool
+    updateable: bool,
+    color_transition_mode: ColorTransitionMode,
+    color_transition_index: u8,
+    color_transition_to_color: ((f32, f32, f32), u8),
+    color_transition_speed: u128
 }
 
 /// Responsible for
@@ -60,7 +84,11 @@ impl DmxRenderer {
             position_index: 0,
             fixtures: fixtures,
             print_dmx_channel_ocupied: true,
-            updateable: false
+            updateable: false,
+            color_transition_mode: ColorTransitionMode::Instant,
+            color_transition_index: 0,
+            color_transition_to_color: ((0.0, 0.0, 0.0), 0),
+            color_transition_speed: 25
         }
     }
     /// Gathers all dmx footprints from all available DmxFixtures
@@ -69,13 +97,19 @@ impl DmxRenderer {
     /// If the Vector is less than 513 bytes, it will be appended with zeros
     pub fn render(&mut self) -> Result<Vec<u8>, String> {
 
+        if self.color_transition_index < 255 && self.render_timestamp.elapsed().as_millis() % if self.color_transition_speed == 0 { 1 } else { self.color_transition_speed } == 0 {
+            self.set_color(vec!(FixtureType::Scanner), self.color_transition_to_color);
+            self.color_transition_index = self.color_transition_index + 1;
+            logging::log(format!("color_transition_index at: {}", self.color_transition_index).as_str(), logging::LogLevel::Info, false);
+        }
+
         if self.position_timestamp.elapsed().as_millis() > 100 {
             self.position_index += 1;
             self.updateable = true;
             self.position_timestamp = Instant::now();
         }
 
-        if self.render_timestamp.elapsed().as_millis() >= 50 {
+        if self.updateable && self.render_timestamp.elapsed().as_millis() >= 50 {
 
             // ? dmx value array construction
             let mut channel_vec: Vec<u8> = vec!();
@@ -95,8 +129,6 @@ impl DmxRenderer {
                 self.print_dmx_channel_ocupied = false;
             }
 
-            //logging::log(format!("channel_vec: {:?}", channel_vec).as_str(), logging::LogLevel::Info, true);
-
             while channel_vec.len() < 513 {
                 channel_vec.push(0);
             }
@@ -114,13 +146,49 @@ impl DmxRenderer {
     }
     /// This maps the given color to all fixtures given in the fixture_types parameter
     pub fn set_color(&mut self, fixture_types: Vec<FixtureType>, color: ((f32, f32, f32), u8)) {
-        for _ in fixture_types.iter() {
-            for fixture in self.fixtures.iter_mut() {
-                // Todo: this should truly react to the fixture type
-                // if fixture_type == fixture.get_type() {
-                    fixture.set_current_color(color);
-                // }
+        self.color_transition_to_color = color;
+        match self.color_transition_mode {
+            ColorTransitionMode::Instant => {
+                for _ in fixture_types.iter() {
+                    for fixture in self.fixtures.iter_mut() {
+                        match fixture.get_type() {
+                            // Todo: this should only change the selected fixtures given by "fixture_types"
+                            _ => fixture.set_current_color(color)
+                        }
+                            
+                    }
+                }
+            },
+            ColorTransitionMode::Animative => {
+                if self.color_transition_index == 255 {
+                    self.color_transition_index = 0;
+                }
+                for _ in fixture_types.iter() {
+                    for fixture in self.fixtures.iter_mut() {
+                        if fixture.get_stage_coordinates().0 < self.color_transition_index {
+                            match fixture.get_type() {
+                                // Todo: this should only change the selected fixtures given by "fixture_types"
+                                _ => fixture.set_current_color(color)
+                            }
+                        }
+                            
+                    }
+                }
             }
         }
+    }
+    /// This sets the color transition mode
+    /// Toggles the transition mode if None is given
+    pub fn set_color_transition_mode(&mut self, new_color_transition_mode: Option<ColorTransitionMode>) {
+        logging::log(format!("color transition mode changed!").as_str(), logging::LogLevel::Info, false);
+        match new_color_transition_mode {
+            Some(e) => self.color_transition_mode = e,
+            None => self.color_transition_mode = !self.color_transition_mode
+        }
+    }
+    /// This sets the color transition speed.
+    /// This function maps the given u8 to 0 - 50
+    pub fn set_color_transition_speed(&mut self, speed: u8) {
+        self.color_transition_speed = GlobalVarsStore::map_range(speed.into(), (0.0, 255.0), (0.0, 50.0)) as u128;
     }
 }

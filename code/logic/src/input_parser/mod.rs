@@ -1,5 +1,5 @@
 use crate::led_renderer::LedRenderer;
-use crate::dmx_renderer::DmxRenderer;
+use crate::dmx_renderer::{DmxRenderer, ColorTransitionMode};
 use crate::dmx_renderer::fixture::FixtureType;
 use crate::config_store::InputConfigStore;
 use crate::logging;
@@ -97,35 +97,28 @@ impl InputParser {
                 },
                 28 => { // color to pink
                     if input.remove(0) == 1 {
-                        // Todo: the mapping to "117" should not happen here
+                        // Todo: evaluate: the mapping to "117" should not happen here
                         dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 182.0, 193.0), 117));
                         led_renderer.set_current_color((255.0, 182.0, 193.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
-                29 => {
+                29 => { // color to rainbow
                     if input.remove(0) == 1 {
                         dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 0.0, 0.0), 0));
                         // Todo: implement rainbow effect for scanners
                         led_renderer.set_rainbow_mode(true);
                     }
                 },
-                30 => {
-                    // Todo: implement smart color toggle.
-                    // smart on -> color change is like one snake is red, other is green
-                    // smart off-> all snakes change imediately
-                    // ! Keep not only the led stripes in mind but also all other fixtures
+                30 => { // color transition mode
                     if input.remove(0) == 1 {
-                        logging::log("button pressed", logging::LogLevel::Info, false);
+                        dmx_renderer.set_color_transition_mode(Some(ColorTransitionMode::Animative));
                     } else {
-                        logging::log("button released", logging::LogLevel::Info, false);
+                        dmx_renderer.set_color_transition_mode(Some(ColorTransitionMode::Instant));
                     }
-
-                    
                 },
-                31 => {
-                    // Todo: implement something for color transition
-                    logging::log(format!("Fader change to: {}", input.remove(0)).as_str(), logging::LogLevel::Info, false);
+                31 => { // color transition speed change (fader)
+                    dmx_renderer.set_color_transition_speed(input.remove(0));
                 }
                 _ => ()
             }
