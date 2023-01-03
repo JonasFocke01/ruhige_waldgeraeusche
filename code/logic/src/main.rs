@@ -71,7 +71,7 @@ fn main() {
             Ok(_) => (),
             Err(error) => logging::log(error.as_str(), logging::LogLevel::Warning, true)
         };
-        match dmx_renderer.render() {
+        match dmx_renderer.render(&dmx_config_store) {
             Ok(_) => (),
             Err(error) => logging::log(error.as_str(), logging::LogLevel::Warning, true)
         }

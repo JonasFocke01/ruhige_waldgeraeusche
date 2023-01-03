@@ -95,7 +95,7 @@ impl DmxRenderer {
     /// Builds and writes the channel vector
     /// The Vector is prepended with a 69 as a startbyte
     /// If the Vector is less than 513 bytes, it will be appended with zeros
-    pub fn render(&mut self) -> Result<Vec<u8>, String> {
+    pub fn render(&mut self, dmx_config_store: &DmxConfigStore) -> Result<Vec<u8>, String> {
 
         if self.color_transition_index < 255 && self.render_timestamp.elapsed().as_millis() % if self.color_transition_speed == 0 { 1 } else { self.color_transition_speed } == 0 {
             self.set_color(vec!(FixtureType::Scanner), (self.color_transition_to_color.0, None));
@@ -123,8 +123,7 @@ impl DmxRenderer {
             }
             
             if self.print_dmx_channel_ocupied {
-                // Todo: log fixture count
-                logging::log(format!("Occupied dmx-channels: {}", channel_vec.len()).as_str(), logging::LogLevel::Info, true);
+                logging::log(format!("Occupied dmx-channels: {} ({} fixtures)", channel_vec.len(), dmx_config_store.get_dmx_fixtures().len()).as_str(), logging::LogLevel::Info, true);
                 self.print_dmx_channel_ocupied = false;
             }
 
