@@ -73,8 +73,7 @@ impl DmxFixture {
             enabled: true
         }
     }
-    // Todo: this can possibly done in one function now
-    // Todo: the parsing should only happen once to not read one file multiple times
+    // Todo: (long term) the parsing should only happen once to not read one file multiple times
     /// reads the animation files and returns the constructed animation vec
     fn read_animation_files(fixture_id: u8, dmx_config_store: &DmxConfigStore) -> Vec<Vec<(u8, u8, bool, bool, bool, bool, f32)>> {
         let mut animations: Vec<Vec<(u8, u8, bool, bool, bool, bool, f32)>> = vec!();
@@ -84,47 +83,40 @@ impl DmxFixture {
         }
 
         for (index, animation_name) in dmx_config_store.get_animations().iter().enumerate() {
-            animations[index] = DmxFixture::help_read_animation_files(fixture_id, animation_name, fixture_count as u8);
+            let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/dmx_renderer/") + animation_name + ".tpl").as_str())) {
+                Ok(e) => e,
+                Err(e) => {
+                    logging::log(format!("Error occured while reading animation file {} {}", animation_name, e).as_str(), logging::LogLevel::Warning, true);
+                    panic!("Error occured while reading animation file {}\n", e);
+                }
+            };
+            plain_content = plain_content.replace(" ", "");
+            let vec_content = plain_content.split("\n");
+            let mut parsed_line_i: isize = 0;
+            for (line_i, line) in vec_content.clone().enumerate() {
+                if line_i == 0 || line_i % (fixture_count + 1) as usize == 0 { continue; }
+                parsed_line_i += 1;
+                if (parsed_line_i + 1) % fixture_count as isize != fixture_id as isize { continue; }
+
+                let mut line_params = line.split(",");
+                let x: u8 = line_params.next().unwrap().parse().expect(format!("Too few fixtures found in file {}. {} required", animation_name, fixture_count).as_str());
+                let y: u8 = line_params.next().unwrap().parse().expect(format!("Too few fixtures found in file {}. {} required", animation_name, fixture_count).as_str());
+                let dir_up: bool = if line_params.next().unwrap().parse::<u8>().expect(format!("Too few fixtures found in file {}. {} required", animation_name, fixture_count).as_str()) == 1 { true } else { false };
+                let dir_down: bool = if line_params.next().unwrap().parse::<u8>().expect(format!("Too few fixtures found in file {}. {} required", animation_name, fixture_count).as_str()) == 1 { true } else { false };
+                let dir_in: bool = if line_params.next().unwrap().parse::<u8>().expect(format!("Too few fixtures found in file {}. {} required", animation_name, fixture_count).as_str()) == 1 { true } else { false };
+                let dir_out: bool = if line_params.next().unwrap().parse::<u8>().expect(format!("Too few fixtures found in file {}. {} required", animation_name, fixture_count).as_str()) == 1 { true } else { false };
+                let mut brightness: f32 = line_params.next().unwrap().parse::<f32>().expect(format!("Too few fixtures found in file {}. {} required", animation_name, fixture_count).as_str());
+                if brightness < 0.0 || brightness > 1.0 {
+                    logging::log(format!("brightness need to be in range 0.0 to 1.0 but found {} in file {}\n", brightness, animation_name).as_str(), logging::LogLevel::Warning, false);
+                    brightness = 0.0;
+                }
+                
+                animations[index].push((x, y, dir_up, dir_down, dir_in, dir_out, brightness));
+            }
+            logging::log(format!("successfully parsed animation file {}", animation_name).as_str(), logging::LogLevel::Info, false);
         }
 
         animations
-    }
-    /// helper function for read_animation_files <br>
-    /// returns the positions for each fixture from a given file for x fixtures
-    fn help_read_animation_files(fixture_id: u8, animation_file_name: &str, fixture_count: u8) -> Vec<(u8, u8, bool, bool, bool, bool, f32)> {
-        let mut fixture_result: Vec<(u8, u8, bool, bool, bool, bool, f32)> = vec!();
-        let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/dmx_renderer/") + animation_file_name + ".tpl").as_str())) {
-            Ok(e) => e,
-            Err(e) => {
-                logging::log(format!("Error occured while reading animation file {} {}", animation_file_name, e).as_str(), logging::LogLevel::Warning, true);
-                panic!("Error occured while reading animation file {}\n", e);
-            }
-        };
-        plain_content = plain_content.replace(" ", "");
-        let vec_content = plain_content.split("\n");
-        let mut parsed_line_i: isize = 0;
-        for (line_i, line) in vec_content.clone().enumerate() {
-            if line_i == 0 || line_i % (fixture_count + 1) as usize == 0 { continue; }
-            parsed_line_i += 1;
-            if (parsed_line_i + 1) % fixture_count as isize != fixture_id as isize { continue; }
-
-            let mut line_params = line.split(",");
-            let x: u8 = line_params.next().unwrap().parse().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str());
-            let y: u8 = line_params.next().unwrap().parse().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str());
-            let dir_up: bool = if line_params.next().unwrap().parse::<u8>().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str()) == 1 { true } else { false };
-            let dir_down: bool = if line_params.next().unwrap().parse::<u8>().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str()) == 1 { true } else { false };
-            let dir_in: bool = if line_params.next().unwrap().parse::<u8>().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str()) == 1 { true } else { false };
-            let dir_out: bool = if line_params.next().unwrap().parse::<u8>().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str()) == 1 { true } else { false };
-            let mut brightness: f32 = line_params.next().unwrap().parse::<f32>().expect(format!("Too few fixtures found in file {}. {} required", animation_file_name, fixture_count).as_str());
-            if brightness < 0.0 || brightness > 1.0 {
-                logging::log(format!("brightness need to be in range 0.0 to 1.0 but found {} in file {}\n", brightness, animation_file_name).as_str(), logging::LogLevel::Warning, false);
-                brightness = 0.0;
-            }
-            
-            fixture_result.push((x, y, dir_up, dir_down, dir_in, dir_out, brightness));
-        }
-        logging::log(format!("successfully parsed animation file {}", animation_file_name).as_str(), logging::LogLevel::Info, false);
-        fixture_result
     }
     /// returns the stage_coordinates
     pub fn get_stage_coordinates(&self) -> (u8, u8) {
@@ -165,7 +157,6 @@ impl DmxFixture {
         
         if p_color.1.is_none() {
             let mut result_color: ((f32, f32, f32), u8) = (p_color.0, 0);
-            print!("color: {} {} {}\n", p_color.0.0, p_color.0.1, p_color.0.2);
             match self.fixture_name.as_str() {
                 "Victory Scan" =>   {
                                         // Todo: Something is odd! correct the mapping
