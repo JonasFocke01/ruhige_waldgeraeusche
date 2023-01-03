@@ -69,7 +69,6 @@ pub struct LedRenderer<'a> {
     led_config_store: &'a LedConfigStore,
     /// The last timestamp the leds where written. The leds framerate is capped to a hardcoded number of milliseconds
     render_timestamp: Instant,
-    // Todo: extract this variables into object to not clutter up LedRenderer
     /// The animation displayed on the strips
     current_animation: Animation,
     /// The direction the animation goes
@@ -199,8 +198,25 @@ impl<'a> LedRenderer<'a> {
     pub fn render(&mut self) -> Result<Vec<Vec<Led>>, String> {
         let mut result_pixels: Vec<Vec<Led>> = vec!();
 
-        // Todo: implement garbage collection on led strips (pixels who are brightness 0.0001 should not live long)
         if self.render_timestamp.elapsed().as_millis() >= self.led_config_store.get_frame_timing().into() {
+
+            // ? garbage collection
+
+            if self.render_timestamp.elapsed().as_millis() % 5 == 0 {
+                for strip_i in 0..self.led_config_store.get_strip_count() {
+                    for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
+                        if  self.pixels[strip_i as usize][pixel_i as usize].brightness < 0.001 {
+                            self.pixels[strip_i as usize][pixel_i as usize] = Led {
+                                brightness: 0.0,
+                                speed: 0,
+                                fade: 1.0,
+                                current_color: (0.0, 0.0, 0.0),
+                                dest_color: self.current_color
+                            }
+                        }
+                    }
+                }
+            }
 
             // ? rainbow mode
             // Todo: (long term) investigate: this might be broken
