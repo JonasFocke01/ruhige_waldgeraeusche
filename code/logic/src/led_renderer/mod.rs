@@ -44,8 +44,10 @@ pub struct Led {
     /// The brightness of each led in the range of 0.0 to 1.0
     brightness: f32,
     /// The speed at which the pixel moves accross the strip
-    /// Todo: test cases (-1.0, 0.0, 1.0)
-    speed: f32,
+    /// > 0.0 -> moving up 
+    /// < 0.0 -> moving down
+    /// = 0.0 -> neutral
+    speed: u8,
     /// The brightness fading of each led
     /// > 1.0 -> fade in
     /// < 1.0 -> fade out
@@ -98,7 +100,7 @@ impl<'a> LedRenderer<'a> {
             for _ in 0..led_config_store.get_led_count_per_strip() {
                 actual_pixels[i as usize].push(Led {
                     brightness: 0.0,
-                    speed: 0.0,
+                    speed: 0,
                     fade: 1.0
                 });
             }
@@ -149,7 +151,7 @@ impl<'a> LedRenderer<'a> {
             for index in self.led_config_store.get_pixel_offset()..12 {
                 self.pixels[strip_i as usize][index as usize] = Led {
                                                                 brightness: index as f32 / 12.0,
-                                                                speed: 3.0,
+                                                                speed: 3,
                                                                 fade: 1.0
                                                             }
             }
@@ -164,7 +166,7 @@ impl<'a> LedRenderer<'a> {
             for index in random_start..(random_start + 15) {
                 self.pixels[strip_i as usize][index as usize] = Led {
                                                                 brightness: 1.0,
-                                                                speed: 0.0,
+                                                                speed: 0,
                                                                 fade: 0.9
                                                             }
             }
@@ -178,7 +180,7 @@ impl<'a> LedRenderer<'a> {
                 if  self.pixels[strip_i as usize][pixel_i as usize].brightness < 10.0 {
                         self.pixels[strip_i as usize][pixel_i as usize] = Led {
                                                                         brightness: 1.0,
-                                                                        speed: 0.0,
+                                                                        speed: 0,
                                                                         fade: 1.0
                                                                     }
                 }
@@ -223,7 +225,7 @@ impl<'a> LedRenderer<'a> {
                 for _ in 0..self.led_config_store.get_led_count_per_strip() {
                     result_pixels[i as usize].push(Led {
                         brightness: 0.0,
-                        speed: 0.0,
+                        speed: 0,
                         fade: 1.0
                     });
                 }
@@ -232,9 +234,10 @@ impl<'a> LedRenderer<'a> {
             for strip_i in 0..self.led_config_store.get_strip_count() {
                 for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
                     if  self.pixels[strip_i as usize][pixel_i as usize].brightness > 0.0 {
+                        // Todo: evaluate: this checks for upper boundarys, but need to also check for lower boundaries
                         if  pixel_i as f32 + self.pixels[strip_i as usize][pixel_i as usize].brightness >= 0.0 &&
-                            pixel_i as f32 + (self.pixels[strip_i as usize][pixel_i as usize].speed) < self.led_config_store.get_led_count_per_strip() as f32 - 1.0 {
-                                result_pixels[strip_i as usize][(pixel_i as f32 + (self.pixels[strip_i as usize][pixel_i as usize].speed)) as usize] = self.pixels[strip_i as usize][pixel_i as usize].clone();
+                            pixel_i as u8 + (self.pixels[strip_i as usize][pixel_i as usize].speed) < self.led_config_store.get_led_count_per_strip() as u8 - 1 {
+                                result_pixels[strip_i as usize][(pixel_i as u8 + (self.pixels[strip_i as usize][pixel_i as usize].speed)) as usize] = self.pixels[strip_i as usize][pixel_i as usize].clone();
                         }
                     }
                 }
@@ -280,7 +283,7 @@ impl<'a> LedRenderer<'a> {
             for _ in 0..self.led_config_store.get_led_count_per_strip() {
                 Led {
                     brightness: 0.0,
-                    speed: 0.0,
+                    speed: 0,
                     fade: 1.0
                 };
             }
