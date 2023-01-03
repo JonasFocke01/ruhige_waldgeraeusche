@@ -79,12 +79,13 @@ impl DmxFixture {
     fn read_animation_files(fixture_id: u8, dmx_config_store: &DmxConfigStore) -> Vec<Vec<(u8, u8, bool, bool, bool, bool, f32)>> {
         let mut animations: Vec<Vec<(u8, u8, bool, bool, bool, bool, f32)>> = vec!();
         let fixture_count = dmx_config_store.get_dmx_fixtures().len();
-        for _ in 0..dmx_config_store.get_animation_count() {
+        for _ in 0..dmx_config_store.get_animations().len() {
             animations.push(vec!());
         }
 
-        animations[0] = DmxFixture::help_read_animation_files(fixture_id, "test.tpl", fixture_count as u8);
-        animations[1] = DmxFixture::help_read_animation_files(fixture_id, "square.tpl", fixture_count as u8);
+        for (index, animation_name) in dmx_config_store.get_animations().iter().enumerate() {
+            animations[index] = DmxFixture::help_read_animation_files(fixture_id, animation_name, fixture_count as u8);
+        }
 
         animations
     }
@@ -92,7 +93,7 @@ impl DmxFixture {
     /// returns the positions for each fixture from a given file for x fixtures
     fn help_read_animation_files(fixture_id: u8, animation_file_name: &str, fixture_count: u8) -> Vec<(u8, u8, bool, bool, bool, bool, f32)> {
         let mut fixture_result: Vec<(u8, u8, bool, bool, bool, bool, f32)> = vec!();
-        let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/dmx_renderer/") + animation_file_name).as_str())) {
+        let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/dmx_renderer/") + animation_file_name + ".tpl").as_str())) {
             Ok(e) => e,
             Err(e) => {
                 logging::log(format!("Error occured while reading animation file {} {}", animation_file_name, e).as_str(), logging::LogLevel::Warning, true);
@@ -159,7 +160,7 @@ impl DmxFixture {
         &self.fixture_type
     }
     /// sets the color of the fixture
-    // Todo: this should calculate the one byte representation
+    /// Maps the RGB value to its Dmx-one-channel-couterpart if None is given for the second value in p_color
     pub fn set_current_color(&mut self, p_color: ((f32, f32, f32), Option<u8>)) {
         
         if p_color.1.is_none() {
@@ -185,7 +186,6 @@ impl DmxFixture {
                                         }else if p_color.0.0 == p_color.0.2 && p_color.0.2 > p_color.0.1 {
                                             result_color.1 = 80 // purple
                                         }
-                                        result_color.1 = 80;
                                     },                                                                
                 e => {
                     logging::log(format!("unknown fixture name found while setting current color: {}", e).as_str(), logging::LogLevel::Warning, true);

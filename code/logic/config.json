@@ -21,6 +21,10 @@
     "dmx": {
         "fixtures": [
             "Victory Scan"
+        ],
+        "animations":[
+            "test",
+            "square"
         ]
      }
 }
