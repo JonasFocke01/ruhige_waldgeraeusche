@@ -15,7 +15,7 @@ pub enum LogLevel {
     Start
 }
 
-const LOG_LEVEL: LogLevel = LogLevel::Info; // Todo: (long term) evaluate if it is worth it to make this to a consolearg
+const LOG_LEVEL: LogLevel = LogLevel::Info;
 
 /// This loggs a given message with the given prioritylevel to the console and to a logfile if persist is true.
 /// Todo: (long term) develop "read-analyse-logfile" function

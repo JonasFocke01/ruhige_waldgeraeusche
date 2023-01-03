@@ -37,8 +37,6 @@ pub enum Combination {
 
 /// This struct contains all values associatet with an individual led
 /// This is created (strip_count * pixels_per_strip) times
-/// Todo: implement destination
-/// Todo: each pixel should have own color
 #[derive(Clone)]
 pub struct Led {
     /// The brightness of each led in the range of 0.0 to 1.0

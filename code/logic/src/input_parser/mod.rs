@@ -42,7 +42,6 @@ impl InputParser {
                     if input.remove(0) == 1 {
                         dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 0.0, 0.0), None));
                         led_renderer.set_current_color((255.0, 0.0, 0.0));
-                        // Todo: rainbox mode should be handled internaly (led_renderer)
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
@@ -97,7 +96,6 @@ impl InputParser {
                 },
                 28 => { // color to pink
                     if input.remove(0) == 1 {
-                        // Todo: evaluate: the mapping to "117" should not happen here
                         dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 182.0, 193.0), None));
                         led_renderer.set_current_color((255.0, 182.0, 193.0));
                         led_renderer.set_rainbow_mode(false);
@@ -106,7 +104,6 @@ impl InputParser {
                 29 => { // color to rainbow
                     if input.remove(0) == 1 {
                         dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 0.0, 0.0), Some(0)));
-                        // Todo: implement rainbow effect for scanners
                         led_renderer.set_rainbow_mode(true);
                     }
                 },
@@ -127,7 +124,7 @@ impl InputParser {
         Ok(input)
     }
     /// gathers input from the configured input source
-    /// Todo: this should happen in a sepparate thread for performance reasons
+    /// Todo: (long term) this should happen in a sepparate thread for performance reasons
     pub fn gather_input(&mut self) -> Result<Vec<u8>, String> {
         let mut return_vec: Vec<u8> = vec!();
       
