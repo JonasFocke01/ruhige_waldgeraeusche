@@ -12,7 +12,7 @@ use std::ops::Not;
 use serial2::SerialPort;
 
 /// The mode that determines how the fixtures should change theyr color
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum ColorTransitionMode {
     /// The fixtures should change instant
     Instant,
@@ -147,33 +147,17 @@ impl DmxRenderer {
     /// This maps the given color to all fixtures given in the fixture_types parameter
     pub fn set_color(&mut self, fixture_types: Vec<FixtureType>, color: ((f32, f32, f32), u8)) {
         self.color_transition_to_color = color;
-        match self.color_transition_mode {
-            ColorTransitionMode::Instant => {
-                for _ in fixture_types.iter() {
-                    for fixture in self.fixtures.iter_mut() {
-                        match fixture.get_type() {
-                            // Todo: this should only change the selected fixtures given by "fixture_types"
-                            _ => fixture.set_current_color(color)
-                        }
-                            
+        if self.color_transition_mode == ColorTransitionMode::Animative && self.color_transition_index == 255 {
+            self.color_transition_index = 0;
+        }
+        for fixture_type in fixture_types.iter() {
+            for fixture in self.fixtures.iter_mut() {
+                if fixture.get_stage_coordinates().0 < self.color_transition_index {
+                    if fixture_type == fixture.get_type() {
+                        fixture.set_current_color(color)
                     }
                 }
-            },
-            ColorTransitionMode::Animative => {
-                if self.color_transition_index == 255 {
-                    self.color_transition_index = 0;
-                }
-                for _ in fixture_types.iter() {
-                    for fixture in self.fixtures.iter_mut() {
-                        if fixture.get_stage_coordinates().0 < self.color_transition_index {
-                            match fixture.get_type() {
-                                // Todo: this should only change the selected fixtures given by "fixture_types"
-                                _ => fixture.set_current_color(color)
-                            }
-                        }
-                            
-                    }
-                }
+                    
             }
         }
     }

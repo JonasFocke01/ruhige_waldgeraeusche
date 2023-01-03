@@ -4,6 +4,7 @@ use crate::logging;
 use std::path::Path;
 
 /// This should indicate the fixtures type
+#[derive(PartialEq)]
 pub enum FixtureType {
     /// The fixture is some sort of a scanner
     Scanner
