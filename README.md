@@ -9,6 +9,7 @@
 # Using
 
 You can download this repo and use it as you please, or you can customize the behavior by changing your local copy or contribute to this repository.
+At the current development state, the rust code must be run as admin: "sudo -E /home/[USER]/.cargo/bin/cargo run"
 
  ## Installing
 
