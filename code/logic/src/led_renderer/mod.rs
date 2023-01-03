@@ -52,7 +52,11 @@ pub struct Led {
     /// > 1.0 -> fade in
     /// < 1.0 -> fade out
     /// = 1.0 -> neutral
-    fade: f32
+    fade: f32,
+    /// The current color of the individual led
+    current_color: (f32, f32, f32),
+    /// The next color of the individual led
+    dest_color: (f32, f32, f32)
 }
 
 /// The struct to define how the LedRenderer should look like
@@ -75,9 +79,6 @@ pub struct LedRenderer<'a> {
     // Todo: extract current color into object to not clutter up LedRenderer
     /// The current color of all led strips
     current_color: (f32, f32, f32),
-    /// The next color of all led strips
-    /// Todo: implement color transition
-    dest_color: (f32, f32, f32),
     /// How much the color should transition each step <br>
     /// current_color: (100.0, 100.0, 100.0) <br>
     /// dest_color: (50.0, 50.0, 50.0) <br>
@@ -101,7 +102,9 @@ impl<'a> LedRenderer<'a> {
                 actual_pixels[i as usize].push(Led {
                     brightness: 0.0,
                     speed: 0,
-                    fade: 1.0
+                    fade: 1.0,
+                    current_color: (0.0, 0.0, 0.0),
+                    dest_color: (0.0, 0.0, 0.0)
                 });
             }
         }
@@ -139,8 +142,7 @@ impl<'a> LedRenderer<'a> {
             current_direction: Direction::Up,
             current_combination: Combination::Parallel,
             current_color: (255.0, 0.0, 0.0),
-            dest_color: (100.0, 100.0, 100.0),
-            color_transition_steps: 0.0,
+            color_transition_steps: 1.0,
             rainbow_mode: false
         }
     }
@@ -152,7 +154,9 @@ impl<'a> LedRenderer<'a> {
                 self.pixels[strip_i as usize][index as usize] = Led {
                                                                 brightness: index as f32 / 12.0,
                                                                 speed: 3,
-                                                                fade: 1.0
+                                                                fade: 0.9,
+                                                                current_color: self.current_color,
+                                                                dest_color: self.current_color
                                                             }
             }
         }
@@ -167,7 +171,9 @@ impl<'a> LedRenderer<'a> {
                 self.pixels[strip_i as usize][index as usize] = Led {
                                                                 brightness: 1.0,
                                                                 speed: 0,
-                                                                fade: 0.9
+                                                                fade: 0.9,
+                                                                current_color: self.current_color,
+                                                                dest_color: self.current_color
                                                             }
             }
         }
@@ -181,7 +187,9 @@ impl<'a> LedRenderer<'a> {
                         self.pixels[strip_i as usize][pixel_i as usize] = Led {
                                                                         brightness: 1.0,
                                                                         speed: 0,
-                                                                        fade: 1.0
+                                                                        fade: 1.0,
+                                                                        current_color: self.current_color,
+                                                                        dest_color: self.current_color
                                                                     }
                 }
             }
@@ -196,6 +204,7 @@ impl<'a> LedRenderer<'a> {
         if self.render_timestamp.elapsed().as_millis() >= self.led_config_store.get_frame_timing().into() {
 
             // ? rainbow mode
+            // Todo: (long term) investigate: this might be broken
 
             if self.rainbow_mode {
                 let new_color = (
@@ -203,8 +212,39 @@ impl<'a> LedRenderer<'a> {
                     if self.current_color.1 < 255.0 { self.current_color.1 + 5.0 } else { 0.0 },
                     if self.current_color.2 < 255.0 { self.current_color.2 + 2.0 } else { 0.0 },
                 );
-                self.current_color = new_color;
-                self.dest_color = new_color;
+                for strip_i in 0..self.led_config_store.get_strip_count() {
+                    for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
+                        if  self.pixels[strip_i as usize][pixel_i as usize].brightness > 0.0 {
+                                self.pixels[strip_i as usize][pixel_i as usize].dest_color = new_color;
+                        }
+                    }
+                }
+            }
+
+            // ? color transition
+
+            for strip_i in 0..self.led_config_store.get_strip_count() {
+                for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
+                    if  self.pixels[strip_i as usize][pixel_i as usize].brightness > 0.0 {
+                        if self.pixels[strip_i as usize][pixel_i as usize].current_color.0 > self.pixels[strip_i as usize][pixel_i as usize].dest_color.0 {
+                            self.pixels[strip_i as usize][pixel_i as usize].current_color.0 += self.color_transition_steps;
+                        } else {
+                            self.pixels[strip_i as usize][pixel_i as usize].current_color.0 -= self.color_transition_steps;
+                        }
+
+                        if self.pixels[strip_i as usize][pixel_i as usize].current_color.1 > self.pixels[strip_i as usize][pixel_i as usize].dest_color.1 {
+                            self.pixels[strip_i as usize][pixel_i as usize].current_color.1 += self.color_transition_steps;
+                        } else {
+                            self.pixels[strip_i as usize][pixel_i as usize].current_color.1 -= self.color_transition_steps;
+                        }
+
+                        if self.pixels[strip_i as usize][pixel_i as usize].current_color.2 > self.pixels[strip_i as usize][pixel_i as usize].dest_color.2 {
+                            self.pixels[strip_i as usize][pixel_i as usize].current_color.2 += self.color_transition_steps;
+                        } else {
+                            self.pixels[strip_i as usize][pixel_i as usize].current_color.2 -= self.color_transition_steps;
+                        }
+                    }
+                }
             }
 
             // ? fade
@@ -226,7 +266,9 @@ impl<'a> LedRenderer<'a> {
                     result_pixels[i as usize].push(Led {
                         brightness: 0.0,
                         speed: 0,
-                        fade: 1.0
+                        fade: 1.0,
+                        current_color: self.current_color,
+                        dest_color: self.current_color
                     });
                 }
             }
@@ -251,9 +293,9 @@ impl<'a> LedRenderer<'a> {
             for strip_i in 0..self.led_config_store.get_strip_count() {
                 for mut pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
                     if strip_i % 2 == 1 { pixel_i = GlobalVarsStore::map_range(pixel_i as f64, (0.0, self.led_config_store.get_led_count_per_strip() as f64 - 1.0), (self.led_config_store.get_led_count_per_strip() as f64 - 1.0, 0.0)) as u64; }
-                    writable_pixels.push((self.pixels[strip_i as usize][pixel_i as usize].brightness as f32 * self.current_color.0) as u8);
-                    writable_pixels.push((self.pixels[strip_i as usize][pixel_i as usize].brightness as f32 * self.current_color.1) as u8);
-                    writable_pixels.push((self.pixels[strip_i as usize][pixel_i as usize].brightness as f32 * self.current_color.2) as u8);
+                    writable_pixels.push((self.pixels[strip_i as usize][pixel_i as usize].brightness as f32 * self.pixels[strip_i as usize][pixel_i as usize].current_color.0 as f32) as u8);
+                    writable_pixels.push((self.pixels[strip_i as usize][pixel_i as usize].brightness as f32 * self.pixels[strip_i as usize][pixel_i as usize].current_color.1 as f32) as u8);
+                    writable_pixels.push((self.pixels[strip_i as usize][pixel_i as usize].brightness as f32 * self.pixels[strip_i as usize][pixel_i as usize].current_color.2 as f32) as u8);
                 }
             }
             for i in 0..writable_pixels.len() {
@@ -284,7 +326,9 @@ impl<'a> LedRenderer<'a> {
                 Led {
                     brightness: 0.0,
                     speed: 0,
-                    fade: 1.0
+                    fade: 1.0,
+                    current_color: self.current_color,
+                    dest_color: self.current_color
                 };
             }
         }
@@ -337,7 +381,13 @@ impl<'a> LedRenderer<'a> {
     }
     /// Sets the color, the current color should fade towards
     pub fn set_dest_color(&mut self, color: (f32, f32, f32)) {
-        self.dest_color = color;
+        for strip_i in 0..self.led_config_store.get_strip_count() {
+                for pixel_i in 0..self.led_config_store.get_led_count_per_strip() {
+                    if  self.pixels[strip_i as usize][pixel_i as usize].brightness > 0.0 {
+                            self.pixels[strip_i as usize][pixel_i as usize].dest_color = color;
+                    }
+                }
+            }
     }
     /// Sets the color transition steps
     pub fn set_color_transition_steps(&mut self, transition_steps: f32) {
