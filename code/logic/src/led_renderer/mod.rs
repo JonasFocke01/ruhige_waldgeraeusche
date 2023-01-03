@@ -76,7 +76,6 @@ pub struct LedRenderer<'a> {
     current_direction: Direction,
     /// The combination on where to show the current animation
     current_combination: Combination,
-    // Todo: extract current color into object to not clutter up LedRenderer
     /// The current color of all led strips
     current_color: (f32, f32, f32),
     /// How much the color should transition each step <br>

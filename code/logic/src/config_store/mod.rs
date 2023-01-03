@@ -31,12 +31,6 @@ pub struct InputConfigStore {
 pub struct LedConfigStore {
     led_count_per_strip: u64,
     strip_count: u64,
-    led_pin: u64,
-    led_freq_hz: u64,
-    led_dma: u64,
-    led_brightness: u64,
-    led_invert: u64,
-    led_channel: u64,
     pixel_offset: u64,
     frame_timing: u64
 }
@@ -80,16 +74,9 @@ impl LedConfigStore {
             }
         };
 
-        //Todo: cleanup config store
         LedConfigStore {
             led_count_per_strip: leds["led_count_per_strip"].as_u64().expect("config file does not contain expected sub key leds/led_count_per_strip"),
             strip_count: leds["strip_count"].as_u64().expect("config file does not contain expected sub key leds/strip_count"),
-            led_pin: leds["led_pin"].as_u64().expect("config file does not contain expected sub key leds/led_pin"),
-            led_freq_hz: leds["led_freq_hz"].as_u64().expect("config file does not contain expected sub key leds/led_freq_hz"),
-            led_dma: leds["led_dma"].as_u64().expect("config file does not contain expected sub key leds/led_dma"),
-            led_brightness: leds["led_brightness"].as_u64().expect("config file does not contain expected sub key leds/led_brightness"),
-            led_invert: leds["led_invert"].as_u64().expect("config file does not contain expected sub key leds/led_invert"),
-            led_channel: leds["led_channel"].as_u64().expect("config file does not contain expected sub key leds/led_channel"),
             pixel_offset: leds["pixel_offset"].as_u64().expect("config file does not contain expected sub key leds/pixel_offset"),
             frame_timing: leds["frame_timing"].as_u64().expect("config file does not contain expected sub key leds/frame_timing")
         }
@@ -101,30 +88,6 @@ impl LedConfigStore {
     /// Returns strip_count
     pub fn get_strip_count(&self) -> u64 {
         self.strip_count
-    }
-    /// Returns led_pin
-    pub fn get_led_pin(&self) -> u64 {
-        self.led_pin
-    }
-    /// Returns led_freq_hz
-    pub fn get_led_freq_hz(&self) -> u64 {
-        self.led_freq_hz
-    }
-    /// Returns led_dma
-    pub fn get_led_dma(&self) -> u64 {
-        self.led_dma
-    }
-    /// Returns led_brightness
-    pub fn get_led_brightness(&self) -> u64 {
-        self.led_brightness
-    }
-    /// Returns led_invert
-    pub fn get_led_invert(&self) -> u64 {
-        self.led_invert
-    }
-    /// Returns led_channel
-    pub fn get_led_channel(&self) -> u64 {
-        self.led_channel
     }
     /// Returns pixel_offset
     pub fn get_pixel_offset(&self) -> u64 {
