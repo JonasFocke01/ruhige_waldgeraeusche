@@ -48,7 +48,7 @@ pub struct DmxRenderer {
     updateable: bool,
     color_transition_mode: ColorTransitionMode,
     color_transition_index: u8,
-    color_transition_to_color: ((f32, f32, f32), u8),
+    color_transition_to_color: ((f32, f32, f32), Option<u8>),
     color_transition_speed: u128
 }
 
@@ -87,7 +87,7 @@ impl DmxRenderer {
             updateable: false,
             color_transition_mode: ColorTransitionMode::Instant,
             color_transition_index: 0,
-            color_transition_to_color: ((0.0, 0.0, 0.0), 0),
+            color_transition_to_color: ((0.0, 0.0, 0.0), None),
             color_transition_speed: 25
         }
     }
@@ -98,7 +98,7 @@ impl DmxRenderer {
     pub fn render(&mut self) -> Result<Vec<u8>, String> {
 
         if self.color_transition_index < 255 && self.render_timestamp.elapsed().as_millis() % if self.color_transition_speed == 0 { 1 } else { self.color_transition_speed } == 0 {
-            self.set_color(vec!(FixtureType::Scanner), self.color_transition_to_color);
+            self.set_color(vec!(FixtureType::Scanner), (self.color_transition_to_color.0, None));
             self.color_transition_index = self.color_transition_index + 1;
         }
 
@@ -144,7 +144,7 @@ impl DmxRenderer {
         Ok(vec!())
     }
     /// This maps the given color to all fixtures given in the fixture_types parameter
-    pub fn set_color(&mut self, fixture_types: Vec<FixtureType>, color: ((f32, f32, f32), u8)) {
+    pub fn set_color(&mut self, fixture_types: Vec<FixtureType>, color: ((f32, f32, f32), Option<u8>)) {
         self.color_transition_to_color = color;
         if self.color_transition_mode == ColorTransitionMode::Animative && self.color_transition_index == 255 {
             self.color_transition_index = 0;

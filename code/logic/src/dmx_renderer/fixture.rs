@@ -160,8 +160,44 @@ impl DmxFixture {
     }
     /// sets the color of the fixture
     // Todo: this should calculate the one byte representation
-    pub fn set_current_color(&mut self, color: ((f32, f32, f32), u8)) {
-        self.current_color = color;
+    pub fn set_current_color(&mut self, p_color: ((f32, f32, f32), Option<u8>)) {
+        
+        if p_color.1.is_none() {
+            let mut result_color: ((f32, f32, f32), u8) = (p_color.0, 0);
+            print!("color: {} {} {}\n", p_color.0.0, p_color.0.1, p_color.0.2);
+            match self.fixture_name.as_str() {
+                "Victory Scan" =>   {
+                                        // Todo: Something is odd! correct the mapping
+                                        if p_color.0.0 > p_color.0.1 + 150.0 && p_color.0.0 > p_color.0.2 + 150.0 {
+                                            result_color.1 = 60 // red
+                                        } else if p_color.0.1 > p_color.0.0 + 150.0 && p_color.0.1 > p_color.0.2 + 150.0 {
+                                            result_color.1 = 49 // green
+                                        } else if p_color.0.2 > p_color.0.0 + 150.0 && p_color.0.2 > p_color.0.1 + 150.0 {
+                                            result_color.1 = 89 // blue
+                                        } else if p_color.0.0 > p_color.0.1 && p_color.0.1 > p_color.0.2 {
+                                            result_color.1 = 113 // orange
+                                        } else if p_color.0.0 > p_color.0.2 + 200.0 && p_color.0.1 > p_color.0.2 + 200.0 {
+                                            result_color.1 = 16 // yellow
+                                        } else if p_color.0.0 < p_color.0.1 && p_color.0.1 < p_color.0.2 {
+                                            result_color.1 = 34 // light blue
+                                        } else if p_color.0.0 > p_color.0.2 && p_color.0.2 > p_color.0.1 {
+                                            result_color.1 = 117 // pink
+                                        }else if p_color.0.0 == p_color.0.2 && p_color.0.2 > p_color.0.1 {
+                                            result_color.1 = 80 // purple
+                                        }
+                                        result_color.1 = 80;
+                                    },                                                                
+                e => {
+                    logging::log(format!("unknown fixture name found while setting current color: {}", e).as_str(), logging::LogLevel::Warning, true);
+                }
+            }
+            self.current_color = result_color;
+        } else {
+            match p_color.1 {
+                Some(n) => self.current_color = (p_color.0, n),
+                None => self.current_color = (p_color.0, 0)
+            }
+        }
     }
     /// Sets the current light mode for up <br>
     /// toggles if light_mode_up: None
