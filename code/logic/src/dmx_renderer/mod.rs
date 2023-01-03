@@ -100,7 +100,6 @@ impl DmxRenderer {
         if self.color_transition_index < 255 && self.render_timestamp.elapsed().as_millis() % if self.color_transition_speed == 0 { 1 } else { self.color_transition_speed } == 0 {
             self.set_color(vec!(FixtureType::Scanner), self.color_transition_to_color);
             self.color_transition_index = self.color_transition_index + 1;
-            logging::log(format!("color_transition_index at: {}", self.color_transition_index).as_str(), logging::LogLevel::Info, false);
         }
 
         if self.position_timestamp.elapsed().as_millis() > 100 {
@@ -164,7 +163,6 @@ impl DmxRenderer {
     /// This sets the color transition mode
     /// Toggles the transition mode if None is given
     pub fn set_color_transition_mode(&mut self, new_color_transition_mode: Option<ColorTransitionMode>) {
-        logging::log(format!("color transition mode changed!").as_str(), logging::LogLevel::Info, false);
         match new_color_transition_mode {
             Some(e) => self.color_transition_mode = e,
             None => self.color_transition_mode = !self.color_transition_mode
