@@ -24,5 +24,5 @@ ID bytes and possible values are
 27 -> Color change to Turquise (1)
 28 -> Color change to PINK (1)
 29 -> Color change to RAINBOW (1)
-30 -> Color transition (duration) INTELLIGENT (1)
+30 -> Color transition (duration) INTELLIGENT / ANIMATIVE (1/0)
 31 -> Color transition (duration) SPEED (0-255)

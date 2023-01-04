@@ -127,7 +127,7 @@ impl DmxFixture {
         self.stage_coordinates = coordinates;
     }
     /// sets the current animation
-    /// Todo: the animations are stored as u8 therefore there must be a human readable doc of (animation == u8)
+    /// a mapping of animation to u8 can be found by enumerating the animations string array in the config file starting with 0
     pub fn set_current_animation(&mut self, animation: u8) {
         self.current_animation = animation;
     }
