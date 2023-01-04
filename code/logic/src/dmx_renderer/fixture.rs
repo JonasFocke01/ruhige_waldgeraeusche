@@ -159,7 +159,6 @@ impl DmxFixture {
             let mut result_color: ((f32, f32, f32), u8) = (p_color.0, 0);
             match self.fixture_name.as_str() {
                 "Victory Scan" =>   {
-                                        // Todo: Something is odd! correct the mapping
                                         if p_color.0.0 > p_color.0.1 + 150.0 && p_color.0.0 > p_color.0.2 + 150.0 {
                                             result_color.1 = 60 // red
                                         } else if p_color.0.1 > p_color.0.0 + 150.0 && p_color.0.1 > p_color.0.2 + 150.0 {
@@ -167,7 +166,7 @@ impl DmxFixture {
                                         } else if p_color.0.2 > p_color.0.0 + 150.0 && p_color.0.2 > p_color.0.1 + 150.0 {
                                             result_color.1 = 89 // blue
                                         } else if p_color.0.0 > p_color.0.1 && p_color.0.1 > p_color.0.2 {
-                                            result_color.1 = 113 // orange
+                                            result_color.1 = 99 // orange
                                         } else if p_color.0.0 > p_color.0.2 + 200.0 && p_color.0.1 > p_color.0.2 + 200.0 {
                                             result_color.1 = 16 // yellow
                                         } else if p_color.0.0 < p_color.0.1 && p_color.0.1 < p_color.0.2 {
