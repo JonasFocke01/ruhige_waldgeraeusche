@@ -9,7 +9,6 @@
 
 unsigned long timestamp = 0;
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(11, A2, NEO_GRB + NEO_KHZ800);
-int index = 0;
 
 // (rows + special-buttons) * cols
 bool button_click_states            [BUTTON_ROW_COUNT + 1][BUTTON_COL_COUNT];
