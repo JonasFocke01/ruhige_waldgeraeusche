@@ -24,6 +24,8 @@ pub enum Direction {
     Up,
     /// Top to bottom
     Down,
+    /// Edges to the middle
+    In,
     /// Middle to edges
     Out
 }
