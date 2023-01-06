@@ -3,6 +3,8 @@
 /testing/rust_testing/rust_serial_communication/target
 /testing/rust_testing/dmx/target
 /testing/rust_testing/language/target
+/testing/rust_testing/ui/target
+/testing/rust_testing/rest_api/target
 code/logic/target/
 code/logic/target/debug/.cargo-lock
 /testing/rust_testing/audio_analysis/target
