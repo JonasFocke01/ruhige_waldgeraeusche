@@ -1,9 +1,25 @@
-<h1>Welcome to SvelteKit</h1>
 <script lang="ts">
     import Fixture from '$lib/+fixture.svelte';
     import Textinput from '@jonas_focke/svelcon/Input/Textfield.svelte'
+	import { onMount } from 'svelte';
+    import config from '../../../logic/config.json'
+
+    onMount(()=> {
+        fetch('http://localhost:3000/cars')
+        // {
+        //     method: 'POST',
+        //     body: JSON.stringify({
+        //         'my_object': 'MOIN'
+        //     }),
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     }
+        // })
+        .then(response => console.log(response.json()))
+    })
 </script>
 
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
-<Fixture />
+{#each config.dmx.fixtures as fixture}
+    <Fixture name={fixture} />
+{/each}
 <Textinput />
