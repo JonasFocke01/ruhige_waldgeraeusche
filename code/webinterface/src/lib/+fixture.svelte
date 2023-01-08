@@ -1,18 +1,100 @@
 <script lang="ts">
-    import Textinput from '@jonas_focke/svelcon/Input/Textfield.svelte'
     import Text from '@jonas_focke/svelcon/Wrapper/Text.svelte'
-    import Checkbox from '@jonas_focke/svelcon/Input/Checkbox.svelte'
-    export let name = "";
-    let moving = false;
-    let m = { x: 0, y: 0 };
+    import Button from '@jonas_focke/svelcon/Input/Button.svelte'
 
-    let directionX = "0";
-    let directionY = "0";
-    let directionUP = false;
-    let directionDOWN = false;
-    let directionIN = false;
-    let directionOUT = false;
-    let fixtureDimm = "0";
+    import P5 from 'p5-svelte';
+    export let positions: Array<{x: number, y: number}> = [];
+    let editingPositionIndex = -1;
+    let createMode = false;
+    let editMode = false;
+    
+	const sketch = (p5) => {
+        p5.setup = () => {
+			p5.createCanvas(width, height);
+		};
+
+		p5.draw = () => {
+            p5.background(220);
+            p5.stroke(0);
+            p5.strokeWeight(0.3);
+            for (let i = 0; i < 255; i += 10) {
+                p5.line(i, 0, i, 255);
+                p5.line(0, i, 255, i);
+            }
+            p5.strokeWeight(1);
+            positions.forEach((position, i) => {
+                p5.noStroke();
+                p5.fill(scale(i, 0, positions.length, 255, 0), i % 6 === 0 ? 255 : 0, scale(i, 0, positions.length, 0, 255));
+                if (editMode && i === editingPositionIndex && Date.now() % 100 > 50) {
+                    p5.circle(position.x, position.y, 10);
+                } else if (i !== editingPositionIndex) {
+                    p5.circle(position.x, position.y, 10);
+                }
+                if (i > 0) {
+                    p5.stroke(0);
+                    p5.line(position.x, position.y, positions[i - 1].x, positions[i - 1].y);
+                } 
+            });
+            if (positions.length > 1) {
+                p5.line(positions[0].x, positions[0].y, positions[positions.length - 1].x, positions[positions.length - 1].y);
+            }
+            positions = positions;
+		};
+
+        p5.mousePressed = () => {
+            if (createMode) {
+                if (p5.mouseX > -1 && p5.mouseX < width && p5.mouseY > -1 && p5.mouseY < height) {
+                    positions.push({x: Math.floor(p5.mouseX / 10) * 10, y: Math.floor(p5.mouseY / 10) * 10})
+                }
+            }
+
+            if (editMode) {
+                positions.forEach((position, i) => {
+                    if (p5.dist(p5.mouseX, p5.mouseY, position.x, position.y) < 11) {
+                        editingPositionIndex = i;
+                    }
+                })
+            }
+        };
+
+        p5.keyPressed = (key: KeyboardEvent) => {
+            if (editMode) {
+                if (editingPositionIndex > -1) {
+                    if (key.key === "ArrowUp" && positions[editingPositionIndex].y > 0) {
+                        positions[editingPositionIndex].y -= 10;
+                    } else if (key.key === "ArrowDown" && positions[editingPositionIndex].y < 250) {
+                        positions[editingPositionIndex].y += 10;
+                    } else if (key.key === "ArrowLeft" && positions[editingPositionIndex].x > 0) {
+                        positions[editingPositionIndex].x -= 10;
+                    } else if (key.key === "ArrowRight" && positions[editingPositionIndex].x < 250) {
+                        positions[editingPositionIndex].x += 10;
+                    }
+                }
+                if (key.key === "Enter") {
+                    if (editingPositionIndex === positions.length - 1) {
+                        editingPositionIndex = 0;    
+                    } else {
+                        editingPositionIndex += 1;
+                    }
+                } if (key.key === "Backspace") {
+                    if (editingPositionIndex < 1) {
+                        editingPositionIndex = positions.length - 1;    
+                    } else {
+                        editingPositionIndex -= 1;
+                    }
+                }
+            }
+        }
+	};
+
+    export let name = "";
+    export let id: number;
+    let moving = false;
+    let m = { x: 500, y: 300 };
+
+    let width = 250;
+    let height = 250;
+
 
     $: {
         name = name.replaceAll(" ", "");
@@ -22,8 +104,6 @@
         if (moving) {
             m.x += event.movementX;
             m.y += event.movementY;
-            console.log(Math.floor(scale(m.x, 0, 1920, 255, 0)))
-            console.log(Math.floor(scale(m.y, 0, 1920, 255, 0)))
         }
     }
 
@@ -36,58 +116,86 @@
     on:mousemove={handleMousemove} 
     on:mouseup={()=> moving = false} 
 />
+
+
 <div
-    class="w-20 h-20 cursor-move absolute" 
-    style="left: {m.x}px; top: {m.y}px;"
-    on:mousedown={()=> moving = true} 
+    class="absolute" 
+    style="left: {m.x}px; top: {m.y}px; width: {width}px; height: {height}px;"
 >
-    <img 
-        src="{name + '.jpg'}" 
-        alt="{name}" 
-    />
-
     <div class="flex flex-row">
-<div>
-
-    <Text text="X: " />
-    
-    <Text text="Y: " />
-    
-    <Text text="UP: " />
-    
-    <Text text="DOWN: " />
-    
-    <Text text="IN: " />
-    
-    <Text text="OUT: " />
-    
-    <Text text="DIMM: " />
-</div>
-    <div>
-
-        <Textinput bind:value={directionX} />
-        <Textinput bind:value={directionY} />
-        <Checkbox label="" bind:checked={directionUP} />
-        <Checkbox label="" bind:checked={directionDOWN} />
-        <Checkbox label="" bind:checked={directionIN} />
-        <Checkbox label="" bind:checked={directionOUT} />
-        <Textinput bind:value={fixtureDimm} />
-    </div>    
+        <div class="w-1/3">
+            P: {positions.length}
+        </div>
+        <div class="flex flex-col justify-center cursor-move bg-primary w-1/3 text-lg text-text" on:mousedown={()=> moving = true} >
+            <Text text={name} />
+            <Text text={"" + (id + 1)} />
+        </div>
+        <div class="w-1/3">
+            <img 
+                src="{name + '.jpg'}" 
+                alt="{name}" 
+            />
+        </div>
     </div>
-        
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    <div class="cursor-pointer border">
+        <P5 {sketch} />
+    </div>
+    {#if createMode}
+        <div class="border m-2">
 
+            <Button bgColor="surface" text="remove last" on:click={() => positions.pop()} />
+            </div>
+        <div class="border m-2">
+
+            <Button bgColor="surface" text="clear" on:click={() => {
+                        if (confirm('Are you sure you want to clear?')){
+                            positions = []
+                        }
+                    }
+                }
+            />
+            </div>
+    {/if}
+    {#if editMode}
+        <div class="border m-2">
+            <Button bgColor="surface" text={'Enter Create Mode'} on:click={() => {
+                editMode = false;
+                createMode = true;
+            }} />
+        </div>
+        <div class="border m-2">
+            <Button bgColor="surface" text={'Leave Edit Mode'} on:click={() => {
+                editMode = false;
+                createMode = false;
+                editingPositionIndex = -1;
+            }} />
+        </div>
+    {:else if createMode}
+        <div class="border m-2">
+            <Button bgColor="surface" text={'Leave Create Mode'} on:click={() => {
+                editMode = false;
+                createMode = false;
+            }} />
+        </div>
+        <div class="border m-2">
+            <Button bgColor="surface" text={'Enter Edit Mode'} on:click={() => {
+                editMode = true;
+                createMode = false;
+            }} />
+        </div>
+    {:else}
+        <div class="border m-2">
+            <Button bgColor="surface" text={'Enter Create Mode'} on:click={() => {
+                editMode = false;
+                createMode = true;
+                editingPositionIndex = -1;
+            }} />
+        </div>
+        <div class="border m-2">
+            <Button bgColor="surface" text={'Enter Edit Mode'} on:click={() => {
+                editMode = true;
+                createMode = false;
+            }} />
+        </div>
+    {/if}
 </div>

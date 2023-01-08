@@ -12,7 +12,8 @@ module.exports = {
 			info: '#62acfc',
 			surface: '#64291e',
 			text: '#b0a8b9',
-			black: '#000000'
+			black: '#000000',
+			white: '#ffffff'
 		}
 	},
 	plugins: []
