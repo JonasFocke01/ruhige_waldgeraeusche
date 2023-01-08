@@ -237,6 +237,8 @@ impl DmxFixture {
                     (self.light_mode_in && self.animations[self.current_animation as usize][position_index as usize].4)   ||
                     (self.light_mode_out && self.animations[self.current_animation as usize][position_index as usize].5)   {
                         footprint.push((255 as f32 * self.animations[self.current_animation as usize][position_index as usize].6 * self.brightness) as u8);
+                } else {
+                    footprint.push(0);
                 }
                 footprint.push(0);
             },
