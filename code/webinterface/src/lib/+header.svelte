@@ -3,7 +3,7 @@
     import Textfield from '@jonas_focke/svelcon/Input/Textfield.svelte';
     import { createEventDispatcher } from 'svelte';
 
-	const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher<{save:{ animationName: string }}>();
 
     let animationName = "";
 

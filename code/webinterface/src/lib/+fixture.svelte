@@ -1,14 +1,17 @@
 <script lang="ts">
     import Text from '@jonas_focke/svelcon/Wrapper/Text.svelte'
     import Button from '@jonas_focke/svelcon/Input/Button.svelte'
+    import Checkbox from '@jonas_focke/svelcon/Input/Checkbox.svelte'
+    import type { FixturePositions } from 'src/routes/+page.svelte';
 
     import P5 from 'p5-svelte';
-    export let positions: Array<{x: number, y: number}> = [];
+    export let positions: Array<FixturePositions> = [];
     let editingPositionIndex = -1;
-    let createMode = false;
+    let createMode = true;
     let editMode = false;
     
-	const sketch = (p5) => {
+    // Todo: remove any
+	const sketch = (p5: any) => {
         p5.setup = () => {
 			p5.createCanvas(width, height);
 		};
@@ -44,7 +47,7 @@
         p5.mousePressed = () => {
             if (createMode) {
                 if (p5.mouseX > -1 && p5.mouseX < width && p5.mouseY > -1 && p5.mouseY < height) {
-                    positions.push({x: Math.floor(p5.mouseX / 10) * 10, y: Math.floor(p5.mouseY / 10) * 10})
+                    positions.push({x: Math.floor(p5.mouseX / 10) * 10, y: Math.floor(p5.mouseY / 10) * 10, directionUp: false, directionDown: false, directionIn:false, directionOut:false, brightness: 0})
                 }
             }
 
@@ -140,62 +143,45 @@
     <div class="cursor-pointer border">
         <P5 {sketch} />
     </div>
-    {#if createMode}
-        <div class="border m-2">
-
+    {#key createMode}
+        {#if createMode}
+            <div class="border m-2">
+            
             <Button bgColor="surface" text="remove last" on:click={() => positions.pop()} />
             </div>
-        <div class="border m-2">
-
-            <Button bgColor="surface" text="clear" on:click={() => {
-                        if (confirm('Are you sure you want to clear?')){
-                            positions = []
-                        }
+            <div class="border m-2">
+                
+                <Button bgColor="surface" text="clear" on:click={() => {
+                    if (confirm('Are you sure you want to clear?')){
+                        positions = []
                     }
                 }
-            />
+            }
+                />
             </div>
-    {/if}
-    {#if editMode}
-        <div class="border m-2">
-            <Button bgColor="surface" text={'Enter Create Mode'} on:click={() => {
-                editMode = false;
-                createMode = true;
-            }} />
-        </div>
-        <div class="border m-2">
-            <Button bgColor="surface" text={'Leave Edit Mode'} on:click={() => {
-                editMode = false;
-                createMode = false;
-                editingPositionIndex = -1;
-            }} />
-        </div>
-    {:else if createMode}
-        <div class="border m-2">
-            <Button bgColor="surface" text={'Leave Create Mode'} on:click={() => {
-                editMode = false;
-                createMode = false;
-            }} />
-        </div>
-        <div class="border m-2">
-            <Button bgColor="surface" text={'Enter Edit Mode'} on:click={() => {
-                editMode = true;
-                createMode = false;
-            }} />
-        </div>
-    {:else}
-        <div class="border m-2">
-            <Button bgColor="surface" text={'Enter Create Mode'} on:click={() => {
-                editMode = false;
-                createMode = true;
-                editingPositionIndex = -1;
-            }} />
-        </div>
-        <div class="border m-2">
-            <Button bgColor="surface" text={'Enter Edit Mode'} on:click={() => {
-                editMode = true;
-                createMode = false;
-            }} />
-        </div>
-    {/if}
+            <div class="border m-2">
+                <Button bgColor="surface" text={'🖋'} on:click={() => {
+                    editMode = true;
+                    createMode = false;
+                }} />
+            </div>
+        {:else if editMode}
+            {#if editingPositionIndex > -1}
+                <div class="bg-primary px-2 flex flex-col">
+                    <Checkbox label="Direction Up" bind:checked={positions[editingPositionIndex].directionUp} />
+                    <Checkbox label="Direction Down" bind:checked={positions[editingPositionIndex].directionDown} />
+                    <Checkbox label="Direction In" bind:checked={positions[editingPositionIndex].directionIn} />
+                    <Checkbox label="Direction Out" bind:checked={positions[editingPositionIndex].directionOut} />
+                    <input type="range" min="0" max="1" step="0.01" bind:value={positions[editingPositionIndex].brightness} />
+                </div>
+            {/if}
+            <div class="border m-2">
+                <Button bgColor="surface" text={'🔙'} on:click={() => {
+                    editMode = false;
+                    createMode = true;
+                    editingPositionIndex = -1;
+                }} />
+            </div>
+        {/if}
+    {/key}
 </div>

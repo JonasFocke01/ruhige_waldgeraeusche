@@ -16,7 +16,7 @@
     "frame_timing": 34
   },
   "dmx": {
-    "fixtures": ["Victory Scan", "Victory Scan"],
+    "fixtures": ["Victory Scan"],
     "animations": ["test", "square"]
   }
 }
