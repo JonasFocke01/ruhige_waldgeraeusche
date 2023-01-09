@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { beforeNavigate } from '$app/navigation';
+
     import Fixture from '$lib/+fixture.svelte';
     import Header from '$lib/+header.svelte';
 	import { onMount } from 'svelte';
@@ -43,8 +45,47 @@
             link.download = e.detail.animationName + '.tpl';
             link.href = url;
             link.click();
-            URL.revokeObjectURL(url); // Object URLs should be revoked after use
+            URL.revokeObjectURL(url);
         }
+    }
+
+    function fillPositionsFromInputFile(fileContent: string) {
+        console.log(fileContent)
+        for (let i = 0; i < fixtures.length; i++) {
+            fixtures[i] = [];
+        }
+        console.log(fixtures)
+        fileContent.replaceAll(" ", "");
+        let lines = fileContent.split("\n");
+        let fixture_i = 0;
+        lines.forEach((line, line_i) => {
+            if (line_i === 0) return;
+            if (line === "") return;
+            if (!line.indexOf('---')) {
+                fixture_i = 0
+                return;
+            }
+
+            let params = line.split(",");
+            
+            fixtures[fixture_i].push(
+                {
+                    x: parseInt(params[0]), 
+                    y: parseInt(params[1]),
+                    directionUp: parseInt(params[2]) === 1 ? true : false,
+                    directionDown: parseInt(params[3]) === 1 ? true : false,
+                    directionIn: parseInt(params[4]) === 1 ? true : false,
+                    directionOut: parseInt(params[5]) === 1 ? true : false,
+                    brightness: parseFloat(params[6]),
+                }
+            )
+
+            if (fixture_i === fixtures.length - 1) {
+                fixture_i = 0;
+            } else {
+                fixture_i += 1;
+            }
+        })
     }
 </script>
 
@@ -60,7 +101,7 @@
     }
 </script>
 
-<Header on:save={(e) => exportToFile(e)} />
+<Header on:save={(e) => exportToFile(e)} on:fileDroped={(e) => fillPositionsFromInputFile(e.detail.content)} />
 {#each config.dmx.fixtures as fixture, i}
     <Fixture name={fixture} id={i} bind:positions={fixtures[i]} />
 {/each}
