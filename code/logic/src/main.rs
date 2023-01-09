@@ -7,19 +7,9 @@ use std::sync::Arc;
 use serial2::SerialPort;
 use std::cmp;
 
-use hyper::body::Buf;
-use hyper::server::conn::Http;
-use hyper::service::{service_fn, make_service_fn};
-use hyper::{header, Body, Method, Request, Response, StatusCode};
-use serde::{Deserialize, Serialize};
-use std::net::SocketAddr;
-use std::error::Error;
-use tokio::net::{TcpListener, TcpStream};
-use std::sync::{Mutex, MutexGuard};
+use tokio::net::{TcpListener};
 use std::sync::mpsc::{Sender, Receiver};
 use std::sync::mpsc;
-use std::thread;
-use std::io::prelude::*;
 use substring::Substring;
 
 /// Responsible for reading and parsing possible input sources
@@ -77,31 +67,44 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>  {
     
     // ? start rest api
 
-    let (tx, rx): (Sender<u8>, Receiver<u8>) = mpsc::channel();
+    let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
     let thread_tx = tx.clone();
     
-    // Todo: make port configurable
     let port = "3000";
-    let mut listener = TcpListener::bind(format!("127.0.0.1:{}", port).as_str()).await?;
+    let listener = TcpListener::bind(format!("127.0.0.1:{}", port).as_str()).await?;
     logging::log(format!("Successfully opened port {} for localhost", port).as_str(), logging::LogLevel::Info, false);
 
     tokio::spawn(async move {
         loop {
             let (stream, _) = match listener.accept().await {
                 Ok(t) => t,
-                Err(e) => panic!("Error")
+                Err(e) => {
+                    logging::log(format!("Error creating connection for a http-tcp client: {}", e).as_str(), logging::LogLevel::Warning, false);
+                    continue;
+                }
             };
-            // thread_tx.send(17);
-            stream.readable().await;
+            match stream.readable().await {
+                Ok(_) => (),
+                Err(e) => {
+                    logging::log(format!("Error while reading the tcp stream: {}", e).as_str(), logging::LogLevel::Warning, false);
+                    continue;
+                }
+            };
             let mut buffer = [0; 128];
-            let stream_result = stream.try_read(&mut buffer);
-            print!("connection result: {:?}\n", stream_result);
+            match stream.try_read(&mut buffer) {
+                Ok(_) => (),
+                Err(e) => {
+                    logging::log(format!("Error while reading rest api input stream: {}", e).as_str(), logging::LogLevel::Warning, false);
+                    continue;
+                }
+            }
             let converted_stream_result = std::str::from_utf8(&buffer).expect("invalid utf-8 sequence");
-            print!("converted stream result: {:?}\n", converted_stream_result);
             let query = converted_stream_result.substring(converted_stream_result.find("?").unwrap() + 1, converted_stream_result.rfind("HTTP").unwrap() - 1);
-            print!("extracted query: {:?}\n", query);
-            thread_tx.send(query.as_bytes().len() as u8);
 
+            match thread_tx.send(query.to_string()) {
+                Ok(_) => (),
+                Err(e) => logging::log(format!("Error while sending query string from rest api thread to main thread: {}", e).as_str(), logging::LogLevel::Warning, false)
+            }
         }
     });
 
@@ -127,7 +130,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>  {
             Err(error) => logging::log(error.as_str(), logging::LogLevel::Warning, true)
         };
 
-        if truncate_index == 600 {
+        if truncate_index == 6000 {
             let mut log_level = logging::LogLevel::Info;
             let mut persist = false;
             if truncate_peak_ms > frame_timing.into() {
@@ -143,62 +146,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>  {
             truncate_index += 1;
         }
         while fps_limit_timestamp.elapsed().as_millis() < 1 {  } //This is to not totaly run at max speed and fry the processor
-    }
-}
-
-async fn async_callback_helper(req: Request<Body>) -> Result<Response<Body>, Box<dyn Error + Send + Sync>> {
-    print!("Im helping with {:?}!\n",
-        match req.uri().query() {
-            Some(e) => e,
-            None => "moin"
-        }
-    );
-    Ok(Response::default())
-}
-
-// ! THIS IS A TEST
-async fn test_handler(req: Request<Body>) -> Result<Response<Body>, Box<dyn Error + Send + Sync>> {
-    logging::log("THIS IS A TESTFUNCTION", logging::LogLevel::Warning, false);
-    let path = req.uri().path().to_owned();
-
-    match req.uri().query() {
-        Some(e) => e
-            .to_owned()
-            .split("&")
-            .collect::<Vec<&str>>()
-            .iter()
-            .for_each(|e| {
-                print!("{:?}\n", e.split("=").collect::<Vec<&str>>())
-            }
-        ),
-        None => print!("No query parameters")
-    };
-
-    let path_segments = path.split("/").collect::<Vec<&str>>();
-    let base_path = path_segments[1];
-
-    // for segment in path_segments.iter() {
-    //     print!("{}\n", segment);
-    // }
-    // Ok(Response::new(Body::from("Moin")));
-    match (req.method(), base_path) {
-        (&Method::GET, "cars") => {
-            print!("Get detected");
-            Ok(Response::new(Body::from("GET cars")))
-        },
-
-        (&Method::POST, "cars") => {
-            print!("Post detected");
-            // print!("requestbody: {:?}\n", req.body());
-            return Ok(Response::new(Body::from("POST cars")))
-        },
-
-        // Return the 404 Not Found for other routes.
-        _ => {
-            let mut not_found = Response::default();
-            *not_found.status_mut() = StatusCode::NOT_FOUND;
-            Ok(not_found)
-        }
     }
 }
 

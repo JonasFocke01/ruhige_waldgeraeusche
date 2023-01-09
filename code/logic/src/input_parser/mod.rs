@@ -4,27 +4,18 @@ use crate::dmx_renderer::fixture::FixtureType;
 use crate::config_store::InputConfigStore;
 use crate::logging;
 
-use hyper::body::Buf;
-use hyper::server::conn::Http;
-use hyper::service::{Service, service_fn};
-use hyper::{header, Body, Method, Request, Response, StatusCode};
-use serde::{Deserialize, Serialize};
-use std::net::SocketAddr;
-use std::error::Error;
-use tokio::net::{TcpListener, TcpStream};
-use tokio::task::JoinHandle;
-use std::sync::mpsc::{Sender, Receiver};
-use std::sync::mpsc;
+use std::sync::mpsc::{Receiver};
 
 use std::time::Duration;
 use std::sync::Arc;
 use serial2::SerialPort;
+use std::cmp::max;
     
 /// The struct to define how the InputParser should look like
 pub struct InputParser {
     /// The input usb port
     module_connectors: Vec<Arc<SerialPort>>,
-    rx_channel: Receiver<u8>
+    rx_channel: Receiver<String>
 }
 
 /// Responsible for reading and parsing possible input sources
@@ -32,7 +23,7 @@ impl InputParser {
     /// This creates, fills and returns the InputParser object
     /// - opens and configures the serial input port
     /// - calculates bpm based on a hardcoded start beat_duration
-    pub fn new(input_config_store: &InputConfigStore, connected_modules: Vec<String>, rx_channel: Receiver<u8>) -> InputParser {
+    pub fn new(input_config_store: &InputConfigStore, connected_modules: Vec<String>, rx_channel: Receiver<String>) -> InputParser {
 
         let module_connectors = Self::spawn_module_connectors(connected_modules, input_config_store.get_baud_rate());
         
@@ -48,10 +39,10 @@ impl InputParser {
             Err(error) => return Err(error)
         };
 
-        input.push(match self.gather_rest_input() {
-            Ok(e) => e,
+        match self.gather_rest_input() {
+            Ok(e) => e.iter().for_each(|param| { input.push(*param) }),
             Err(error) => return Err(error)
-        });
+        };
         
         // ! This computes, how the programm should behave by analysing the given input
         while input.len() >= 2 {
@@ -163,13 +154,34 @@ impl InputParser {
         
         Ok(return_vec)
     }
-    fn gather_rest_input(&mut self) -> Result<u8, String> {
+    fn gather_rest_input(&mut self) -> Result<Vec<u8>, String> {
+        let mut result = vec!();
         return match self.rx_channel.try_recv() {
-            Ok(n) => {
-                print!("\nThread got {:?} from api\n", n);
-                Ok(n)
+            Ok(e) => {
+                if e.as_bytes().len() > 0 {
+                    e
+                    .split("&")
+                    .for_each(|pair| { 
+                        pair
+                        .split("=")
+                        .for_each(|param| {
+                            let mut parsed_param = 0;
+                            param
+                                .as_bytes()
+                                .iter()
+                                .rev()
+                                .enumerate()
+                                .for_each(|(i, byte_param)| {
+                                    parsed_param += (byte_param - 48) * max(i *  10, 1) as u8
+                                });
+                            result.push(parsed_param);
+                        })
+                    });
+                    return Ok(result)
+                }
+                return Ok(vec!())
             },
-            Err(_) => Ok(0)
+            Err(_) => Ok(vec!())
         }
     }
     /// This spawns and returns all available connectors
