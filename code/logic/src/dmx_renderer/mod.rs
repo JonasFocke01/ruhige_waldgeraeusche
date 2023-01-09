@@ -5,7 +5,7 @@ use crate::logging;
 /// The DmxFixture struct is responsible for a single DmxFixture and is created multiple times from the DmxRenderer
 pub mod fixture;
 use fixture::DmxFixture;
-use fixture::FixtureType;
+use fixture::{FixtureType, AnimationType};
 
 use std::time::Instant;
 use std::ops::Not;
@@ -31,6 +31,7 @@ impl Not for ColorTransitionMode {
         }
     }
 }
+
 /// The struct to define how a DmxRenderer should look like (more than one is possible and intended)
 pub struct DmxRenderer {
     /// the fixture positions advance every 100 ms
@@ -159,7 +160,22 @@ impl DmxRenderer {
                         fixture.set_current_color(color)
                     }
                 }
-                    
+            }
+        }
+    }
+    /// Passes the animation_type and the animation_name to each fixture enumerated in _fixture_types
+    pub fn set_animation(&mut self, fixture_types: Vec<FixtureType>, animation_type: AnimationType, animation_name: String) {
+        // Todo: implement animation type match arms
+        match animation_type {
+            AnimationType::Animation => logging::log("Animation type Animation is not implemented", logging::LogLevel::Warning, false),
+            AnimationType::Quickanimation => logging::log("Animation type Quickanimation is not implemented", logging::LogLevel::Warning, false),
+            AnimationType::Effect => logging::log("Animation type Effect is not implemented", logging::LogLevel::Warning, false)
+        };
+        for fixture_type in fixture_types.iter() {
+            for fixture in self.fixtures.iter_mut() {
+                if fixture_type == fixture.get_type() {
+                    fixture.set_current_animation(animation_type, animation_name);
+                }
             }
         }
     }

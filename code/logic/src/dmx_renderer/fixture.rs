@@ -9,6 +9,17 @@ pub enum FixtureType {
     /// The fixture is some sort of a scanner
     Scanner
 }
+
+/// Holds all possible animation types
+pub enum AnimationType {
+    /// This is for all normal animations
+    Animation,
+    /// This is for all quickanimations
+    Quickanimation,
+    /// This is for all animations that are more off effect on current animations than animations itself
+    Effect
+}
+
 /// All fixture must implement this to be handled by the dmx renderer
 pub struct DmxFixture {
     /// The name of the fixture
@@ -22,9 +33,11 @@ pub struct DmxFixture {
     /// The up, down, in, out bools indicate, in which direction the fixture is moving <br>
     /// The Index vec contains the individual steps the fixture should take <br>
     /// Animation< Index< x_position, y_position, up, down, in, out >>
-    animations: Vec<Vec<(u8, u8, bool, bool, bool, bool, f32)>>,
+    animations: Vec<(String, Vec<(u8, u8, bool, bool, bool, bool, f32)>)>,
     /// Stores the current animation the fixture is in
-    current_animation: u8,
+    current_animation: String,
+    /// The type of the current animation
+    current_animation_type: AnimationType,
     /// The fixtures dimm value
     brightness: f32,
     /// The fixtures color as a tuple containing <br>
@@ -63,31 +76,32 @@ impl DmxFixture {
             fixture_type: fixture_type,
             stage_coordinates: (125, 0),
             animations: animations,
-            current_animation: 0,
+            current_animation: "test".to_string(),
+            current_animation_type: AnimationType::Animation,
             brightness: 1.0,
             current_color: ((150.0, 0.0, 0.0), 60),
             light_mode_up: true,
             light_mode_down: true,
-            light_mode_in: false,
-            light_mode_out: false,
+            light_mode_in: true,
+            light_mode_out: true,
             enabled: true
         }
     }
     // Todo: (long term) the parsing should only happen once to not read one file multiple times
     /// reads the animation files and returns the constructed animation vec
-    fn read_animation_files(fixture_id: u8, dmx_config_store: &DmxConfigStore) -> Vec<Vec<(u8, u8, bool, bool, bool, bool, f32)>> {
-        let mut animations: Vec<Vec<(u8, u8, bool, bool, bool, bool, f32)>> = vec!();
+    fn read_animation_files(fixture_id: u8, dmx_config_store: &DmxConfigStore) -> Vec<(String, Vec<(u8, u8, bool, bool, bool, bool, f32)>)> {
+        let mut animations: Vec<(String, Vec<(u8, u8, bool, bool, bool, bool, f32)>)> = vec!();
         let fixture_count = dmx_config_store.get_dmx_fixtures().len();
         for _ in 0..dmx_config_store.get_animations().len() {
-            animations.push(vec!());
+            animations.push(("placeholder".to_string(), vec!()));
         }
 
-        for (index, animation_name) in dmx_config_store.get_animations().iter().enumerate() {
+        for (animation_i, animation_name) in dmx_config_store.get_animations().iter().enumerate() {
             let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/dmx_renderer/") + animation_name + ".tpl").as_str())) {
                 Ok(e) => e,
                 Err(e) => {
-                    logging::log(format!("Error: File occured while reading animation file {} {}", animation_name, e).as_str(), logging::LogLevel::Warning, true);
-                    panic!("Error: File occured while reading animation file {}\n", e);
+                    logging::log(format!("Error occured while reading animation file {} {}", animation_name, e).as_str(), logging::LogLevel::Warning, true);
+                    panic!("Error occured while reading animation file {}\n", e);
                 }
             };
             plain_content = plain_content.replace(" ", "");
@@ -111,7 +125,8 @@ impl DmxFixture {
                     brightness = 0.0;
                 }
                 
-                animations[index].push((x, y, dir_up, dir_down, dir_in, dir_out, brightness));
+                animations[animation_i].0 = animation_name.to_string();
+                animations[animation_i].1.push((x, y, dir_up, dir_down, dir_in, dir_out, brightness));
             }
         }
 
@@ -127,8 +142,9 @@ impl DmxFixture {
     }
     /// sets the current animation
     /// a mapping of animation to u8 can be found by enumerating the animations string array in the config file starting with 0
-    pub fn set_current_animation(&mut self, animation: u8) {
-        self.current_animation = animation;
+    pub fn set_current_animation(&mut self, animation_type: AnimationType, animation_name: String) {
+        self.current_animation_type = animation_type;
+        self.current_animation = animation_name;
     }
     /// returns the brightness of the fixture
     pub fn get_brightness(&self) -> f32 {
@@ -223,19 +239,26 @@ impl DmxFixture {
     /// This creates all dmx values needed to drive the hardware fixture
     pub fn get_dmx_footprint(&self, position_index: u64) -> Vec<u8> {
         let mut footprint = vec!();
-        let position_index = position_index % self.animations[self.current_animation as usize].len() as u64;
+        let current_animation_index: u8 = match self.animations.iter().position(|animation| animation.0 == self.current_animation) {
+            Some(n) => n as u8,
+            None => {
+                logging::log(format!("Animation {} not found in config file, setting current animation to default", self.current_animation).as_str(), logging::LogLevel::Warning, true);
+                0
+            }
+        };
+        let position_index = position_index % self.animations[current_animation_index as usize].1.len() as u64;
         match self.fixture_name.as_str() {
             "Victory Scan" => {
-                footprint.push(self.animations[self.current_animation as usize][position_index as usize].0);
-                footprint.push(self.animations[self.current_animation as usize][position_index as usize].1);
+                footprint.push(self.animations[current_animation_index as usize].1[position_index as usize].0);
+                footprint.push(self.animations[current_animation_index as usize].1[position_index as usize].1);
                 footprint.push(8);
                 footprint.push(0);
                 footprint.push(self.current_color.1);
-                if  (self.light_mode_up && self.animations[self.current_animation as usize][position_index as usize].2)   ||
-                    (self.light_mode_down && self.animations[self.current_animation as usize][position_index as usize].3) ||
-                    (self.light_mode_in && self.animations[self.current_animation as usize][position_index as usize].4)   ||
-                    (self.light_mode_out && self.animations[self.current_animation as usize][position_index as usize].5)   {
-                        footprint.push((255 as f32 * self.animations[self.current_animation as usize][position_index as usize].6 * self.brightness) as u8);
+                if  (self.light_mode_up && self.animations[current_animation_index as usize].1[position_index as usize].2)   ||
+                    (self.light_mode_down && self.animations[current_animation_index as usize].1[position_index as usize].3) ||
+                    (self.light_mode_in && self.animations[current_animation_index as usize].1[position_index as usize].4)   ||
+                    (self.light_mode_out && self.animations[current_animation_index as usize].1[position_index as usize].5)   {
+                        footprint.push((255 as f32 * self.animations[current_animation_index as usize].1[position_index as usize].6 * self.brightness) as u8);
                 } else {
                     footprint.push(0);
                 }
