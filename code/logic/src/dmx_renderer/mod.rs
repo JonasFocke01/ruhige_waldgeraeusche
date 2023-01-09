@@ -174,7 +174,7 @@ impl DmxRenderer {
         for fixture_type in fixture_types.iter() {
             for fixture in self.fixtures.iter_mut() {
                 if fixture_type == fixture.get_type() {
-                    fixture.set_current_animation(animation_type, animation_name);
+                    fixture.set_current_animation(animation_type, animation_name.to_string());
                 }
             }
         }

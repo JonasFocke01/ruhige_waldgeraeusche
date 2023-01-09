@@ -11,6 +11,7 @@ pub enum FixtureType {
 }
 
 /// Holds all possible animation types
+#[derive(Clone, Copy)]
 pub enum AnimationType {
     /// This is for all normal animations
     Animation,
