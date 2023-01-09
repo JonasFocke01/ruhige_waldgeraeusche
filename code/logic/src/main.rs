@@ -72,7 +72,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>  {
     
     let port = "3000";
     let listener = TcpListener::bind(format!("127.0.0.1:{}", port).as_str()).await?;
-    logging::log(format!("Successfully opened port {} for localhost", port).as_str(), logging::LogLevel::Info, false);
+    // Todo: (long term) make this network wide available
+    logging::log(format!("Successfully opened port :{} for localhost", port).as_str(), logging::LogLevel::Info, false);
 
     tokio::spawn(async move {
         loop {
@@ -160,8 +161,8 @@ fn map_serial_connections_to_arduino_modules(input_config_store: &InputConfigSto
     }
     for port in mapped_inputs.iter() {
         match port.0 {
-            ArduinoModule::Input => logging::log(format!("mapped port {} to Input", port.1).as_str(), logging::LogLevel::Info, false),
-            ArduinoModule::DmxAdapter => logging::log(format!("mapped port {} to DmxAdapter", port.1).as_str(), logging::LogLevel::Info, false)
+            ArduinoModule::Input => logging::log(format!("Mapped port {} to Input", port.1).as_str(), logging::LogLevel::Info, false),
+            ArduinoModule::DmxAdapter => logging::log(format!("Mapped port {} to DmxAdapter", port.1).as_str(), logging::LogLevel::Info, false)
         }
     }
     mapped_inputs

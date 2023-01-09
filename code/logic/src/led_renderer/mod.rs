@@ -124,7 +124,7 @@ impl<'a> LedRenderer<'a> {
         }
         let mut python_instance_stdin: ChildStdin = python_instance.stdin.unwrap();
         match python_instance_stdin.flush() {
-            Ok(()) => logging::log("successfully created python stdin", logging::LogLevel::Info, false),
+            Ok(()) => logging::log("Successfully created python stdin", logging::LogLevel::Info, false),
             Err(error) => {
                 logging::log("Failed to flush python instance stdin", logging::LogLevel::Warning, true);
                 panic!("Failed to flush python instance stdin - {}", error);

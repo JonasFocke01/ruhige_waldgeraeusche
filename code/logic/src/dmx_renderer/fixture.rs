@@ -86,8 +86,8 @@ impl DmxFixture {
             let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/dmx_renderer/") + animation_name + ".tpl").as_str())) {
                 Ok(e) => e,
                 Err(e) => {
-                    logging::log(format!("Error occured while reading animation file {} {}", animation_name, e).as_str(), logging::LogLevel::Warning, true);
-                    panic!("Error occured while reading animation file {}\n", e);
+                    logging::log(format!("Error: File occured while reading animation file {} {}", animation_name, e).as_str(), logging::LogLevel::Warning, true);
+                    panic!("Error: File occured while reading animation file {}\n", e);
                 }
             };
             plain_content = plain_content.replace(" ", "");
@@ -113,7 +113,6 @@ impl DmxFixture {
                 
                 animations[index].push((x, y, dir_up, dir_down, dir_in, dir_out, brightness));
             }
-            logging::log(format!("successfully parsed animation file {}", animation_name).as_str(), logging::LogLevel::Info, false);
         }
 
         animations

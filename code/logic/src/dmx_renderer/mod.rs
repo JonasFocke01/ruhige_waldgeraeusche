@@ -10,6 +10,7 @@ use fixture::FixtureType;
 use std::time::Instant;
 use std::ops::Not;
 use serial2::SerialPort;
+use colored::*;
 
 /// The mode that determines how the fixtures should change theyr color
 #[derive(Clone, Copy, PartialEq)]
@@ -72,10 +73,12 @@ impl DmxRenderer {
         };
 
         let mut fixtures: Vec<DmxFixture> = vec!();
-
+        
         for (fixture_i, fixture) in dmx_config_store.get_dmx_fixtures().iter().enumerate() {
             fixtures.push(DmxFixture::new(fixture_i as u8, fixture.to_string(), &dmx_config_store));
+            print!("\r{} Sucessfully created fixture: {}", "Info:".blue(), fixture_i + 1);
         }
+        print!("/{}\n", fixtures.len());
 
         DmxRenderer {
             position_timestamp: Instant::now(),
@@ -123,6 +126,7 @@ impl DmxRenderer {
             }
             
             if self.print_dmx_channel_ocupied {
+                // Todo: print dmx configuration
                 logging::log(format!("Occupied dmx-channels: {} ({} fixtures)", channel_vec.len(), dmx_config_store.get_dmx_fixtures().len()).as_str(), logging::LogLevel::Info, true);
                 self.print_dmx_channel_ocupied = false;
             }
