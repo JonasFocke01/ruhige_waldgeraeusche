@@ -7,6 +7,21 @@ use std::sync::Arc;
 use serial2::SerialPort;
 use std::cmp;
 
+use hyper::body::Buf;
+use hyper::server::conn::Http;
+use hyper::service::{service_fn, make_service_fn};
+use hyper::{header, Body, Method, Request, Response, StatusCode};
+use serde::{Deserialize, Serialize};
+use std::net::SocketAddr;
+use std::error::Error;
+use tokio::net::{TcpListener, TcpStream};
+use std::sync::{Mutex, MutexGuard};
+use std::sync::mpsc::{Sender, Receiver};
+use std::sync::mpsc;
+use std::thread;
+use std::io::prelude::*;
+use substring::Substring;
+
 /// Responsible for reading and parsing possible input sources
 pub mod input_parser;
 use input_parser::InputParser;
@@ -34,7 +49,8 @@ pub enum ArduinoModule {
     Input
 }
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>  {
     logging::log("", logging::LogLevel::Start, true);
 
     //? setup
@@ -57,8 +73,39 @@ fn main() {
             ArduinoModule::Input => input_port_paths.push(e.1.to_string())
         }
     }
-    let mut input_parser = InputParser::new(&input_config_store, input_port_paths);
     let mut dmx_renderer = DmxRenderer::new(&input_config_store, &dmx_config_store, dmx_adapter_port);
+    
+    // ? start rest api
+
+    let (tx, rx): (Sender<u8>, Receiver<u8>) = mpsc::channel();
+    let thread_tx = tx.clone();
+    
+    // Todo: make port configurable
+    let port = "3000";
+    let mut listener = TcpListener::bind(format!("127.0.0.1:{}", port).as_str()).await?;
+    logging::log(format!("Successfully opened port {} for localhost", port).as_str(), logging::LogLevel::Info, false);
+
+    tokio::spawn(async move {
+        loop {
+            let (stream, _) = match listener.accept().await {
+                Ok(t) => t,
+                Err(e) => panic!("Error")
+            };
+            // thread_tx.send(17);
+            stream.readable().await;
+            let mut buffer = [0; 128];
+            let stream_result = stream.try_read(&mut buffer);
+            print!("connection result: {:?}\n", stream_result);
+            let converted_stream_result = std::str::from_utf8(&buffer).expect("invalid utf-8 sequence");
+            print!("converted stream result: {:?}\n", converted_stream_result);
+            let query = converted_stream_result.substring(converted_stream_result.find("?").unwrap() + 1, converted_stream_result.rfind("HTTP").unwrap() - 1);
+            print!("extracted query: {:?}\n", query);
+            thread_tx.send(query.as_bytes().len() as u8);
+
+        }
+    });
+
+    let mut input_parser = InputParser::new(&input_config_store, input_port_paths, rx);
 
     //? infinite programmloop whose speed is capped by the FRAME_TIMING attribute
 
@@ -96,6 +143,62 @@ fn main() {
             truncate_index += 1;
         }
         while fps_limit_timestamp.elapsed().as_millis() < 1 {  } //This is to not totaly run at max speed and fry the processor
+    }
+}
+
+async fn async_callback_helper(req: Request<Body>) -> Result<Response<Body>, Box<dyn Error + Send + Sync>> {
+    print!("Im helping with {:?}!\n",
+        match req.uri().query() {
+            Some(e) => e,
+            None => "moin"
+        }
+    );
+    Ok(Response::default())
+}
+
+// ! THIS IS A TEST
+async fn test_handler(req: Request<Body>) -> Result<Response<Body>, Box<dyn Error + Send + Sync>> {
+    logging::log("THIS IS A TESTFUNCTION", logging::LogLevel::Warning, false);
+    let path = req.uri().path().to_owned();
+
+    match req.uri().query() {
+        Some(e) => e
+            .to_owned()
+            .split("&")
+            .collect::<Vec<&str>>()
+            .iter()
+            .for_each(|e| {
+                print!("{:?}\n", e.split("=").collect::<Vec<&str>>())
+            }
+        ),
+        None => print!("No query parameters")
+    };
+
+    let path_segments = path.split("/").collect::<Vec<&str>>();
+    let base_path = path_segments[1];
+
+    // for segment in path_segments.iter() {
+    //     print!("{}\n", segment);
+    // }
+    // Ok(Response::new(Body::from("Moin")));
+    match (req.method(), base_path) {
+        (&Method::GET, "cars") => {
+            print!("Get detected");
+            Ok(Response::new(Body::from("GET cars")))
+        },
+
+        (&Method::POST, "cars") => {
+            print!("Post detected");
+            // print!("requestbody: {:?}\n", req.body());
+            return Ok(Response::new(Body::from("POST cars")))
+        },
+
+        // Return the 404 Not Found for other routes.
+        _ => {
+            let mut not_found = Response::default();
+            *not_found.status_mut() = StatusCode::NOT_FOUND;
+            Ok(not_found)
+        }
     }
 }
 

@@ -12,3 +12,6 @@ serial2 = "0.1.7"
 rand = "0.8.5"
 chrono = "0.4.23"
 colored = "2"
+hyper = { version = "0.14", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
+substring = "1.4.5"
