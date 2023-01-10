@@ -1,6 +1,6 @@
 use crate::led_renderer::LedRenderer;
 use crate::dmx_renderer::{DmxRenderer, ColorTransitionMode};
-use crate::dmx_renderer::fixture::FixtureType;
+use crate::dmx_renderer::fixture::{FixtureType, AnimationType};
 use crate::config_store::InputConfigStore;
 use crate::logging;
 
@@ -126,8 +126,16 @@ impl InputParser {
                 },
                 31 => { // color transition speed change (fader)
                     dmx_renderer.set_color_transition_speed(input.remove(0));
+                },
+                
+                // ! Testroutes
+                32 => {
+                    dmx_renderer.set_animation(vec!(FixtureType::Scanner), AnimationType::Quickanimation, "square".to_string());
+                },
+                33 => {
+                    dmx_renderer.set_animation(vec!(FixtureType::Scanner), AnimationType::Animation, "test".to_string());
                 }
-                _ => ()
+                _ => (/*Todo: log unexpected input */)
             }
         }
         

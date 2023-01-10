@@ -139,6 +139,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>  {
                 persist = true;
             }
             led_renderer.trigger_current_animation();// * This is only for test reasons and should probably be triggered by something like beat
+            // Todo: log average also
             logging::log(format!("Peak elapsed ms since last log: {}", truncate_peak_ms.to_string()).as_str(), log_level, persist);
             truncate_peak_ms = 0;
             truncate_index = 0;

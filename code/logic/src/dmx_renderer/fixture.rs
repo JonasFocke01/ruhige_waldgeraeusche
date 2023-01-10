@@ -2,6 +2,7 @@ use crate::config_store::DmxConfigStore;
 use crate::logging;
 
 use std::path::Path;
+use std::slice::Iter;
 
 /// This should indicate the fixtures type
 #[derive(PartialEq)]
@@ -16,9 +17,16 @@ pub enum AnimationType {
     /// This is for all normal animations
     Animation,
     /// This is for all quickanimations
-    Quickanimation,
-    /// This is for all animations that are more off effect on current animations than animations itself
-    Effect
+    Quickanimation
+}
+
+/// Holds all possible effect types
+#[derive(Clone, Copy)]
+pub enum Effect {
+    /// This strobes all lights
+    SyncStrobe,
+    /// There is no effect to apply
+    None
 }
 
 /// All fixture must implement this to be handled by the dmx renderer
@@ -33,12 +41,20 @@ pub struct DmxFixture {
     /// The inner vec is left to right when looking towards the stage <br>
     /// The up, down, in, out bools indicate, in which direction the fixture is moving <br>
     /// The Index vec contains the individual steps the fixture should take <br>
-    /// Animation< Index< x_position, y_position, up, down, in, out >>
+    /// Animation< ( Animation_Name, Index< x_position, y_position, up, down, in, out > ) >
     animations: Vec<(String, Vec<(u8, u8, bool, bool, bool, bool, f32)>)>,
+    /// The quickanimations of this fixture parsed from the tpl files <br>
+    /// The inner vec is left to right when looking towards the stage <br>
+    /// The up, down, in, out bools indicate, in which direction the fixture is moving <br>
+    /// The Index vec contains the individual steps the fixture should take <br>
+    /// Animation< ( Animation_Name, Index< x_position, y_position, up, down, in, out > ) >
+    quickanimations: Vec<(String, Vec<(u8, u8, bool, bool, bool, bool, f32)>)>,
     /// Stores the current animation the fixture is in
-    current_animation: String,
+    current_animation_name: String,
     /// The type of the current animation
     current_animation_type: AnimationType,
+    /// An effect to apply
+    effect_to_apply: Effect,
     /// The fixtures dimm value
     brightness: f32,
     /// The fixtures color as a tuple containing <br>
@@ -62,7 +78,8 @@ pub struct DmxFixture {
 impl DmxFixture {
     /// The constructor fills all fields by taking in the fixture id, the fixture name and the dmx_config_store
     pub fn new(fixture_id: u8, fixture_name: String, dmx_config_store: &DmxConfigStore) -> DmxFixture {
-        let animations = DmxFixture::read_animation_files(fixture_id, dmx_config_store);
+        let animations = DmxFixture::read_animation_files(fixture_id, dmx_config_store, AnimationType::Animation);
+        let quickanimations = DmxFixture::read_animation_files(fixture_id, dmx_config_store, AnimationType::Quickanimation);
 
         let fixture_type = match fixture_name.as_str() {
             "Victory Scan" => FixtureType::Scanner,
@@ -77,8 +94,10 @@ impl DmxFixture {
             fixture_type: fixture_type,
             stage_coordinates: (125, 0),
             animations: animations,
-            current_animation: "test".to_string(),
+            quickanimations: quickanimations,
+            current_animation_name: "test".to_string(),
             current_animation_type: AnimationType::Animation,
+            effect_to_apply: Effect::None,
             brightness: 1.0,
             current_color: ((150.0, 0.0, 0.0), 60),
             light_mode_up: true,
@@ -90,18 +109,33 @@ impl DmxFixture {
     }
     // Todo: (long term) the parsing should only happen once to not read one file multiple times
     /// reads the animation files and returns the constructed animation vec
-    fn read_animation_files(fixture_id: u8, dmx_config_store: &DmxConfigStore) -> Vec<(String, Vec<(u8, u8, bool, bool, bool, bool, f32)>)> {
+    fn read_animation_files(fixture_id: u8, dmx_config_store: &DmxConfigStore, animation_type: AnimationType) -> Vec<(String, Vec<(u8, u8, bool, bool, bool, bool, f32)>)> {
         let mut animations: Vec<(String, Vec<(u8, u8, bool, bool, bool, bool, f32)>)> = vec!();
         let fixture_count = dmx_config_store.get_dmx_fixtures().len();
-        for _ in 0..dmx_config_store.get_animations().len() {
+        let animation_count: u8;
+        let animation_name_iter: Iter<String>;
+        let directory: &str;
+        match animation_type {
+            AnimationType::Animation => {
+                animation_count = dmx_config_store.get_animations().len() as u8;
+                animation_name_iter = dmx_config_store.get_animations().iter();
+                directory = "normal";
+            },
+            AnimationType::Quickanimation => {
+                animation_count = dmx_config_store.get_quickanimations().len() as u8;
+                animation_name_iter = dmx_config_store.get_quickanimations().iter();
+                directory = "quick";
+            }
+        }
+        for _ in 0..animation_count {
             animations.push(("placeholder".to_string(), vec!()));
         }
 
-        for (animation_i, animation_name) in dmx_config_store.get_animations().iter().enumerate() {
-            let mut plain_content = match std::fs::read_to_string(Path::new((String::from("src/dmx_renderer/") + animation_name + ".tpl").as_str())) {
+        for (animation_i, animation_name) in animation_name_iter.enumerate() {
+            let mut plain_content = match std::fs::read_to_string(Path::new((format!("src/dmx_renderer/animations/{}/{}.tpl", directory, animation_name)).as_str())) {
                 Ok(e) => e,
                 Err(e) => {
-                    logging::log(format!("Error occured while reading animation file {} {}", animation_name, e).as_str(), logging::LogLevel::Warning, true);
+                    logging::log(format!("Error occured while reading animation file src/dmx_renderer/animations/{}/{}.tpl {}", directory, animation_name, e).as_str(), logging::LogLevel::Warning, true);
                     panic!("Error occured while reading animation file {}\n", e);
                 }
             };
@@ -142,10 +176,9 @@ impl DmxFixture {
         self.stage_coordinates = coordinates;
     }
     /// sets the current animation
-    /// a mapping of animation to u8 can be found by enumerating the animations string array in the config file starting with 0
     pub fn set_current_animation(&mut self, animation_type: AnimationType, animation_name: String) {
         self.current_animation_type = animation_type;
-        self.current_animation = animation_name;
+        self.current_animation_name = animation_name;
     }
     /// returns the brightness of the fixture
     pub fn get_brightness(&self) -> f32 {
@@ -237,29 +270,44 @@ impl DmxFixture {
             None => self.light_mode_out = !self.light_mode_out
         }
     }
-    /// This creates all dmx values needed to drive the hardware fixture
+    /// This calculates all dmx values needed to drive the hardware fixture
     pub fn get_dmx_footprint(&self, position_index: u64) -> Vec<u8> {
         let mut footprint = vec!();
-        let current_animation_index: u8 = match self.animations.iter().position(|animation| animation.0 == self.current_animation) {
-            Some(n) => n as u8,
-            None => {
-                logging::log(format!("Animation {} not found in config file, setting current animation to default", self.current_animation).as_str(), logging::LogLevel::Warning, true);
-                0
+        let current_animation: &Vec<(u8, u8, bool, bool, bool, bool, f32)> = match self.current_animation_type {
+            AnimationType::Animation => {
+                let current_animation_index: usize = match self.animations.iter().position(|animation| animation.0 == self.current_animation_name) {
+                    Some(n) => n,
+                    None => {
+                        logging::log(format!("Animation {} not found in config file, setting current animation to default", self.current_animation_name).as_str(), logging::LogLevel::Warning, true);
+                        0
+                    }
+                };
+                &self.animations[current_animation_index].1
+            },
+            AnimationType::Quickanimation => {
+                let current_animation_index: usize = match self.quickanimations.iter().position(|animation| animation.0 == self.current_animation_name) {
+                    Some(n) => n,
+                    None => {
+                        logging::log(format!("Animation {} not found in config file, setting current animation to default", self.current_animation_name).as_str(), logging::LogLevel::Warning, true);
+                        0
+                    }
+                };
+                &self.quickanimations[current_animation_index].1
             }
         };
-        let position_index = position_index % self.animations[current_animation_index as usize].1.len() as u64;
+        let position_index = position_index % current_animation.len() as u64;
         match self.fixture_name.as_str() {
             "Victory Scan" => {
-                footprint.push(self.animations[current_animation_index as usize].1[position_index as usize].0);
-                footprint.push(self.animations[current_animation_index as usize].1[position_index as usize].1);
-                footprint.push(8);
+                footprint.push(current_animation[position_index as usize].0);
+                footprint.push(current_animation[position_index as usize].1);
+                footprint.push( match self.effect_to_apply { Effect::SyncStrobe => 125, Effect::None => 8 } );
                 footprint.push(0);
                 footprint.push(self.current_color.1);
-                if  (self.light_mode_up && self.animations[current_animation_index as usize].1[position_index as usize].2)   ||
-                    (self.light_mode_down && self.animations[current_animation_index as usize].1[position_index as usize].3) ||
-                    (self.light_mode_in && self.animations[current_animation_index as usize].1[position_index as usize].4)   ||
-                    (self.light_mode_out && self.animations[current_animation_index as usize].1[position_index as usize].5)   {
-                        footprint.push((255 as f32 * self.animations[current_animation_index as usize].1[position_index as usize].6 * self.brightness) as u8);
+                if  (self.light_mode_up && current_animation[position_index as usize].2)   ||
+                    (self.light_mode_down && current_animation[position_index as usize].3) ||
+                    (self.light_mode_in && current_animation[position_index as usize].4)   ||
+                    (self.light_mode_out && current_animation[position_index as usize].5)   {
+                        footprint.push((255 as f32 * current_animation[position_index as usize].6 * self.brightness) as u8);
                 } else {
                     footprint.push(0);
                 }

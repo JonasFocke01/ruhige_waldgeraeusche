@@ -40,14 +40,21 @@ pub struct DmxRenderer {
     render_timestamp: Instant,
     /// The SerialPort object, the adapter is connected to
     dmx_port: SerialPort,
-    /// This is the position index all fixtures need to calculate theyr currrent position
+    /// This is the position index all fixtures need to calculate theyr currrent position <br>
+    /// counts indefinitely
     position_index: u64,
+    /// This is the position index all fixtures need to calculate theyr current position if quickanimations is active for them <br>
+    /// will count indefinitely
+    quickanimation_position_index: u64,
+    /// Prevents quickanimation_index from counting up if set to true
+    advance_quickanimation_position_index: bool,
     /// This stores all fixtures
     fixtures: Vec<DmxFixture>,
     /// Should only be true at the start of the programm to review how much dmx channels are used
     print_dmx_channel_ocupied: bool,
     /// Stores if an dmx update happened to further slow down dmx writing
     updateable: bool,
+    // Todo: create doc
     color_transition_mode: ColorTransitionMode,
     color_transition_index: u8,
     color_transition_to_color: ((f32, f32, f32), Option<u8>),
@@ -86,6 +93,8 @@ impl DmxRenderer {
             render_timestamp: Instant::now(),
             dmx_port: port,
             position_index: 0,
+            quickanimation_position_index: 0,
+            advance_quickanimation_position_index: false,
             fixtures: fixtures,
             print_dmx_channel_ocupied: true,
             updateable: false,
@@ -99,6 +108,9 @@ impl DmxRenderer {
     /// Builds and writes the channel vector
     /// The Vector is prepended with a 69 as a startbyte
     /// If the Vector is less than 513 bytes, it will be appended with zeros
+    /// Also advances the color_transition_index if needed
+    /// Also advances the position index
+    /// Also advances the quickanimation position index if needed
     pub fn render(&mut self, dmx_config_store: &DmxConfigStore) -> Result<Vec<u8>, String> {
 
         if self.color_transition_index < 255 && self.render_timestamp.elapsed().as_millis() % if self.color_transition_speed == 0 { 1 } else { self.color_transition_speed } == 0 {
@@ -107,9 +119,11 @@ impl DmxRenderer {
         }
 
         if self.position_timestamp.elapsed().as_millis() > 100 {
-            self.position_index += 1;
-            self.updateable = true;
             self.position_timestamp = Instant::now();
+            self.updateable = true;
+
+            self.position_index += 1;
+            if !self.advance_quickanimation_position_index { self.quickanimation_position_index += 1 }
         }
 
         if self.updateable && self.render_timestamp.elapsed().as_millis() >= 50 {
@@ -166,10 +180,10 @@ impl DmxRenderer {
     /// Passes the animation_type and the animation_name to each fixture enumerated in _fixture_types
     pub fn set_animation(&mut self, fixture_types: Vec<FixtureType>, animation_type: AnimationType, animation_name: String) {
         // Todo: implement animation type match arms
+        // General fields regarding the animations, like indices etc., sould be set here
         match animation_type {
             AnimationType::Animation => logging::log("Animation type Animation is not implemented", logging::LogLevel::Warning, false),
-            AnimationType::Quickanimation => logging::log("Animation type Quickanimation is not implemented", logging::LogLevel::Warning, false),
-            AnimationType::Effect => logging::log("Animation type Effect is not implemented", logging::LogLevel::Warning, false)
+            AnimationType::Quickanimation => logging::log("Animation type Quickanimation is not implemented", logging::LogLevel::Warning, false)
         };
         for fixture_type in fixture_types.iter() {
             for fixture in self.fixtures.iter_mut() {
@@ -191,5 +205,13 @@ impl DmxRenderer {
     /// This function maps the given u8 to 0 - 50
     pub fn set_color_transition_speed(&mut self, speed: u8) {
         self.color_transition_speed = GlobalVarsStore::map_range(speed.into(), (0.0, 255.0), (0.0, 50.0)) as u128;
+    }
+    /// Sets the advance_quickanimation_position_index value
+    /// Toggles if parameter is None
+    pub fn set_advance_quickanimation_position_index(&mut self, param: Option<bool>) {
+        match param {
+            Some(e) => self.advance_quickanimation_position_index = e,
+            None => self.advance_quickanimation_position_index = !self.advance_quickanimation_position_index
+        }
     }
 }

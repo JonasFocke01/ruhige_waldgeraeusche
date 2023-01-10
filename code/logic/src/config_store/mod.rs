@@ -37,7 +37,8 @@ pub struct LedConfigStore {
 /// The struct to define how the DmxConfigStore should look like
 pub struct DmxConfigStore {
     dmx_fixtures: Vec<String>,
-    animations: Vec<String>
+    animations: Vec<String>,
+    quickanimations: Vec<String>
 }
 /// The struct to define how the GlobalVarsStore should look like
 pub struct GlobalVarsStore {
@@ -200,9 +201,20 @@ impl DmxConfigStore {
             animations.push(e.as_str().expect("could not convert dmx/animations[i] as_str").to_string());
         }
 
+        let quickanimations_key = match dmx["quickanimations"].as_array() {
+            Some(e) => e,
+            None => panic!("config does not contain key dmx/quickanimations (array needed)")
+        };
+
+        let mut quickanimations: Vec<String> = vec!();
+        for e in quickanimations_key.iter() {
+            quickanimations.push(e.as_str().expect("could not convert dmx/quickanimations[i] as_str").to_string());
+        }
+
         DmxConfigStore {
             dmx_fixtures: dmx_fixtures,
-            animations: animations
+            animations: animations,
+            quickanimations: quickanimations
         }
     }
     /// Returns dmx_fixtures
@@ -212,6 +224,10 @@ impl DmxConfigStore {
     /// Returns animations
     pub fn get_animations(&self) -> &Vec<String> {
         &self.animations
+    }
+    /// Returns quickanimations
+    pub fn get_quickanimations(&self) -> &Vec<String> {
+        &self.quickanimations
     }
 }
 
