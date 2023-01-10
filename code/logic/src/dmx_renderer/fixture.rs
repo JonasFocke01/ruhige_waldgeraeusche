@@ -238,6 +238,10 @@ impl DmxFixture {
             }
         }
     }
+    /// Returns current_animation_type
+    pub fn get_animation_type(&self) -> &AnimationType {
+        &self.current_animation_type
+    }
     /// Sets the current light mode for up <br>
     /// toggles if light_mode_up: None
     pub fn set_current_light_mode_up(&mut self, light_mode_up: Option<bool>) {
@@ -288,7 +292,7 @@ impl DmxFixture {
                 let current_animation_index: usize = match self.quickanimations.iter().position(|animation| animation.0 == self.current_animation_name) {
                     Some(n) => n,
                     None => {
-                        logging::log(format!("Animation {} not found in config file, setting current animation to default", self.current_animation_name).as_str(), logging::LogLevel::Warning, true);
+                        logging::log(format!("Quickanimation {} not found in config file, setting current animation to default", self.current_animation_name).as_str(), logging::LogLevel::Warning, true);
                         0
                     }
                 };

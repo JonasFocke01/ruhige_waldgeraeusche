@@ -28,7 +28,9 @@ pub struct InputParser {
     /// Fills up if QueueMode is set to Queue and flushes its content if QueueMode is set to Flush
     queue: Vec<u8>,
     /// Controlls whether queue fills up or flushes
-    queue_mode: QueueMode
+    queue_mode: QueueMode,
+    /// Stores all fixture types that are changeable by the inputstream
+    selected_fixtures: Vec<FixtureType>
 }
 
 /// Responsible for reading and parsing possible input sources
@@ -39,12 +41,16 @@ impl InputParser {
     pub fn new(input_config_store: &InputConfigStore, connected_modules: Vec<String>, rx_channel: Receiver<String>) -> InputParser {
 
         let module_connectors = Self::spawn_module_connectors(connected_modules, input_config_store.get_baud_rate());
+
+        // Todo: change this to an empty vec as soon as selection buttons are implemented
+        let selected_fixtures = vec!(FixtureType::Scanner);
         
         InputParser {
             module_connectors: module_connectors,
             rx_channel: rx_channel,
             queue: vec!(),
-            queue_mode: QueueMode::Flush
+            queue_mode: QueueMode::Flush,
+            selected_fixtures: selected_fixtures
         }
     }
     /// acts acordingly to the processed input gathered by gather_serial_input()
@@ -71,72 +77,74 @@ impl InputParser {
             let value = input.remove(0);
             match key {
                 1..=14 => (),
-                20 => { // Color to red
+
+                // ? color
+                20 => { // red
                     if value == 1 && self.queue_mode_allows_continue(key, value) {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 0.0, 0.0), None));
+                        dmx_renderer.set_color(&self.selected_fixtures, ((255.0, 0.0, 0.0), None));
                         led_renderer.set_current_color((255.0, 0.0, 0.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
-                21 => { // color to orange
+                21 => { // orange
                     if value == 1 && self.queue_mode_allows_continue(key, value) {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 165.0, 0.0), None));
+                        dmx_renderer.set_color(&self.selected_fixtures, ((255.0, 165.0, 0.0), None));
                         led_renderer.set_current_color((255.0, 165.0, 0.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
-                22 => { // color to Purple
+                22 => { // Purple
                     if value == 1 && self.queue_mode_allows_continue(key, value) {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((128.0, 0.0, 128.0), None));
+                        dmx_renderer.set_color(&self.selected_fixtures, ((128.0, 0.0, 128.0), None));
                         led_renderer.set_current_color((128.0, 0.0, 128.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
-                23 => { // color to blue
+                23 => { // blue
                     if value == 1 && self.queue_mode_allows_continue(key, value) {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 0.0, 255.0), None));
+                        dmx_renderer.set_color(&self.selected_fixtures, ((0.0, 0.0, 255.0), None));
                         led_renderer.set_current_color((0.0, 0.0, 255.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
-                24 => { // color to green
+                24 => { // green
                     if value == 1 && self.queue_mode_allows_continue(key, value) {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 255.0, 0.0), None));
+                        dmx_renderer.set_color(&self.selected_fixtures, ((0.0, 255.0, 0.0), None));
                         led_renderer.set_current_color((0.0, 255.0, 0.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
-                25 => { // color to yellow
+                25 => { // yellow
                     if value == 1 && self.queue_mode_allows_continue(key, value) {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 255.0, 0.0), None));
+                        dmx_renderer.set_color(&self.selected_fixtures, ((255.0, 255.0, 0.0), None));
                         led_renderer.set_current_color((255.0, 255.0, 0.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
-                26 => { // color to white
+                26 => { // white
                     if value == 1 && self.queue_mode_allows_continue(key, value) {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 255.0, 255.0), None));
+                        dmx_renderer.set_color(&self.selected_fixtures, ((255.0, 255.0, 255.0), None));
                         led_renderer.set_current_color((255.0, 255.0, 255.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
-                27 => { // color to light blue
+                27 => { // light blue
                     if value == 1 && self.queue_mode_allows_continue(key, value) {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((173.0, 216.0, 230.0), None));
+                        dmx_renderer.set_color(&self.selected_fixtures, ((173.0, 216.0, 230.0), None));
                         led_renderer.set_current_color((173.0, 216.0, 230.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
-                28 => { // color to pink
+                28 => { // pink
                     if value == 1 && self.queue_mode_allows_continue(key, value) {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 182.0, 193.0), None));
+                        dmx_renderer.set_color(&self.selected_fixtures, ((255.0, 182.0, 193.0), None));
                         led_renderer.set_current_color((255.0, 182.0, 193.0));
                         led_renderer.set_rainbow_mode(false);
                     }
                 },
-                29 => { // color to rainbow
+                29 => { // rainbow
                     if value == 1 && self.queue_mode_allows_continue(key, value) {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 0.0, 0.0), Some(0)));
+                        dmx_renderer.set_color(&self.selected_fixtures, ((0.0, 0.0, 0.0), Some(0)));
                         led_renderer.set_rainbow_mode(true);
                     }
                 },
@@ -154,19 +162,30 @@ impl InputParser {
                         dmx_renderer.set_color_transition_speed(value);
                     }
                 },
-                254 => { //
 
+                // ? quickanimations
+                190 => {
+                    match value {
+                        1 => {
+                            dmx_renderer.reset_quickanimation_position_index(Some(false));
+                            dmx_renderer.set_animation(&self.selected_fixtures, AnimationType::Quickanimation, "square".to_string())
+                        },
+                        0 => {
+                            if self.queue_mode_allows_continue(key, value) {
+                                dmx_renderer.reset_quickanimation_position_index(Some(true));
+                            }
+                        },
+                        _ => ()
+                    }
                 }
+
                 255 => { // Space bar - queue key
                     match value {
                         1 => {
                             self.queue_mode = QueueMode::Queue;
-                            dmx_renderer.set_advance_quickanimation_position_index(Some(false));
-                            dmx_renderer.reset_quickanimation_position_index();
                         },
                         0 => {
                             self.queue_mode = QueueMode::Flush;
-                            dmx_renderer.set_advance_quickanimation_position_index(Some(true));
                         },
                         _ => ()
                     }
@@ -179,7 +198,7 @@ impl InputParser {
                         self.queue.push(15);
                         self.queue.push(value);
                     } else if value == 1 {
-                        dmx_renderer.set_animation(vec!(FixtureType::Scanner), AnimationType::Quickanimation, "square".to_string())
+                        dmx_renderer.set_animation(&self.selected_fixtures, AnimationType::Quickanimation, "square".to_string())
                     }
 
                 },

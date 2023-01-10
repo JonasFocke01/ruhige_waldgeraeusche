@@ -113,8 +113,9 @@ impl DmxRenderer {
     /// Also advances the quickanimation position index if needed
     pub fn render(&mut self, dmx_config_store: &DmxConfigStore) -> Result<Vec<u8>, String> {
 
+        // Todo: rework color transition
         if self.color_transition_index < 255 && self.render_timestamp.elapsed().as_millis() % if self.color_transition_speed == 0 { 1 } else { self.color_transition_speed } == 0 {
-            self.set_color(vec!(FixtureType::Scanner), (self.color_transition_to_color.0, None));
+            self.set_color(&vec!(FixtureType::Scanner), (self.color_transition_to_color.0, None));
             self.color_transition_index = self.color_transition_index + 1;
         }
 
@@ -123,7 +124,7 @@ impl DmxRenderer {
             self.updateable = true;
 
             self.position_index += 1;
-            if !self.advance_quickanimation_position_index { self.quickanimation_position_index += 1 }
+            if self.advance_quickanimation_position_index { self.quickanimation_position_index += 1 }
         }
 
         if self.updateable && self.render_timestamp.elapsed().as_millis() >= 50 {
@@ -135,7 +136,8 @@ impl DmxRenderer {
             channel_vec.push(69);
 
             for fixture in self.fixtures.iter() {
-                for parameter in fixture.get_dmx_footprint(self.position_index).iter() {
+                let position_index = match fixture.get_animation_type() { AnimationType::Animation => self.position_index, AnimationType::Quickanimation => self.quickanimation_position_index };
+                for parameter in fixture.get_dmx_footprint(position_index).iter() {
                     channel_vec.push(*parameter);
                 }
             }
@@ -162,7 +164,7 @@ impl DmxRenderer {
         Ok(vec!())
     }
     /// This maps the given color to all fixtures given in the fixture_types parameter
-    pub fn set_color(&mut self, fixture_types: Vec<FixtureType>, color: ((f32, f32, f32), Option<u8>)) {
+    pub fn set_color(&mut self, fixture_types: &Vec<FixtureType>, color: ((f32, f32, f32), Option<u8>)) {
         self.color_transition_to_color = color;
         if self.color_transition_mode == ColorTransitionMode::Animative && self.color_transition_index == 255 {
             self.color_transition_index = 0;
@@ -179,16 +181,7 @@ impl DmxRenderer {
     }
     /// Passes the animation_type and the animation_name to each fixture enumerated in _fixture_types <br>
     /// To change execute change events without changing animaiton you can give fixture_types as an empty vec
-    pub fn set_animation(&mut self, fixture_types: Vec<FixtureType>, animation_type: AnimationType, animation_name: String) {
-        match animation_type {
-            AnimationType::Animation => {
-                ()
-            },
-            AnimationType::Quickanimation => {
-                self.advance_quickanimation_position_index = true;
-                self.quickanimation_position_index = 0;
-            }
-        };
+    pub fn set_animation(&mut self, fixture_types: &Vec<FixtureType>, animation_type: AnimationType, animation_name: String) {
         for fixture_type in fixture_types.iter() {
             for fixture in self.fixtures.iter_mut() {
                 if fixture_type == fixture.get_type() {
@@ -210,16 +203,13 @@ impl DmxRenderer {
     pub fn set_color_transition_speed(&mut self, speed: u8) {
         self.color_transition_speed = GlobalVarsStore::map_range(speed.into(), (0.0, 255.0), (0.0, 50.0)) as u128;
     }
-    /// Sets the advance_quickanimation_position_index value <br>
-    /// Toggles if parameter is None
-    pub fn set_advance_quickanimation_position_index(&mut self, param: Option<bool>) {
-        match param {
-            Some(e) => self.advance_quickanimation_position_index = e,
-            None => self.advance_quickanimation_position_index = !self.advance_quickanimation_position_index
-        }
-    }
     /// This sets the quickanimation_position_index to 0
-    pub fn reset_quickanimation_position_index(&mut self) {
+    /// Also sets advance_quickanimation_position_index to param if some(n), otherwise ignorse it
+    pub fn reset_quickanimation_position_index(&mut self, advance_toggle: Option<bool>) {
+        match advance_toggle {
+            Some(e) => self.advance_quickanimation_position_index = e,
+            None => ()
+        };
         self.quickanimation_position_index = 0;
     }
 }
