@@ -1,6 +1,6 @@
 use crate::led_renderer::LedRenderer;
 use crate::dmx_renderer::{DmxRenderer, ColorTransitionMode};
-use crate::dmx_renderer::fixture::{FixtureType, AnimationType};
+use crate::dmx_renderer::fixture::{FixtureType};
 use crate::config_store::InputConfigStore;
 use crate::logging;
 
@@ -9,19 +9,32 @@ use std::sync::mpsc::{Receiver};
 use std::time::Duration;
 use std::sync::Arc;
 use serial2::SerialPort;
-use std::cmp::max;
-    
+
+/// Toggles if incomming request should fill the queue or if the queue should be flushed
+#[derive(PartialEq)]
+pub enum QueueMode {
+    /// The queue should be flushed
+    Flush,
+    /// The queue should be filled
+    Queue
+}
+
 /// The struct to define how the InputParser should look like
 pub struct InputParser {
     /// The input usb port
     module_connectors: Vec<Arc<SerialPort>>,
-    rx_channel: Receiver<String>
+    /// The channel where this thread receives values from the rest thread
+    rx_channel: Receiver<String>,
+    /// Fills up if QueueMode is set to Queue and flushes its content if QueueMode is set to Flush
+    queue: Vec<u8>,
+    /// Controlls whether queue fills up or flushes
+    queue_mode: QueueMode
 }
 
 /// Responsible for reading and parsing possible input sources
 impl InputParser {
-    /// This creates, fills and returns the InputParser object
-    /// - opens and configures the serial input port
+    /// This creates, fills and returns the InputParser object <br>
+    /// - opens and configures the serial input port <br>
     /// - calculates bpm based on a hardcoded start beat_duration
     pub fn new(input_config_store: &InputConfigStore, connected_modules: Vec<String>, rx_channel: Receiver<String>) -> InputParser {
 
@@ -29,7 +42,9 @@ impl InputParser {
         
         InputParser {
             module_connectors: module_connectors,
-            rx_channel: rx_channel
+            rx_channel: rx_channel,
+            queue: vec!(),
+            queue_mode: QueueMode::Flush
         }
     }
     /// acts acordingly to the processed input gathered by gather_serial_input()
@@ -40,101 +55,191 @@ impl InputParser {
         };
 
         match self.gather_rest_input() {
+            // Todo: evaluate if this is better suited
+            // Ok(e) => e.append(&mut e),
             Ok(e) => e.iter().for_each(|param| { input.push(*param) }),
             Err(error) => return Err(error)
         };
+
+        // Todo: evaluate: it might be usefull to log the length of the queue
+        if self.queue_mode == QueueMode::Flush {
+            input.append(&mut self.queue);
+        }
         
         // ! This computes, how the programm should behave by analysing the given input
         while input.len() >= 2 {
             match input.remove(0) {
-                1..=19 => (),
+                1..=14 => (),
                 20 => { // Color to red
                     if input.remove(0) == 1 {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 0.0, 0.0), None));
-                        led_renderer.set_current_color((255.0, 0.0, 0.0));
-                        led_renderer.set_rainbow_mode(false);
+                        if self.queue_mode == QueueMode::Flush {
+                            dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 0.0, 0.0), None));
+                            led_renderer.set_current_color((255.0, 0.0, 0.0));
+                            led_renderer.set_rainbow_mode(false);
+                        } else {
+                            self.queue.push(20);
+                            self.queue.push(1);
+                        }
                     }
                 },
                 21 => { // color to orange
                     if input.remove(0) == 1 {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 165.0, 0.0), None));
-                        led_renderer.set_current_color((255.0, 165.0, 0.0));
-                        led_renderer.set_rainbow_mode(false);
+                        if self.queue_mode == QueueMode::Flush {
+                            dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 165.0, 0.0), None));
+                            led_renderer.set_current_color((255.0, 165.0, 0.0));
+                            led_renderer.set_rainbow_mode(false);
+                        } else {
+                            self.queue.push(21);
+                            self.queue.push(1);
+                        }
                     }
                 },
                 22 => { // color to Purple
                     if input.remove(0) == 1 {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((128.0, 0.0, 128.0), None));
-                        led_renderer.set_current_color((128.0, 0.0, 128.0));
-                        led_renderer.set_rainbow_mode(false);
+                        if self.queue_mode == QueueMode::Flush {
+                            dmx_renderer.set_color(vec!(FixtureType::Scanner), ((128.0, 0.0, 128.0), None));
+                            led_renderer.set_current_color((128.0, 0.0, 128.0));
+                            led_renderer.set_rainbow_mode(false);
+                        } else {
+                            self.queue.push(22);
+                            self.queue.push(1);
+                        }
                     }
                 },
                 23 => { // color to blue
                     if input.remove(0) == 1 {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 0.0, 255.0), None));
-                        led_renderer.set_current_color((0.0, 0.0, 255.0));
-                        led_renderer.set_rainbow_mode(false);
+                        if self.queue_mode == QueueMode::Flush {
+                            dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 0.0, 255.0), None));
+                            led_renderer.set_current_color((0.0, 0.0, 255.0));
+                            led_renderer.set_rainbow_mode(false);
+                        } else {
+                            self.queue.push(23);
+                            self.queue.push(1);
+                        }
                     }
                 },
                 24 => { // color to green
                     if input.remove(0) == 1 {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 255.0, 0.0), None));
-                        led_renderer.set_current_color((0.0, 255.0, 0.0));
-                        led_renderer.set_rainbow_mode(false);
+                        if self.queue_mode == QueueMode::Flush {
+                            dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 255.0, 0.0), None));
+                            led_renderer.set_current_color((0.0, 255.0, 0.0));
+                            led_renderer.set_rainbow_mode(false);
+                        } else {
+                            self.queue.push(24);
+                            self.queue.push(1);
+                        }
                     }
                 },
                 25 => { // color to yellow
                     if input.remove(0) == 1 {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 255.0, 0.0), None));
-                        led_renderer.set_current_color((255.0, 255.0, 0.0));
-                        led_renderer.set_rainbow_mode(false);
+                        if self.queue_mode == QueueMode::Flush {
+                            dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 255.0, 0.0), None));
+                            led_renderer.set_current_color((255.0, 255.0, 0.0));
+                            led_renderer.set_rainbow_mode(false);
+                        } else {
+                            self.queue.push(25);
+                            self.queue.push(1);
+                        }
                     }
                 },
                 26 => { // color to white
                     if input.remove(0) == 1 {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 255.0, 255.0), None));
-                        led_renderer.set_current_color((255.0, 255.0, 255.0));
-                        led_renderer.set_rainbow_mode(false);
+                        if self.queue_mode == QueueMode::Flush {
+                            dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 255.0, 255.0), None));
+                            led_renderer.set_current_color((255.0, 255.0, 255.0));
+                            led_renderer.set_rainbow_mode(false);
+                        } else {
+                            self.queue.push(26);
+                            self.queue.push(1);
+                        }
                     }
                 },
                 27 => { // color to light blue
                     if input.remove(0) == 1 {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((173.0, 216.0, 230.0), None));
-                        led_renderer.set_current_color((173.0, 216.0, 230.0));
-                        led_renderer.set_rainbow_mode(false);
+                        if self.queue_mode == QueueMode::Flush {
+                            dmx_renderer.set_color(vec!(FixtureType::Scanner), ((173.0, 216.0, 230.0), None));
+                            led_renderer.set_current_color((173.0, 216.0, 230.0));
+                            led_renderer.set_rainbow_mode(false);
+                        } else {
+                            self.queue.push(27);
+                            self.queue.push(1);
+                        }
                     }
                 },
                 28 => { // color to pink
                     if input.remove(0) == 1 {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 182.0, 193.0), None));
-                        led_renderer.set_current_color((255.0, 182.0, 193.0));
-                        led_renderer.set_rainbow_mode(false);
+                        if self.queue_mode == QueueMode::Flush {
+                            dmx_renderer.set_color(vec!(FixtureType::Scanner), ((255.0, 182.0, 193.0), None));
+                            led_renderer.set_current_color((255.0, 182.0, 193.0));
+                            led_renderer.set_rainbow_mode(false);
+                        } else {
+                            self.queue.push(28);
+                            self.queue.push(1);
+                        }
                     }
                 },
                 29 => { // color to rainbow
                     if input.remove(0) == 1 {
-                        dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 0.0, 0.0), Some(0)));
-                        led_renderer.set_rainbow_mode(true);
+                        if self.queue_mode == QueueMode::Flush {
+                            dmx_renderer.set_color(vec!(FixtureType::Scanner), ((0.0, 0.0, 0.0), Some(0)));
+                            led_renderer.set_rainbow_mode(true);
+                        } else {
+                            self.queue.push(29);
+                            self.queue.push(1);
+                        }
                     }
                 },
                 30 => { // color transition mode
-                    if input.remove(0) == 1 {
-                        dmx_renderer.set_color_transition_mode(Some(ColorTransitionMode::Animative));
-                    } else {
-                        dmx_renderer.set_color_transition_mode(Some(ColorTransitionMode::Instant));
+                    if self.queue_mode == QueueMode::Queue {
+                        self.queue.push(30);
+                        self.queue.push(input.remove(0));
+                    }
+                    match input.remove(0) {
+                        1 => dmx_renderer.set_color_transition_mode(Some(ColorTransitionMode::Animative)),
+                        0 => dmx_renderer.set_color_transition_mode(Some(ColorTransitionMode::Instant)),
+                        _ => ()
                     }
                 },
                 31 => { // color transition speed change (fader)
+                    if self.queue_mode == QueueMode::Queue {
+                        self.queue.push(31);
+                        self.queue.push(input.remove(0));
+                    }
                     dmx_renderer.set_color_transition_speed(input.remove(0));
+                },
+                255 => { // Space bar - queue key
+                    match input.remove(0) {
+                        1 => {
+                            self.queue_mode = QueueMode::Queue;
+                            dmx_renderer.set_advance_quickanimation_position_index(Some(false));
+                            dmx_renderer.reset_quickanimation_position_index();
+                        },
+                        0 => {
+                            self.queue_mode = QueueMode::Flush;
+                            dmx_renderer.set_color_transition_mode(Some(ColorTransitionMode::Instant));
+                        },
+                        _ => ()
+                    }
                 },
                 
                 // ! Testroutes
-                32 => {
-                    dmx_renderer.set_animation(vec!(FixtureType::Scanner), AnimationType::Quickanimation, "square".to_string());
+                15 => {
+                    ()
                 },
-                33 => {
-                    dmx_renderer.set_animation(vec!(FixtureType::Scanner), AnimationType::Animation, "test".to_string());
-                }
+                16 => {
+                    ()
+                },
+                17 => {
+                    ()
+                },
+                18 => {
+                    ()
+                },
+                19 => {
+                    ()
+                },
+                // ! Testroutes
+
                 _ => (/*Todo: log unexpected input */)
             }
         }
@@ -180,7 +285,7 @@ impl InputParser {
                                 .rev()
                                 .enumerate()
                                 .for_each(|(i, byte_param)| {
-                                    parsed_param += (byte_param - 48) * max(i *  10, 1) as u8
+                                    parsed_param += (byte_param - 48) * 10u32.pow(i as u32) as u8
                                 });
                             result.push(parsed_param);
                         })

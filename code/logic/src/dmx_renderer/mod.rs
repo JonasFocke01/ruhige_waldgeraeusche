@@ -1,7 +1,7 @@
 use crate::config_store::{InputConfigStore, DmxConfigStore, GlobalVarsStore};
 use crate::logging;
 
-/// A separate module that contains the DmxFixture struct and implementation
+/// A separate module that contains the DmxFixture struct and implementation <br>
 /// The DmxFixture struct is responsible for a single DmxFixture and is created multiple times from the DmxRenderer
 pub mod fixture;
 use fixture::DmxFixture;
@@ -61,12 +61,12 @@ pub struct DmxRenderer {
     color_transition_speed: u128
 }
 
-/// Responsible for
-/// - collecting the current state of all fixtures
-/// - processing them by building a dmx ready vec of 512 bytes
+/// Responsible for <br>
+/// - collecting the current state of all fixtures <br>
+/// - processing them by building a dmx ready vec of 512 bytes <br>
 /// - writing the build vec to the usb connected dmx adapter
 impl DmxRenderer {
-    /// This creates, fills and returns the DmxRenderer object
+    /// This creates, fills and returns the DmxRenderer object <br>
     /// - opens the serial port to the dmx adapter
     pub fn new(input_config_store: &InputConfigStore, dmx_config_store: &DmxConfigStore, serial_input_port: &str) -> DmxRenderer {
         let port = match SerialPort::open(format!("/dev/{}", serial_input_port), input_config_store.get_baud_rate() as u32) {
@@ -104,12 +104,12 @@ impl DmxRenderer {
             color_transition_speed: 25
         }
     }
-    /// Gathers all dmx footprints from all available DmxFixtures
-    /// Builds and writes the channel vector
-    /// The Vector is prepended with a 69 as a startbyte
-    /// If the Vector is less than 513 bytes, it will be appended with zeros
-    /// Also advances the color_transition_index if needed
-    /// Also advances the position index
+    /// Gathers all dmx footprints from all available DmxFixtures <br>
+    /// Builds and writes the channel vector <br>
+    /// The Vector is prepended with a 69 as a startbyte <br>
+    /// If the Vector is less than 513 bytes, it will be appended with zeros <br>
+    /// Also advances the color_transition_index if needed <br>
+    /// Also advances the position index <br>
     /// Also advances the quickanimation position index if needed
     pub fn render(&mut self, dmx_config_store: &DmxConfigStore) -> Result<Vec<u8>, String> {
 
@@ -177,13 +177,17 @@ impl DmxRenderer {
             }
         }
     }
-    /// Passes the animation_type and the animation_name to each fixture enumerated in _fixture_types
+    /// Passes the animation_type and the animation_name to each fixture enumerated in _fixture_types <br>
+    /// To change execute change events without changing animaiton you can give fixture_types as an empty vec
     pub fn set_animation(&mut self, fixture_types: Vec<FixtureType>, animation_type: AnimationType, animation_name: String) {
-        // Todo: implement animation type match arms
-        // General fields regarding the animations, like indices etc., sould be set here
         match animation_type {
-            AnimationType::Animation => logging::log("Animation type Animation is not implemented", logging::LogLevel::Warning, false),
-            AnimationType::Quickanimation => logging::log("Animation type Quickanimation is not implemented", logging::LogLevel::Warning, false)
+            AnimationType::Animation => {
+                ()
+            },
+            AnimationType::Quickanimation => {
+                self.advance_quickanimation_position_index = true;
+                self.quickanimation_position_index = 0;
+            }
         };
         for fixture_type in fixture_types.iter() {
             for fixture in self.fixtures.iter_mut() {
@@ -193,7 +197,7 @@ impl DmxRenderer {
             }
         }
     }
-    /// This sets the color transition mode
+    /// This sets the color transition mode <br>
     /// Toggles the transition mode if None is given
     pub fn set_color_transition_mode(&mut self, new_color_transition_mode: Option<ColorTransitionMode>) {
         match new_color_transition_mode {
@@ -201,17 +205,21 @@ impl DmxRenderer {
             None => self.color_transition_mode = !self.color_transition_mode
         }
     }
-    /// This sets the color transition speed.
+    /// This sets the color transition speed. <br>
     /// This function maps the given u8 to 0 - 50
     pub fn set_color_transition_speed(&mut self, speed: u8) {
         self.color_transition_speed = GlobalVarsStore::map_range(speed.into(), (0.0, 255.0), (0.0, 50.0)) as u128;
     }
-    /// Sets the advance_quickanimation_position_index value
+    /// Sets the advance_quickanimation_position_index value <br>
     /// Toggles if parameter is None
     pub fn set_advance_quickanimation_position_index(&mut self, param: Option<bool>) {
         match param {
             Some(e) => self.advance_quickanimation_position_index = e,
             None => self.advance_quickanimation_position_index = !self.advance_quickanimation_position_index
         }
+    }
+    /// This sets the quickanimation_position_index to 0
+    pub fn reset_quickanimation_position_index(&mut self) {
+        self.quickanimation_position_index = 0;
     }
 }
